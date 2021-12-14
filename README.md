@@ -9,8 +9,8 @@ Around the survival area, there are armor, health, and weapon pickups to aid the
 If the player goes too far away from the survival area, the survival will be automatically canceled after 15 seconds, the player will receive a warning indicating how much time is left before this happens.
 
 # Requirements
-Latest version of ScriptHookV
-Microsoft Visual C++ Redistributables
+- Latest version of ScriptHookV.
+- Microsoft Visual C++ Redistributables.
 
 
 # Installation
