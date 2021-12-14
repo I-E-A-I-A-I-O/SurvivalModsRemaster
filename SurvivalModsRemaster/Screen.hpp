@@ -10,4 +10,8 @@ namespace SCREEN
 	void ShowSubtitle(const char* text, int time);
 	void ShowNotification(const char* text);
 	void DrawMarker(int type, Vector3 position, Vector3 scale);
+	void LoadSprites();
+	void UnloadSprites();
+	void DrawSprite(bool red);
+	void DrawSpriteText(const char* text);
 }

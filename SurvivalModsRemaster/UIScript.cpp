@@ -11,8 +11,13 @@ bool ShouldShowCount()
 
 void UIScriptMain()
 {
+	SCREEN::LoadSprites();
+
 	while (true)
 	{
+		SCREEN::DrawSprite(true);
+		SCREEN::DrawSpriteText("TIME	     ~r~15 seconds");
+
 		if (UIScript::Data::pendingNoti)
 		{
 			if (CAM::IS_SCREEN_FADED_OUT() && !CAM::IS_SCREEN_FADING_IN() && !CAM::IS_SCREEN_FADING_OUT())
@@ -39,6 +44,7 @@ void UIScript::ScriptMain()
 
 void UIScript::OnAbort()
 {
+	SCREEN::UnloadSprites();
 	Data::pendingNoti = false;
 	Data::notiText = (char*)"";
 }
