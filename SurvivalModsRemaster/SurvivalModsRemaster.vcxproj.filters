@@ -1,0 +1,159 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Utils">
+      <UniqueIdentifier>{fade5ece-3bfd-4144-8268-ccdf00bbe8f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{9a8076fa-82d8-489f-85dd-c5123cb47720}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Loading">
+      <UniqueIdentifier>{21d79d35-ed0a-40c9-ba60-6bede8d80c38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Loading">
+      <UniqueIdentifier>{c14fca0c-6a0e-43d8-b125-aa1f929f9dde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Mission">
+      <UniqueIdentifier>{4f9c77fe-6d97-4f34-ae43-6ee9c9700b32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Mission">
+      <UniqueIdentifier>{fa1c66e6-f300-4e14-ab27-217f49d3f7ad}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Script.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Controls.hpp">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Screen.hpp">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Calculations.hpp">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Blip.hpp">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Music.hpp">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="SpawnData.hpp">
+      <Filter>Header Files\Loading</Filter>
+    </ClInclude>
+    <ClInclude Include="Initialization.hpp">
+      <Filter>Header Files\Loading</Filter>
+    </ClInclude>
+    <ClInclude Include="Intermission.hpp">
+      <Filter>Header Files\Mission</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemies.hpp">
+      <Filter>Header Files\Mission</Filter>
+    </ClInclude>
+    <ClInclude Include="Jesus.hpp">
+      <Filter>Header Files\Mission</Filter>
+    </ClInclude>
+    <ClInclude Include="MissionTimers.hpp">
+      <Filter>Header Files\Mission</Filter>
+    </ClInclude>
+    <ClInclude Include="Pickups.hpp">
+      <Filter>Header Files\Mission</Filter>
+    </ClInclude>
+    <ClInclude Include="Survival.hpp">
+      <Filter>Header Files\Mission</Filter>
+    </ClInclude>
+    <ClInclude Include="SurvivalSpawner.hpp">
+      <Filter>Header Files\Mission</Filter>
+    </ClInclude>
+    <ClInclude Include="Timers.hpp">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Storage.hpp">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="UIScript.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Script.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Screen.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Calculations.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Blip.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Music.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="SpawnData.cpp">
+      <Filter>Source Files\Loading</Filter>
+    </ClCompile>
+    <ClCompile Include="Initialization.cpp">
+      <Filter>Source Files\Loading</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemies.cpp">
+      <Filter>Source Files\Mission</Filter>
+    </ClCompile>
+    <ClCompile Include="Intermission.cpp">
+      <Filter>Source Files\Mission</Filter>
+    </ClCompile>
+    <ClCompile Include="Jesus.cpp">
+      <Filter>Source Files\Mission</Filter>
+    </ClCompile>
+    <ClCompile Include="MissionTimers.cpp">
+      <Filter>Source Files\Mission</Filter>
+    </ClCompile>
+    <ClCompile Include="Pickups.cpp">
+      <Filter>Source Files\Mission</Filter>
+    </ClCompile>
+    <ClCompile Include="Survival.cpp">
+      <Filter>Source Files\Mission</Filter>
+    </ClCompile>
+    <ClCompile Include="SurvivalSpawner.cpp">
+      <Filter>Source Files\Mission</Filter>
+    </ClCompile>
+    <ClCompile Include="Timers.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Storage.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="UIScript.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>
