@@ -14,10 +14,11 @@ namespace TIMERS
         static bool Started;
     };
 
-    struct InterMission
+    struct Intermission
     {
         static int StartTime;
         static int CurrentTime;
+        static int timeLeft;
         static bool Started;
     };
 
@@ -54,6 +55,7 @@ namespace TIMERS
         static int StartTime;
         static int CurrentTime;
         static int InterWaveTime;
+        static int timeLeft;
         static bool Started;
     };
 

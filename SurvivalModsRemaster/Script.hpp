@@ -15,6 +15,13 @@ struct Data
 	static std::string currentPedKey;
 	static Hash enemiesRelGroup;
 	static int intermissionDuration;
+	static Controls tenWaveControl;
+	static Controls infiniteWaveControl;
+	static Controls timedSurvivalControl;
+	static Controls hardcoreSurvivalControl;
+	static Controls cancelControl;
+	static Controls reloadTriggerPedsControl;
+	static bool canStartMission;
 };
 
 void ScriptMain();

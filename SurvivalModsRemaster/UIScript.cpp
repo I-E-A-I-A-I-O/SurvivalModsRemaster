@@ -4,9 +4,19 @@
 bool UIScript::Data::pendingNoti;
 std::string UIScript::Data::notiText;
 
-bool ShouldShowCount()
+bool ShowCount()
 {
 	return SURVIVAL::SurvivalData::IsActive && SURVIVAL::SurvivalData::Started && !INTERMISSION::Data::Active && !SURVIVAL::SurvivalData::timed;
+}
+
+bool ShowInterTimeLeft()
+{
+	return SURVIVAL::SurvivalData::IsActive && SURVIVAL::SurvivalData::Started && INTERMISSION::Data::Active;
+}
+
+bool ShowTimeLeft()
+{
+	return SURVIVAL::SurvivalData::IsActive && SURVIVAL::SurvivalData::Started && !INTERMISSION::Data::Active && SURVIVAL::SurvivalData::timed;
 }
 
 void UIScriptMain()
@@ -15,12 +25,14 @@ void UIScriptMain()
 
 	while (true)
 	{
-		SCREEN::DrawSprite(true);
-		SCREEN::DrawSpriteText("TIME	     ~r~15 seconds");
+		if (!SURVIVAL::SurvivalData::IsActive && Data::canStartMission)
+		{
+			SCREEN::ShowControls();
+		}
 
 		if (UIScript::Data::pendingNoti)
 		{
-			if (CAM::IS_SCREEN_FADED_OUT() && !CAM::IS_SCREEN_FADING_IN() && !CAM::IS_SCREEN_FADING_OUT())
+			if (CAM::IS_SCREEN_FADED_IN() && !PLAYER::IS_PLAYER_DEAD(PLAYER::PLAYER_ID()))
 			{
 				SCREEN::ShowNotification(UIScript::Data::notiText.c_str());
 				UIScript::Data::pendingNoti = false;
@@ -28,9 +40,17 @@ void UIScriptMain()
 			}
 		}
 
-		if (ShouldShowCount())
+		if (ShowCount())
 		{
-			SCREEN::ShowEnemyCountHelpText(SURVIVAL::SurvivalData::MaxWaveSize - ENEMIES::EnemiesData::kills, SURVIVAL::SurvivalData::MaxWaveSize, SURVIVAL::SurvivalData::CurrentWave, ENEMIES::EnemiesData::footEnemies.size());
+			SCREEN::ShowEnemyCountBadge(SURVIVAL::SurvivalData::MaxWaveSize - ENEMIES::EnemiesData::kills, SURVIVAL::SurvivalData::MaxWaveSize, SURVIVAL::SurvivalData::CurrentWave);
+		}
+		else if (ShowInterTimeLeft())
+		{
+			SCREEN::ShowIntermissionBadge(TIMERS::Intermission::timeLeft, SURVIVAL::SurvivalData::CurrentWave + 1, SURVIVAL::SurvivalData::timed);
+		}
+		else if (ShowTimeLeft())
+		{
+			SCREEN::ShowTimeLeftBadge(TIMERS::TimedSurvival::timeLeft);
 		}
 
 		WAIT(0);

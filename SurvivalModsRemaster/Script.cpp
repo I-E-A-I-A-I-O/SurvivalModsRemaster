@@ -5,12 +5,13 @@
 int Data::intermissionDuration;
 std::map<std::string, Ped> Data::missionTriggerPeds;
 std::string Data::currentPedKey;
-Controls tenWaveControl;
-Controls infiniteWaveControl;
-Controls timedSurvivalControl;
-Controls cancelControl;
-Controls reloadTriggerPedsControl;
-static bool canStartMission = false;
+Controls Data::tenWaveControl;
+Controls Data::infiniteWaveControl;
+Controls Data::timedSurvivalControl;
+Controls Data::cancelControl;
+Controls Data::reloadTriggerPedsControl;
+Controls Data::hardcoreSurvivalControl;
+bool Data::canStartMission;
 int cancelStartTime;
 int cancelCurrentTime;
 Hash Data::enemiesRelGroup;
@@ -19,16 +20,11 @@ bool initialized = false;
 nlohmann::json j;
 std::string startSurvivalText;
 
-void ShowStartSurvivalText()
-{
-	SCREEN::ShowHelpTextThisFrame(startSurvivalText.c_str(), true);
-}
-
 void IsPlayerInMissionStartRange()
 {
     if (SURVIVAL::SurvivalData::IsActive || PED::IS_PED_IN_ANY_VEHICLE(PLAYER::PLAYER_PED_ID(), false))
     {
-        canStartMission = false;
+        Data::canStartMission = false;
         return;
     }
 
@@ -38,12 +34,12 @@ void IsPlayerInMissionStartRange()
         Vector3 pedPosition = ENTITY::GET_ENTITY_COORDS(value, true);
         if (CALC::IsInRange_2(playerPosition, pedPosition, 4.5f))
         {
-            canStartMission = true;
+            Data::canStartMission = true;
             Data::currentPedKey = key;
             return;
         }
     }
-    canStartMission = false;
+    Data::canStartMission = false;
 }
 
 void ReadConfigAndSpawnTriggerPeds()
@@ -51,28 +47,14 @@ void ReadConfigAndSpawnTriggerPeds()
     std::ifstream i("SurvivalsData\\config.json");
     i >> j;
     i.close();
-    int tenControl = j["Controls"]["StartTenWave"];
-    int infiniteControl = j["Controls"]["StartInfiniteWaves"];
-    int timedControl = j["Controls"]["StartTimedSurvival"];
-    int cControl = j["Controls"]["CancelSurvival"];
+
     Data::intermissionDuration = j["Gameplay"]["IntermissionDuration"];
-
-    tenWaveControl = static_cast<Controls>(j["Controls"]["StartTenWave"]);
-    infiniteWaveControl = static_cast<Controls>(j["Controls"]["StartInfiniteWaves"]);
-    timedSurvivalControl = static_cast<Controls>(j["Controls"]["StartTimedSurvival"]);
-    cancelControl = static_cast<Controls>(j["Controls"]["CancelSurvival"]);
-    reloadTriggerPedsControl = static_cast<Controls>(j["Controls"]["ReloadTriggerPeds"]);
-
-    char evName[500];
-    strcpy_s(evName, "~");
-    strcat_s(evName, controlsNames[tenControl]);
-    strcat_s(evName, "~ Ten waves\n~");
-    strcat_s(evName, controlsNames[infiniteControl]);
-    strcat_s(evName, "~ Infinite waves\n~");
-    strcat_s(evName, controlsNames[timedControl]);
-    strcat_s(evName, "~ Timed");
-
-    startSurvivalText = evName;
+    Data::tenWaveControl = static_cast<Controls>(j["Controls"]["StartTenWave"]);
+    Data::infiniteWaveControl = static_cast<Controls>(j["Controls"]["StartInfiniteWaves"]);
+    Data::timedSurvivalControl = static_cast<Controls>(j["Controls"]["StartTimedSurvival"]);
+    Data::cancelControl = static_cast<Controls>(j["Controls"]["CancelSurvival"]);
+    Data::reloadTriggerPedsControl = static_cast<Controls>(j["Controls"]["ReloadTriggerPeds"]);
+    Data::hardcoreSurvivalControl = static_cast<Controls>(j["Controls"]["StartHardcoreSurvival"]);
 
     char relName[] = "SURVIVAL_MISSION_ENEMIES_REL_GROUP";
     char playerRelName[] = "PLAYER";
@@ -91,9 +73,9 @@ void ReadConfigAndSpawnTriggerPeds()
 
 void ControlsWatch()
 {
-    if (!SURVIVAL::SurvivalData::IsActive && !canStartMission)
+    if (!SURVIVAL::SurvivalData::IsActive && !Data::canStartMission)
     {
-        if (CONTROLS::IS_CONTROL_JUST_RELEASED(0, static_cast<int>(reloadTriggerPedsControl)))
+        if (CONTROLS::IS_CONTROL_JUST_RELEASED(0, static_cast<int>(Data::reloadTriggerPedsControl)))
         {
             STORAGE::StoredData::peds.clear();
             STORAGE::StoredData::timers.clear();
@@ -109,30 +91,34 @@ void ControlsWatch()
         }
     }
 
-    if (canStartMission) {
-        if (CONTROLS::IS_CONTROL_JUST_RELEASED(0, static_cast<int>(tenWaveControl)))
+    if (Data::canStartMission) {
+        if (CONTROLS::IS_CONTROL_JUST_RELEASED(0, static_cast<int>(Data::tenWaveControl)))
         {
-            SURVIVAL::StartMission(false, false);
+            SURVIVAL::StartMission(false, false, false);
         }
 
-        if (CONTROLS::IS_CONTROL_JUST_RELEASED(0, static_cast<int>(infiniteWaveControl)))
+        if (CONTROLS::IS_CONTROL_JUST_RELEASED(0, static_cast<int>(Data::infiniteWaveControl)))
         {
-            SURVIVAL::StartMission(true, false);
+            SURVIVAL::StartMission(true, false, false);
         }
 
-        if (CONTROLS::IS_CONTROL_JUST_RELEASED(0, static_cast<int>(timedSurvivalControl)))
+        if (CONTROLS::IS_CONTROL_JUST_RELEASED(0, static_cast<int>(Data::timedSurvivalControl)))
         {
-            SURVIVAL::StartMission(false, true);
+            SURVIVAL::StartMission(false, true, false);
         }
 
+        if (CONTROLS::IS_CONTROL_JUST_RELEASED(0, static_cast<int>(Data::hardcoreSurvivalControl)))
+        {
+            SURVIVAL::StartMission(false, false, true);
+        }
     }
     else if (SURVIVAL::SurvivalData::IsActive) {
-        if (CONTROLS::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(cancelControl)))
+        if (CONTROLS::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::cancelControl)))
         {
             cancelStartTime = GAMEPLAY::GET_GAME_TIMER();
         }
 
-        if (CONTROLS::IS_CONTROL_PRESSED(0, static_cast<int>(cancelControl)))
+        if (CONTROLS::IS_CONTROL_PRESSED(0, static_cast<int>(Data::cancelControl)))
         {
             cancelCurrentTime = GAMEPLAY::GET_GAME_TIMER();
             if (cancelCurrentTime - cancelStartTime >= 3000)
@@ -187,14 +173,7 @@ void main()
         ProcessDelayedSpawns();
         IsPlayerInMissionStartRange();
 
-        if (!SURVIVAL::SurvivalData::IsActive)
-        {
-            if (canStartMission)
-            {
-                ShowStartSurvivalText();
-            }
-        }
-        else
+        if (SURVIVAL::SurvivalData::IsActive)
         {
             if (SURVIVAL::SurvivalData::Triggered)
             {

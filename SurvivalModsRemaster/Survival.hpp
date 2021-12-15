@@ -30,9 +30,10 @@ namespace SURVIVAL
         static bool timed;
         static int timedTimeLeft;
         static bool cheated;
+        static bool hardcore;
 	};
 
-    void StartMission(bool infiniteWaves, bool timed);
+    void StartMission(bool infiniteWaves, bool timed, bool hardcore);
     void SetOffTrigger();
     void Initialize();
     void ProcessSurvival();

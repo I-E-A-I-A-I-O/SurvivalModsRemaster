@@ -1,41 +1,111 @@
 #include "pch.h"
 #include "Screen.hpp"
+#include <unordered_map>
 
-void SCREEN::ShowEnemyCountHelpText(int count, int max, int wave, int altCount)
+struct Position
+{
+	float x;
+	float y;
+
+	Position(float x, float y)
+	{
+		this->x = x;
+		this->y = y;
+	}
+};
+
+std::unordered_map<int, Position> badgeSlots = {
+	{0, Position(0.91f, 0.97f)},
+	{1, Position(0.91f, 0.918f)}
+};
+
+std::unordered_map<int, Position> contentSlots =
+{
+	{0, Position(0.75f, 0.952f)},
+	{1, Position(0.75f, 0.90f)}
+};
+
+std::unordered_map<int, Position> titleSlots =
+{
+	{0, Position(0.855f, 0.956f)},
+	{1, Position(0.855f, 0.904f)}
+};
+
+void SCREEN::ShowEnemyCountBadge(int count, int max, int wave)
+{
+	DrawBadge("WAVE", std::to_string(wave).c_str(), false, 1);
+	char enemyCount[50];
+	strcpy_s(enemyCount, std::to_string(count).c_str());
+	strcat_s(enemyCount, "/");
+	strcat_s(enemyCount, std::to_string(max).c_str());
+	DrawBadge("ENEMIES", enemyCount, false, 0);
+}
+
+void SCREEN::ShowIntermissionBadge(int time, int wave, bool timed)
 {
 	const char* colorModifier;
+	bool red = false;
 
-	if (count <= 0)
+	if (time > 20 / 1.5f)
 	{
-		count = altCount;
-		max += altCount;
+		colorModifier = "~g~";
 	}
-
-	if (count > max / 1.5f)
-	{
-		colorModifier = "~r~";
-	}
-	else if (count > max / 3)
+	else if (time > 20 / 3)
 	{
 		colorModifier = "~y~";
 	}
 	else
 	{
-		colorModifier = "~g~";
+		colorModifier = "~r~";
+		red = true;
 	}
 
-	char text[200];
-	strcpy_s(text, "~h~Wave: ");
-	strcat_s(text, std::to_string(wave).c_str());
-	strcat_s(text, "\nEnemies: ");
-	strcat_s(text, colorModifier);
-	strcat_s(text, std::to_string(count).c_str());
-	strcat_s(text, "~w~");
-	strcat_s(text, "/");
-	strcat_s(text, std::to_string(max).c_str());
-	UI::_SET_TEXT_COMPONENT_FORMAT((char*)"STRING");
-	UI::_ADD_TEXT_COMPONENT_STRING((char*)text);
-	UI::_DISPLAY_HELP_TEXT_FROM_STRING_LABEL(0, 0, false, -1);
+	char title[40];
+	strcpy_s(title, colorModifier);
+
+	if (timed)
+	{
+		strcat_s(title, "STARTING");
+	}
+	else
+	{
+		strcat_s(title, "WAVE ");
+		strcat_s(title, std::to_string(wave).c_str());
+	}
+
+	strcat_s(title, " IN");
+	char content[40];
+	strcpy_s(content, colorModifier);
+	strcat_s(content, std::to_string(time).c_str());
+	DrawBadge(title, content, red, 0);
+}
+
+void SCREEN::ShowTimeLeftBadge(int time)
+{
+	const char* colorModifier;
+	bool red = false;
+
+	if (time > 20 / 1.5f)
+	{
+		colorModifier = "~g~";
+	}
+	else if (time > 20 / 3)
+	{
+		colorModifier = "~y~";
+	}
+	else
+	{
+		colorModifier = "~r~";
+		red = true;
+	}
+
+	char title[40];
+	strcpy_s(title, colorModifier);
+	strcat_s(title, "TIME LEFT");
+	char content[40];
+	strcpy_s(content, colorModifier);
+	strcat_s(content, std::to_string(time).c_str());
+	DrawBadge(title, content, red, 0);
 }
 
 void SCREEN::ShowHelpTextThisFrame(const char* text, bool beep)
@@ -77,20 +147,58 @@ void SCREEN::UnloadSprites()
 	GRAPHICS::SET_STREAMED_TEXTURE_DICT_AS_NO_LONGER_NEEDED((char*)"timerbars");
 }
 
-void SCREEN::DrawSprite(bool red)
+void DrawSprite(float x, float y, bool red)
 {
 	if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED((char*)"timerbars"))
-		LoadSprites();
-	GRAPHICS::DRAW_SPRITE((char*)"timerbars", (char*)"all_black_bg", 0.88f, 0.97f, 0.21f, 0.045f, 0, 0, 0, 0, 255);
-	GRAPHICS::DRAW_SPRITE((char*)"timerbars", (char*)(red ? "all_red_bg" : "all_black_bg"), 0.88f, 0.97f, 0.21f, 0.045f, 0, 107, 2, 2, 255);
+		SCREEN::LoadSprites();
+
+	GRAPHICS::DRAW_SPRITE((char*)"timerbars", (char*)"all_black_bg", x, y, 0.15f, 0.045f, 0, 0, 0, 0, 200);
+
+	if (red)
+		GRAPHICS::DRAW_SPRITE((char*)"timerbars", (char*)"all_red_bg", x, y, 0.15f, 0.045f, 0, 165, 15, 1, 255);
 }
 
-void SCREEN::DrawSpriteText(const char* text)
+void DrawSpriteText(float x, float y, float scale, const char* text, bool right)
 {
 	UI::_SET_TEXT_ENTRY((char*)"STRING");
 	UI::_ADD_TEXT_COMPONENT_STRING((char*)text);
-	UI::SET_TEXT_WRAP(0.6f, 0.98f);
-	UI::SET_TEXT_JUSTIFICATION(2);
-	UI::SET_TEXT_SCALE(1.0f, 0.45f);
-	UI::_DRAW_TEXT(0.80f, 0.952f);
+	if (right)
+	{
+		UI::SET_TEXT_WRAP(0.6f, 0.975f);
+		UI::SET_TEXT_JUSTIFICATION(2);
+	}
+	UI::SET_TEXT_SCALE(1.0f, scale);
+	UI::_DRAW_TEXT(x, y);
+}
+
+void SCREEN::DrawBadge(const char* title, const char* content, bool red, int slot)
+{
+	Position bPos = badgeSlots.at(slot);
+	Position cPos = contentSlots.at(slot);
+	Position tPos = titleSlots.at(slot);
+	DrawSprite(bPos.x, bPos.y, red);
+	DrawSpriteText(cPos.x, cPos.y, 0.42f, content, true);
+	DrawSpriteText(tPos.x, tPos.y, 0.38f, title, false);
+}
+
+void SCREEN::ShowControls()
+{
+	char controlA[200];
+	strcpy_s(controlA, "Press ~");
+	strcat_s(controlA, controlsNames[static_cast<int>(Data::tenWaveControl)]);
+	strcat_s(controlA, "~ for 10 waves~n~");
+	strcat_s(controlA, "Press ~");
+	strcat_s(controlA, controlsNames[static_cast<int>(Data::infiniteWaveControl)]);
+	strcat_s(controlA, "~ for infinite waves");
+	char controlB[200];
+	strcpy_s(controlB, "~n~Press ~");
+	strcat_s(controlB, controlsNames[static_cast<int>(Data::timedSurvivalControl)]);
+	strcat_s(controlB, "~ for timed~n~");
+	strcat_s(controlB, "Press ~");
+	strcat_s(controlB, controlsNames[static_cast<int>(Data::hardcoreSurvivalControl)]);
+	strcat_s(controlB, "~ for harcore");
+	UI::_SET_TEXT_COMPONENT_FORMAT((char*)"TWOSTRINGS");
+	UI::_ADD_TEXT_COMPONENT_STRING(controlA);
+	UI::_ADD_TEXT_COMPONENT_STRING(controlB);
+	UI::_DISPLAY_HELP_TEXT_FROM_STRING_LABEL(0, 0, false, 0);
 }

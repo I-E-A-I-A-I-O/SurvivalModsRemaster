@@ -4,9 +4,10 @@
 int TIMERS::TriggerPed::CurrentTime;
 int TIMERS::TriggerPed::StartTime;
 bool TIMERS::TriggerPed::Started;
-int TIMERS::InterMission::CurrentTime;
-int TIMERS::InterMission::StartTime;
-bool TIMERS::InterMission::Started;
+int TIMERS::Intermission::CurrentTime;
+int TIMERS::Intermission::StartTime;
+bool TIMERS::Intermission::Started;
+int TIMERS::Intermission::timeLeft;
 int TIMERS::LeavingZone::CurrentTime;
 int TIMERS::LeavingZone::StartTime;
 bool TIMERS::LeavingZone::Started;
@@ -23,6 +24,7 @@ int TIMERS::TimedSurvival::CurrentTime;
 int TIMERS::TimedSurvival::StartTime;
 int TIMERS::TimedSurvival::InterWaveTime;
 bool TIMERS::TimedSurvival::Started;
+int TIMERS::TimedSurvival::timeLeft;
 int TIMERS::DogTimer::CurrentTime;
 int TIMERS::DogTimer::StartTime;
 bool TIMERS::DogTimer::Started;
@@ -56,12 +58,8 @@ bool TIMERS::ProcessTimedSurvivalTimer(int endTime)
 			}
 		}
 
-		char helpText[300];
-		strcpy_s(helpText, "Remaining time: ");
-		strcat_s(helpText, std::to_string((endTime / 1000) - ((TimedSurvival::CurrentTime - TimedSurvival::StartTime) / 1000)).c_str());
-		strcat_s(helpText, " seconds");
+		TimedSurvival::timeLeft = (endTime / 1000) - ((TimedSurvival::CurrentTime - TimedSurvival::StartTime) / 1000);
 
-		SCREEN::ShowHelpTextThisFrame(helpText, false);
 		if (TimedSurvival::CurrentTime - TimedSurvival::StartTime >= endTime)
 		{
 			TimedSurvival::Started = false;
@@ -99,7 +97,7 @@ bool TIMERS::ProcessTriggerPedTimer()
 void TIMERS::RestartTimers()
 {
 	TimedSurvival::Started = false;
-	InterMission::Started = false;
+	Intermission::Started = false;
 	SpawnAircraft::Started = false;
 	LeavingZone::Started = false;
 	SpawnEnemy::Started = false;
@@ -127,55 +125,23 @@ bool TIMERS::LeavingZoneTimerStarted()
 
 void TIMERS::RestartIntermissionTimer()
 {
-	InterMission::Started = false;
+	Intermission::Started = false;
 }
 
 bool TIMERS::ProcessIntermissionTimer()
 {
-	if (!InterMission::Started)
+	if (!Intermission::Started)
 	{
-		InterMission::Started = true;
-		InterMission::StartTime = GAMEPLAY::GET_GAME_TIMER();
+		Intermission::Started = true;
+		Intermission::StartTime = GAMEPLAY::GET_GAME_TIMER();
 		return false;
 	}
 	else
 	{
-		InterMission::CurrentTime = GAMEPLAY::GET_GAME_TIMER();
-		char helpText[300];
-		int timeLeft = (Data::intermissionDuration / 1000) - ((InterMission::CurrentTime - InterMission::StartTime) / 1000);
-		const char* colorModifier;
+		Intermission::CurrentTime = GAMEPLAY::GET_GAME_TIMER();
+		Intermission::timeLeft = (Data::intermissionDuration / 1000) - ((Intermission::CurrentTime - Intermission::StartTime) / 1000);
 
-		if (timeLeft > 20 / 1.5f)
-		{
-			colorModifier = "~g~";
-		}
-		else if (timeLeft > 20 / 3)
-		{
-			colorModifier = "~y~";
-		}
-		else
-		{
-			colorModifier = "~r~";
-		}
-
-		if (!SURVIVAL::SurvivalData::timed)
-		{
-			strcpy_s(helpText, "Wave ");
-			strcat_s(helpText, std::to_string(SURVIVAL::SurvivalData::CurrentWave + 1).c_str());
-		}
-		else
-		{
-			strcpy_s(helpText, "Survival ");
-		}
-
-		strcat_s(helpText, " starting in ");
-		strcat_s(helpText, colorModifier);
-		strcat_s(helpText, std::to_string(timeLeft).c_str());
-		strcat_s(helpText, "~w~");
-		strcat_s(helpText, " seconds");
-		SCREEN::ShowHelpTextThisFrame(helpText, false);
-
-		if (InterMission::CurrentTime - InterMission::StartTime >= Data::intermissionDuration)
+		if (Intermission::CurrentTime - Intermission::StartTime >= Data::intermissionDuration)
 		{
 			return true;
 		}

@@ -334,6 +334,9 @@ void SURVIVAL::ClearVectors()
 	SpawnerData::aircraftSpawnpoints.clear();
 	SpawnerData::vehicleSpawnpoints.clear();
 	SpawnerData::pickups.clear();
+	SpawnerData::pedsGroup1.clear();
+	SpawnerData::pedsGroup2.clear();
+	SpawnerData::pedsGroup3.clear();
 }
 
 void SURVIVAL::LoadSurvival(std::string survivalID)
@@ -377,7 +380,7 @@ void SURVIVAL::LoadSurvival(std::string survivalID)
 		SpawnerData::isHalloween = js["Flags"]["halloween"];
 		SpawnerData::hasJuggernaut = js["Flags"]["juggernaut"];
 		SpawnerData::hasDogs = js["Flags"]["dogs"];
-		SpawnerData::hasJesus = js["Flags"]["Jesus"];
+		SpawnerData::hasJesus = js["Flags"]["jesus"];
 
 		SpawnerData::location.x = locationPoints.at(0);
 		SpawnerData::location.y = locationPoints.at(1);
@@ -633,7 +636,7 @@ Ped SURVIVAL::SpawnDog()
 
 Ped SURVIVAL::SpawnEnemy(int wave, bool canSpawnJesus)
 {
-	if (SpawnerData::hasJesus && canSpawnJesus && wave >= 7)
+	if (SpawnerData::hasJesus && canSpawnJesus && (wave >= 7 || SURVIVAL::SurvivalData::hardcore))
 	{
 		Hash model = 0xCE2CB751;
 		size_t index = CALC::RanInt(SpawnerData::enemySpawnpoints.size() - (size_t)1, (size_t)0);
@@ -717,32 +720,41 @@ std::vector<Ped> SURVIVAL::SpawnEnemiesInVehicle(Vehicle vehicle, int wave)
 
 void SURVIVAL::UpdateModels(int currentWave)
 {
-	switch (currentWave)
+	if (SurvivalData::hardcore)
 	{
-	case 1:
-		SpawnerData::currentPedModels = SpawnerData::pedsGroup1;
-		break;
-	case 3:
-		SpawnerData::currentVehicleModels = SpawnerData::vehiclesGroup1;
-		break;
-	case 4:
-		SpawnerData::currentPedModels = SpawnerData::pedsGroup2;
-		break;
-	case 5:
-		SpawnerData::currentAircraftModels = SpawnerData::aircraftGroup1;
-		SpawnerData::currentVehicleModels = SpawnerData::vehiclesGroup2;
-		break;
-	case 6:
-		SpawnerData::currentAircraftModels = SpawnerData::aircraftGroup2;
-		break;
-	case 7:
+		SpawnerData::currentAircraftModels = SpawnerData::aircraftGroup3;
 		SpawnerData::currentVehicleModels = SpawnerData::vehiclesGroup3;
 		SpawnerData::currentPedModels = SpawnerData::pedsGroup3;
-		break;
-	case 8:
-		SpawnerData::currentAircraftModels = SpawnerData::aircraftGroup3;
-		break;
-	default:
-		break;
+	}
+	else
+	{
+		switch (currentWave)
+		{
+			case 1:
+				SpawnerData::currentPedModels = SpawnerData::pedsGroup1;
+				break;
+			case 3:
+				SpawnerData::currentVehicleModels = SpawnerData::vehiclesGroup1;
+				break;
+			case 4:
+				SpawnerData::currentPedModels = SpawnerData::pedsGroup2;
+				break;
+			case 5:
+				SpawnerData::currentAircraftModels = SpawnerData::aircraftGroup1;
+				SpawnerData::currentVehicleModels = SpawnerData::vehiclesGroup2;
+				break;
+			case 6:
+				SpawnerData::currentAircraftModels = SpawnerData::aircraftGroup2;
+				break;
+			case 7:
+				SpawnerData::currentVehicleModels = SpawnerData::vehiclesGroup3;
+				SpawnerData::currentPedModels = SpawnerData::pedsGroup3;
+				break;
+			case 8:
+				SpawnerData::currentAircraftModels = SpawnerData::aircraftGroup3;
+				break;
+			default:
+				break;
+		}
 	}
 }

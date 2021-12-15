@@ -14,14 +14,16 @@ bool SURVIVAL::SurvivalData::Started;
 bool SURVIVAL::SurvivalData::timed;
 int SURVIVAL::SurvivalData::timedTimeLeft;
 bool SURVIVAL::SurvivalData::cheated;
+bool SURVIVAL::SurvivalData::hardcore;
 
-void SURVIVAL::StartMission(bool infiniteWaves, bool timed)
+void SURVIVAL::StartMission(bool infiniteWaves, bool timed, bool hardcore)
 {
 	SurvivalData::MissionID = Data::currentPedKey;
 	LoadSurvival(SurvivalData::MissionID);
 	SurvivalData::IsActive = true;
 	SurvivalData::Started = false;
 	SurvivalData::cheated = false;
+	SurvivalData::hardcore = hardcore;
 	SurvivalData::timedTimeLeft = 60000;
 	SurvivalData::InfiniteWaves = infiniteWaves;
 	SurvivalData::timed = timed;
@@ -129,7 +131,7 @@ void SURVIVAL::ProcessSurvival()
 
 	PICKUPS::Process();
 
-	if (SurvivalData::CurrentWave >= 3)
+	if (SurvivalData::CurrentWave >= 3 || SurvivalData::hardcore)
 	{
 		ENEMIES::RemoveUnusedVehicles();
 	}
@@ -224,13 +226,11 @@ void SURVIVAL::GiveReward(bool playerDied)
 	}
 
 	STATS::STAT_SET_INT(stat, playerMoney + reward, 1);
-
 	std::string notification = "";
 	notification.append("Survival ended at wave ");
 	notification.append(std::to_string(SurvivalData::CurrentWave).c_str());
 	notification.append(". Reward: ~g~$");
 	notification.append(std::to_string(reward).c_str());
-
 	UIScript::Data::pendingNoti = true;
 	UIScript::Data::notiText = notification;
 }

@@ -283,6 +283,9 @@ std::vector<DWORD> ENEMIES::GetWeapons(Hash pedModel)
         return EnemiesData::alienWeapons;
     }
 
+    if (SURVIVAL::SurvivalData::hardcore)
+        return EnemiesData::strongWeapons;
+
     switch (SURVIVAL::SurvivalData::CurrentWave)
     {
     case 1:
@@ -337,10 +340,16 @@ void ENEMIES::InitializeJuggernaut(Ped ped)
     BLIPS::CreateForEnemyPed(ped, 543, "Enemy Juggernaut");
     PED::SET_PED_RELATIONSHIP_GROUP_HASH(ped, Data::enemiesRelGroup);
     int accuracyModifier = SURVIVAL::SurvivalData::CurrentWave > 10 ? 10 : SURVIVAL::SurvivalData::CurrentWave;
-    PED::SET_PED_ARMOUR(ped, SURVIVAL::SurvivalData::CurrentWave * 10);
+
+    if (SURVIVAL::SurvivalData::hardcore)
+        accuracyModifier = 10;
+
+    PED::SET_PED_ARMOUR(ped, SURVIVAL::SurvivalData::hardcore ? 300 : 150);
     PED::SET_PED_ACCURACY(ped, accuracyModifier * 3);
     WEAPON::GIVE_WEAPON_TO_PED(ped, eWeapon::WeaponMinigun, 9000, true, true);
     PED::SET_PED_FIRING_PATTERN(ped, eFiringPattern::FiringPatternFullAuto);
+    PED::SET_PED_COMBAT_MOVEMENT(ped, 2);
+    AI::TASK_COMBAT_PED(ped, PLAYER::PLAYER_PED_ID(), 0, 16);
 }
 
 void ENEMIES::InitializeRageEnemy(Ped ped)
@@ -399,7 +408,11 @@ void ENEMIES::InitializeEnemy(Ped ped, bool heliPassenger, bool heliCrewMember)
 
     PED::SET_PED_RELATIONSHIP_GROUP_HASH(ped, Data::enemiesRelGroup);
     int accuracyModifier = SURVIVAL::SurvivalData::CurrentWave > 10 ? 10 : SURVIVAL::SurvivalData::CurrentWave;
-    PED::SET_PED_ARMOUR(ped, SURVIVAL::SurvivalData::CurrentWave * 10);
+
+    if (SURVIVAL::SurvivalData::hardcore)
+        accuracyModifier = 10;
+
+    PED::SET_PED_ARMOUR(ped, SURVIVAL::SurvivalData::hardcore ? 150 : SURVIVAL::SurvivalData::CurrentWave * 10);
     PED::SET_PED_ACCURACY(ped, accuracyModifier * 3);
     std::vector<DWORD> weapons = GetWeapons(pedModel);
     size_t index = CALC::RanInt(weapons.size() - (size_t)1, (size_t)0);
@@ -503,7 +516,7 @@ void ENEMIES::Process()
             EnemiesData::currentWaveSize += 1;
             Ped ped;
 
-            if (SURVIVAL::SurvivalData::CurrentWave >= 8 && !EnemiesData::jugSpawned && EnemiesData::currentWaveSize >= SURVIVAL::SurvivalData::MaxWaveSize / 2)
+            if ((SURVIVAL::SurvivalData::CurrentWave >= 8 || SURVIVAL::SurvivalData::hardcore) && SURVIVAL::SpawnerData::hasJuggernaut && !EnemiesData::jugSpawned && EnemiesData::currentWaveSize >= SURVIVAL::SurvivalData::MaxWaveSize / 2)
             {
                 ped = SURVIVAL::SpawnJuggernaut();
                 InitializeJuggernaut(ped);
@@ -524,7 +537,7 @@ void ENEMIES::Process()
             }
         }
 
-        if (SURVIVAL::SurvivalData::CurrentWave >= 3 && EnemiesData::currentVehicles < SURVIVAL::SurvivalData::MaxVehicles)
+        if ((SURVIVAL::SurvivalData::CurrentWave >= 3 || SURVIVAL::SurvivalData::hardcore) && EnemiesData::currentVehicles < SURVIVAL::SurvivalData::MaxVehicles)
         {
             if (TIMERS::ProcessVehicleTimer())
             {
@@ -550,7 +563,7 @@ void ENEMIES::Process()
             }
         }
 
-        if (SURVIVAL::SurvivalData::CurrentWave >= 5 && EnemiesData::currentAircraft < SURVIVAL::SurvivalData::MaxAircraft)
+        if ((SURVIVAL::SurvivalData::CurrentWave >= 5 || SURVIVAL::SurvivalData::hardcore) && EnemiesData::currentAircraft < SURVIVAL::SurvivalData::MaxAircraft)
         {
             if (TIMERS::ProcessAircraftTimer())
             {
@@ -577,7 +590,7 @@ void ENEMIES::Process()
             }
         }
 
-        if (SURVIVAL::SurvivalData::CurrentWave >= 7 && !EnemiesData::dogLimitReached)
+        if ((SURVIVAL::SurvivalData::CurrentWave >= 7 || SURVIVAL::SurvivalData::hardcore) && SURVIVAL::SpawnerData::hasDogs && !EnemiesData::dogLimitReached)
         {
             if (TIMERS::ProcessDogTimer())
             {
@@ -608,23 +621,28 @@ void ENEMIES::Process()
     {
         RemoveDeadEnemies();
         ProcessJesus();
-        switch (SURVIVAL::SurvivalData::CurrentWave)
+        
+        if (!SURVIVAL::SurvivalData::hardcore)
         {
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-        case 5:
-            EnemiesData::limitReached = SURVIVAL::SurvivalData::timed ? EnemiesData::footEnemies.size() >= 13 : EnemiesData::footEnemies.size() >= 15;
-            break;
-        case 6:
-        case 7:
-            EnemiesData::limitReached = SURVIVAL::SurvivalData::timed ? EnemiesData::footEnemies.size() >= 11 : EnemiesData::footEnemies.size() >= 13;
-            break;
-        default:
-            EnemiesData::limitReached = SURVIVAL::SurvivalData::timed ? EnemiesData::footEnemies.size() >= 10 : EnemiesData::footEnemies.size() >= 11;
-            break;
+            switch (SURVIVAL::SurvivalData::CurrentWave)
+            {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    EnemiesData::limitReached = SURVIVAL::SurvivalData::timed ? EnemiesData::footEnemies.size() >= 14 : EnemiesData::footEnemies.size() >= 15;
+                    break;
+                case 6:
+                case 7:
+                    EnemiesData::limitReached = SURVIVAL::SurvivalData::timed ? EnemiesData::footEnemies.size() >= 13 : EnemiesData::footEnemies.size() >= 14;
+                    break;
+                default:
+                    EnemiesData::limitReached = SURVIVAL::SurvivalData::timed ? EnemiesData::footEnemies.size() >= 12 : EnemiesData::footEnemies.size() >= 13;
+                    break;
+            }
         }
+
         return;
     }
     else if (!EnemiesData::canSpawnMore)
