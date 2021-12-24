@@ -22,6 +22,7 @@ struct Data
 	static Controls cancelControl;
 	static Controls reloadTriggerPedsControl;
 	static bool canStartMission;
+	static bool showPassedScaleform;
 };
 
 void ScriptMain();

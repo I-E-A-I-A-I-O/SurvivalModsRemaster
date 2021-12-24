@@ -15,10 +15,15 @@ bool Data::canStartMission;
 int cancelStartTime;
 int cancelCurrentTime;
 Hash Data::enemiesRelGroup;
+bool Data::showPassedScaleform;
 bool playerDied;
 bool initialized = false;
 nlohmann::json j;
 std::string startSurvivalText;
+bool passedScaleformRequested;
+bool passedScaleformFading;
+int passedScaleformST;
+int passedScaleform;
 
 void IsPlayerInMissionStartRange()
 {
@@ -173,6 +178,32 @@ void main()
         ProcessDelayedSpawns();
         IsPlayerInMissionStartRange();
 
+        if (Data::showPassedScaleform)
+        {
+            if (!passedScaleformRequested)
+            {
+                passedScaleform = SCREEN::RequestScaleform();
+                SCREEN::SetScaleformText(passedScaleform, "~y~survival passed", "");
+                passedScaleformST = GAMEPLAY::GET_GAME_TIMER();
+                passedScaleformRequested = true;
+            }
+
+            GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(passedScaleform, 255, 255, 0, 255, 0);
+
+            if (GAMEPLAY::GET_GAME_TIMER() - passedScaleformST >= 8000 && !passedScaleformFading)
+            {
+                SCREEN::FadeOutScaleform(passedScaleform, 2000);
+                passedScaleformFading = true;
+            }
+            else if (GAMEPLAY::GET_GAME_TIMER() - passedScaleformST >= 2000 && passedScaleformFading)
+            {
+                SCREEN::FreeScaleform(passedScaleform);
+                passedScaleformRequested = false;
+                passedScaleformFading = false;
+                Data::showPassedScaleform = false;
+            }
+        }
+
         if (SURVIVAL::SurvivalData::IsActive)
         {
             if (SURVIVAL::SurvivalData::Triggered)
@@ -198,7 +229,7 @@ void main()
 
 void ScriptMain()
 {
-	srand(GetTickCount());
+    srand(GetTickCount64());
 	main();
 }
 

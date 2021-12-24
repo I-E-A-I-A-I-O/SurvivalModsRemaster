@@ -22,6 +22,7 @@ void BLIPS::CreateForEnemyPed(Ped ped)
 	Blip blipHandle = UI::ADD_BLIP_FOR_ENTITY(ped);
 
 	UI::SET_BLIP_SCALE(blipHandle, 0.7f);
+	UI::SET_BLIP_SPRITE(blipHandle, eBlipSprite::BlipSpriteEnemy);
 	UI::SET_BLIP_COLOUR(blipHandle, eBlipColor::BlipColorRed);
 	SetBlipName(blipHandle, (char*)"Enemy");
 	UI::SET_BLIP_AS_SHORT_RANGE(blipHandle, true);

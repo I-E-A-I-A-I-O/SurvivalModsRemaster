@@ -23,6 +23,10 @@ bool SURVIVAL::SpawnerData::isHalloween;
 bool SURVIVAL::SpawnerData::hasJuggernaut;
 bool SURVIVAL::SpawnerData::hasJesus;
 bool SURVIVAL::SpawnerData::hasDogs;
+bool SURVIVAL::SpawnerData::hasVehicles;
+bool SURVIVAL::SpawnerData::hasAircraft;
+std::vector<std::string> jugModels;
+std::string dogModel;
 
 ePickupType SURVIVAL::GetPickupType(std::string pickupModel)
 {
@@ -337,6 +341,8 @@ void SURVIVAL::ClearVectors()
 	SpawnerData::pedsGroup1.clear();
 	SpawnerData::pedsGroup2.clear();
 	SpawnerData::pedsGroup3.clear();
+	jugModels.clear();
+	dogModel.clear();
 }
 
 void SURVIVAL::LoadSurvival(std::string survivalID)
@@ -376,16 +382,25 @@ void SURVIVAL::LoadSurvival(std::string survivalID)
 		std::vector<std::string> aircraftGroup2 = js["Models"]["aircraft"]["group2"];
 		std::vector<std::string> aircraftGroup3 = js["Models"]["aircraft"]["group3"];
 		std::vector<std::string> pickupModels = js["Models"]["pickups"];
+		std::vector<std::string> jModels = js["Models"]["juggernaut"];
+		dogModel = js["Models"]["dog"];
 		SpawnerData::isXmas = js["Flags"]["xmas"];
 		SpawnerData::isHalloween = js["Flags"]["halloween"];
 		SpawnerData::hasJuggernaut = js["Flags"]["juggernaut"];
 		SpawnerData::hasDogs = js["Flags"]["dogs"];
 		SpawnerData::hasJesus = js["Flags"]["jesus"];
+		SpawnerData::hasAircraft = js["Flags"]["aircraft"];
+		SpawnerData::hasVehicles = js["Flags"]["vehicles"];
 
 		SpawnerData::location.x = locationPoints.at(0);
 		SpawnerData::location.y = locationPoints.at(1);
 		SpawnerData::location.z = locationPoints.at(2);
 		
+		for (size_t i = 0; i < jModels.size(); i++)
+		{
+			jugModels.push_back(jModels.at(i));
+		}
+
 		for (size_t i = 0; i < pedSpawnpointsX.size(); i++)
 		{
 			Vector3 spawnpoint = Vector3();
@@ -502,13 +517,21 @@ Ped SURVIVAL::SpawnFreemodeCustom(std::string outfit, bool isMale, bool inVehicl
 
 	STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
 
-	if (outfit.find("_JUGGERNAUT_") != std::string::npos)
+	if (outfit.find("_JUGGERNAUT_") != std::string::npos && isMale)
 	{
 		SetComponentVariation(ped, 1, 91, 0);
 		SetComponentVariation(ped, 4, 84, 0);
 		SetComponentVariation(ped, 6, 3, 0);
 		SetComponentVariation(ped, 8, 97, 0);
 		SetComponentVariation(ped, 11, 186, 0);
+	}
+	else if (outfit.find("_JUGGERNAUT_") != std::string::npos && !isMale)
+	{
+		SetComponentVariation(ped, 1, 91, 0);
+		SetComponentVariation(ped, 4, 86, 0);
+		SetComponentVariation(ped, 6, 4, 0);
+		SetComponentVariation(ped, 8, 97, 0);
+		SetComponentVariation(ped, 11, 188, 0);
 	}
 	else if (outfit.find("_SANTA_") != std::string::npos)
 	{
@@ -608,26 +631,45 @@ Ped SURVIVAL::SpawnFreemodeCustom(std::string outfit, bool isMale, bool inVehicl
 
 Ped SURVIVAL::SpawnJuggernaut()
 {
+	int index;
+
 	if (SpawnerData::isHalloween)
 	{
-		return SpawnFreemodeCustom("CUSTOM_BEAST_M", true);
+		index = 1;
 	}
 	else if (SpawnerData::isXmas)
 	{
-		return SpawnFreemodeCustom("CUSTOM_SNOWBIGFOOT_M", true);
+		index = 2;
 	}
 	else
 	{
-		return SpawnFreemodeCustom("CUSTOM_JUGGERNAUT_M", true);
+		index = 0;
+	}
+
+	std::string name = jugModels.at(index);
+
+	if (name.find("CUSTOM_") != std::string::npos)
+	{
+		return SpawnFreemodeCustom(name, name.find("_M") != std::string::npos);
+	}
+	else
+	{
+		Hash model = INIT::LoadModel(name.c_str());
+		Ped ped;
+		size_t index = CALC::RanInt(SpawnerData::enemySpawnpoints.size() - (size_t)1, (size_t)0);
+		Vector3 spawnpoint = SpawnerData::enemySpawnpoints.at(index);
+		ped = PED::CREATE_PED(0, model, spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, false, true);
+		STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+
+		return ped;
 	}
 }
 
 Ped SURVIVAL::SpawnDog()
 {
-	Hash model = 0x9563221D;
 	size_t index = CALC::RanInt(SpawnerData::enemySpawnpoints.size() - (size_t)1, (size_t)0);
 	Vector3 spawnpoint = SpawnerData::enemySpawnpoints.at(index);
-	INIT::LoadModel(model);
+	Hash model = INIT::LoadModel(dogModel.c_str());
 	Ped ped = PED::CREATE_PED(0, model, spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, false, true);
 	INIT::UnloadModel(model);
 

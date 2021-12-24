@@ -144,6 +144,7 @@ void SURVIVAL::ProcessSurvival()
 	if (!CALC::IsInRange_2(ENTITY::GET_ENTITY_COORDS(PLAYER::PLAYER_PED_ID(), true), SURVIVAL::SpawnerData::location, 80))
 	{
 		GRAPHICS::DRAW_MARKER(1, SURVIVAL::SpawnerData::location.x, SURVIVAL::SpawnerData::location.y, SURVIVAL::SpawnerData::location.z, 0, 1, 0, 0, 0, 0, 160, 160, 160, 255, 255, 0, 100, false, false, 2, false, NULL, NULL, false);
+		
 		if (TIMERS::ProcessLeavingZoneTimer())
 		{
 			QuitSurvival(false);
@@ -238,16 +239,18 @@ void SURVIVAL::GiveReward(bool playerDied)
 void SURVIVAL::CompleteSurvival()
 {
 	MUSIC::MissionCompletedSound();
+	Data::showPassedScaleform = true;
 	GiveReward(false);
 	PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(PLAYER::PLAYER_ID(), true);
 	ENEMIES::ClearVectors();
+	SURVIVAL::ClearVectors();
 	PICKUPS::Delete();
 
 	SurvivalData::IsActive = false;
 	SurvivalData::Started = false;
 	SurvivalData::cheated = false;
 
-	if (SurvivalData::MissionID == "Halloween Survival" || SurvivalData::MissionID == "Xmas Survival")
+	if (SpawnerData::isXmas || SpawnerData::isHalloween)
 	{
 		GAMEPLAY::CLEAR_WEATHER_TYPE_PERSIST();
 		WAIT(0);
@@ -278,13 +281,14 @@ void SURVIVAL::QuitSurvival(bool playerDied)
 	MUSIC::StopTrack();
 	PICKUPS::Delete();
 	ENEMIES::ClearVectors();
+	SURVIVAL::ClearVectors();
 	PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(PLAYER::PLAYER_ID(), true);
 
 	SurvivalData::IsActive = false;
 	SurvivalData::Started = false;
 	SurvivalData::cheated = false;
 
-	if (SurvivalData::MissionID == "Halloween Survival" || SurvivalData::MissionID == "Xmas Survival")
+	if (SpawnerData::isXmas || SpawnerData::isHalloween)
 	{
 		GAMEPLAY::CLEAR_WEATHER_TYPE_PERSIST();
 		WAIT(0);
@@ -307,7 +311,7 @@ void SURVIVAL::ScriptQuit()
 	SurvivalData::Started = false;
 	SurvivalData::cheated = false;
 
-	if (SurvivalData::MissionID == "Halloween Survival" || SurvivalData::MissionID == "Xmas Survival")
+	if (SpawnerData::isXmas || SpawnerData::isHalloween)
 	{
 		GAMEPLAY::CLEAR_WEATHER_TYPE_PERSIST();
 		WAIT(0);

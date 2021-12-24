@@ -46,7 +46,9 @@ namespace ENEMIES
 	void RemoveDeadEnemies();
 	void ProcessJesus();
 	std::vector<DWORD> GetWeapons(Hash pedModel);
-	void InitializeEnemy(Ped ped, bool heliPassenger, bool heliCrewMember);
+	void InitializeEnemyInAircraft(Ped ped, bool passenger);
+	void InitializeEnemyInVehicle(Ped ped, bool passenger);
+	void InitializeEnemy(Ped ped);
 	void InitializeJuggernaut(Ped ped);
 	void InitializeJesus(Ped ped);
 	void InitializeAnimal(Ped ped);

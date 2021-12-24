@@ -17,4 +17,10 @@ namespace SCREEN
 	void UnloadSprites();
 	void DrawBadge(const char* title, const char* content, bool red, int slot);
 	void ShowControls();
+	int RequestScaleform();
+	void SetScaleformText(int scaleform, const char* title, const char* subtitle);
+	void FadeOutScaleform(int handle, int duration);
+	void FreeScaleform(int handle);
+	void DrawBar(float percentage);
+	void SetScaleformTextFailed(int scaleform, const char* title, const char* subtitle);
 }

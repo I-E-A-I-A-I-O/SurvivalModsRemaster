@@ -9,7 +9,11 @@ namespace MUSIC
 	{
 		SurvivalPrimary,
 		BusinessBattle,
-		BikerContracts
+		BikerContracts,
+		Casino,
+		Casino2,
+		Tuner,
+		Contract
 	};
 
 	struct MusicData

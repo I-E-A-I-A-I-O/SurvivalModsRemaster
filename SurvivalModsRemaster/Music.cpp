@@ -6,20 +6,8 @@ bool MUSIC::MusicData::finalWaveHI;
 
 void MUSIC::PrepareTracks()
 {
-    int value = CALC::RanInt(100, 1);
-
-    if (value <= 20)
-    {
-        MusicData::currentTrackGroup = TrackGroups::BikerContracts;
-    }
-    else if (value <= 40)
-    {
-        MusicData::currentTrackGroup = TrackGroups::BusinessBattle;
-    }
-    else
-    {
-        MusicData::currentTrackGroup = TrackGroups::SurvivalPrimary;
-    }
+    int value = CALC::RanInt(6, 0);
+    MusicData::currentTrackGroup = static_cast<TrackGroups>(value);
 }
 
 void MUSIC::StopTrack()
@@ -46,6 +34,26 @@ void MUSIC::StartTrack()
         AUDIO::TRIGGER_MUSIC_EVENT((char*)"BIKER_SYG_START");
         break;
     }
+    case TrackGroups::Casino:
+    {
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"CH_SUSPENSE_START");
+        break;
+    }
+    case TrackGroups::Casino2:
+    {
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"VWC_SUSPENSE_START");
+        break;
+    }
+    case TrackGroups::Tuner:
+    {
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"TUNER_SUSPENSE_START");
+        break;
+    }
+    case TrackGroups::Contract:
+    {
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"FIXER_SUSPENSE_START");
+        break;
+    }
     default:
         break;
     }
@@ -70,6 +78,26 @@ void MUSIC::LowIntensityTrack()
         AUDIO::TRIGGER_MUSIC_EVENT((char*)"BIKER_SYG_CALM");
         break;
     }
+    case TrackGroups::Casino:
+    {
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"CH_SUSPENSE");
+        break;
+    }
+    case TrackGroups::Casino2:
+    {
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"VWC_SUSPENSE");
+        break;
+    }
+    case TrackGroups::Tuner:
+    {
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"TUNER_SUSPENSE");
+        break;
+    }
+    case TrackGroups::Contract:
+    {
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"FIXER_SUSPENSE");
+        break;
+    }
     default:
         break;
     }
@@ -90,12 +118,67 @@ void MUSIC::MidIntensityTrack(int wave)
     }
     case TrackGroups::BusinessBattle:
     {
-        AUDIO::TRIGGER_MUSIC_EVENT((char*)"BTL_MED_INTENSITY");
+        if (wave <= 3)
+        {
+            AUDIO::TRIGGER_MUSIC_EVENT((char*)"BTL_MED_INTENSITY");
+        }
+        else
+        {
+            AUDIO::TRIGGER_MUSIC_EVENT((char*)"BTL_GUNFIGHT");
+        }
         break;
     }
     case TrackGroups::BikerContracts:
     {
         AUDIO::TRIGGER_MUSIC_EVENT((char*)"BIKER_DEFEND_POLICE_RAID_FIGHT");
+        break;
+    }
+    case TrackGroups::Casino:
+    {
+        if (wave <= 3)
+        {
+            AUDIO::TRIGGER_MUSIC_EVENT((char*)"CH_MED_INTENSITY");
+        }
+        else
+        {
+            AUDIO::TRIGGER_MUSIC_EVENT((char*)"CH_GUNFIGHT");
+        }
+        break;
+    }
+    case TrackGroups::Casino2:
+    {
+        if (wave <= 3)
+        {
+            AUDIO::TRIGGER_MUSIC_EVENT((char*)"VWC_MED_INTENSITY");
+        }
+        else
+        {
+            AUDIO::TRIGGER_MUSIC_EVENT((char*)"VWC_GUNFIGHT");
+        }
+        break;
+    }
+    case TrackGroups::Tuner:
+    {
+        if (wave <= 3)
+        {
+            AUDIO::TRIGGER_MUSIC_EVENT((char*)"TUNER_MED_INTENSITY");
+        }
+        else
+        {
+            AUDIO::TRIGGER_MUSIC_EVENT((char*)"TUNER_GUNFIGHT");
+        }
+        break;
+    }
+    case TrackGroups::Contract:
+    {
+        if (wave <= 3)
+        {
+            AUDIO::TRIGGER_MUSIC_EVENT((char*)"FIXER_MED_INTENSITY");
+        }
+        else
+        {
+            AUDIO::TRIGGER_MUSIC_EVENT((char*)"FIXER_GUNFIGHT");
+        }
         break;
     }
     default:
@@ -118,12 +201,32 @@ void MUSIC::HighIntensityTrack(int wave)
     }
     case TrackGroups::BusinessBattle:
     {
-        AUDIO::TRIGGER_MUSIC_EVENT((char*)"BTL_GUNFIGHT");
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"BTL_VEHICLE_ACTION");
         break;
     }
     case TrackGroups::BikerContracts:
     {
         AUDIO::TRIGGER_MUSIC_EVENT((char*)"BIKER_SYG_ATTACKED");
+        break;
+    }
+    case TrackGroups::Casino:
+    {
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"CH_VEHICLE_ACTION");
+        break;
+    }
+    case TrackGroups::Casino2:
+    {
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"VWC_VEHICLE_ACTION");
+        break;
+    }
+    case TrackGroups::Tuner:
+    {
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"TUNER_VEHICLE_ACTION");
+        break;
+    }
+    case TrackGroups::Contract:
+    {
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"FIXER_VEHICLE_ACTION");
         break;
     }
     default:

@@ -1,22 +1,16 @@
 #include "pch.h"
 #include "Calculations.hpp"
+#include <cstdlib>
+#include <ctime>
 
 int CALC::RanInt(int max, int min)
 {
-	std::random_device rd;
-	std::default_random_engine eng(rd());
-	std::uniform_int_distribution<int> distr(min, max);
-
-	return distr(eng);
+	return min + (std::rand() % (max - min + 1));
 }
 
 size_t CALC::RanInt(size_t max, size_t min)
 {
-	std::random_device rd;
-	std::default_random_engine eng(rd());
-	std::uniform_int_distribution<size_t> distr(min, max);
-
-	return distr(eng);
+	return min + (std::rand() % (max - min + 1));
 }
 
 bool CALC::IsInRange_2(Vector3 a, Vector3 b, float range)

@@ -318,7 +318,7 @@ void ENEMIES::InitializeJesus(Ped ped)
 
 void ENEMIES::InitializeAnimal(Ped ped)
 {
-    BLIPS::CreateForEnemyPed(ped, 463, "Enemy Rottweiler");
+    BLIPS::CreateForEnemyPed(ped, 463, "Enemy Animal");
     PED::SET_PED_RELATIONSHIP_GROUP_HASH(ped, GAMEPLAY::GET_HASH_KEY((char*)"COUGAR"));
     AI::TASK_PUT_PED_DIRECTLY_INTO_MELEE(ped, PLAYER::PLAYER_PED_ID(), 0, 0, 0, 0);
     EnemiesData::currentDogCount += 1;
@@ -364,17 +364,17 @@ void ENEMIES::InitializeRageEnemy(Ped ped)
     BLIPS::CreateForEnemyPed(ped, 671, "Ragemode Sasquatch");
 }
 
-void ENEMIES::InitializeEnemy(Ped ped, bool heliPassenger, bool heliCrewMember)
+void ENEMIES::InitializeEnemy(Ped ped)
 {
     Hash pedModel = ENTITY::GET_ENTITY_MODEL(ped);
 
-    if (pedModel == 0xCE2CB751 && !heliCrewMember && !heliPassenger && !EnemiesData::jesusSpawned)
+    if (pedModel == 0xCE2CB751 &&  !EnemiesData::jesusSpawned)
     {
         InitializeJesus(ped);
         return;
     }
 
-    if ((pedModel == 0xAD340F5A || pedModel == 0x61D4C771) && !heliCrewMember)
+    if ((pedModel == 0xAD340F5A || pedModel == 0x61D4C771))
     {
         int rageChance = CALC::RanInt(100, 1);
 
@@ -384,6 +384,54 @@ void ENEMIES::InitializeEnemy(Ped ped, bool heliPassenger, bool heliCrewMember)
             return;
         }
     }
+
+    switch (pedModel)
+    {
+        case 0x5E3DA4A4:
+        case 0x15F8700D:
+        case 0x616C97B9:
+        case 0x72C0CAD2:
+        case 0x8D8F1B10:
+            PED::SET_PED_CONFIG_FLAG(ped, 155, false);
+            PED::SET_PED_CONFIG_FLAG(ped, 42, true);
+            PED::SET_PED_CONFIG_FLAG(ped, 301, true);
+            break;
+        default:
+            break;
+    }
+
+    if (pedModel == 0x64611296)
+    {
+        PED::SET_PED_DEFAULT_COMPONENT_VARIATION(ped);
+        AUDIO::DISABLE_PED_PAIN_AUDIO(ped, true);
+    }
+
+    PED::SET_PED_RELATIONSHIP_GROUP_HASH(ped, Data::enemiesRelGroup);
+    int accuracyModifier = SURVIVAL::SurvivalData::CurrentWave > 10 ? 10 : SURVIVAL::SurvivalData::CurrentWave;
+
+    if (SURVIVAL::SurvivalData::hardcore)
+        accuracyModifier = 10;
+
+    PED::SET_PED_ARMOUR(ped, SURVIVAL::SurvivalData::hardcore ? 150 : SURVIVAL::SurvivalData::CurrentWave * 10);
+    PED::SET_PED_ACCURACY(ped, 7 + (accuracyModifier * 3));
+    std::vector<DWORD> weapons = GetWeapons(pedModel);
+    size_t index = CALC::RanInt(weapons.size() - (size_t)1, (size_t)0);
+    DWORD weaponHash = weapons.at(index);
+    WEAPON::GIVE_WEAPON_TO_PED(ped, weaponHash, 1000, true, true);
+    AI::TASK_COMBAT_PED(ped, PLAYER::PLAYER_PED_ID(), 0, 16);
+    BLIPS::CreateForEnemyPed(ped);
+    PED::SET_PED_COMBAT_MOVEMENT(ped, 2);
+    int i = CALC::RanInt(100, 1);
+
+    if (i <= accuracyModifier * 3)
+    {
+        PED::SET_PED_FIRING_PATTERN(ped, eFiringPattern::FiringPatternFullAuto);
+    }
+}
+
+void ENEMIES::InitializeEnemyInAircraft(Ped ped, bool passenger)
+{
+    Hash pedModel = ENTITY::GET_ENTITY_MODEL(ped);
 
     switch (pedModel)
     {
@@ -413,33 +461,71 @@ void ENEMIES::InitializeEnemy(Ped ped, bool heliPassenger, bool heliCrewMember)
         accuracyModifier = 10;
 
     PED::SET_PED_ARMOUR(ped, SURVIVAL::SurvivalData::hardcore ? 150 : SURVIVAL::SurvivalData::CurrentWave * 10);
-    PED::SET_PED_ACCURACY(ped, accuracyModifier * 3);
+    PED::SET_PED_ACCURACY(ped, 7 + (accuracyModifier * 3));
     std::vector<DWORD> weapons = GetWeapons(pedModel);
     size_t index = CALC::RanInt(weapons.size() - (size_t)1, (size_t)0);
     DWORD weaponHash = weapons.at(index);
+    WEAPON::GIVE_WEAPON_TO_PED(ped, weaponHash, 1000, true, true);
 
-    if (!heliCrewMember)
-    {
-        WEAPON::GIVE_WEAPON_TO_PED(ped, weaponHash, 1000, true, true);
-        AI::TASK_COMBAT_PED(ped, PLAYER::PLAYER_PED_ID(), 0, 16);
-        BLIPS::CreateForEnemyPed(ped);
-    }
+    if (passenger)
+        AI::TASK_SHOOT_AT_ENTITY(ped, PLAYER::PLAYER_PED_ID(), 18000000, eFiringPattern::FiringPatternBurstFire);
     else
+        AI::TASK_COMBAT_PED(ped, PLAYER::PLAYER_PED_ID(), 0, 16);
+
+    BLIPS::CreateForEnemyPed(ped);
+    PED::SET_PED_COMBAT_MOVEMENT(ped, 2);
+    int i = CALC::RanInt(100, 1);
+
+    if (i <= accuracyModifier * 3)
     {
-        WEAPON::GIVE_WEAPON_TO_PED(ped, weaponHash, 1000, true, true);
+        PED::SET_PED_FIRING_PATTERN(ped, eFiringPattern::FiringPatternFullAuto);
+    }
+}
 
-        if (heliPassenger)
-        {
-            AI::TASK_SHOOT_AT_ENTITY(ped, PLAYER::PLAYER_PED_ID(), 18000000, eFiringPattern::FiringPatternBurstFire);
-        }
-        else
-        {
-            AI::TASK_COMBAT_PED(ped, PLAYER::PLAYER_PED_ID(), 0, 16);
-        }
+void ENEMIES::InitializeEnemyInVehicle(Ped ped, bool passenger)
+{
+    Hash pedModel = ENTITY::GET_ENTITY_MODEL(ped);
 
-        BLIPS::CreateForEnemyPed(ped);
+    switch (pedModel)
+    {
+    case 0x5E3DA4A4:
+    case 0x15F8700D:
+    case 0x616C97B9:
+    case 0x72C0CAD2:
+    case 0x8D8F1B10:
+        PED::SET_PED_CONFIG_FLAG(ped, 155, false);
+        PED::SET_PED_CONFIG_FLAG(ped, 42, true);
+        PED::SET_PED_CONFIG_FLAG(ped, 301, true);
+        break;
+    default:
+        break;
     }
 
+    if (pedModel == 0x64611296)
+    {
+        PED::SET_PED_DEFAULT_COMPONENT_VARIATION(ped);
+        AUDIO::DISABLE_PED_PAIN_AUDIO(ped, true);
+    }
+
+    PED::SET_PED_RELATIONSHIP_GROUP_HASH(ped, Data::enemiesRelGroup);
+    int accuracyModifier = SURVIVAL::SurvivalData::CurrentWave > 10 ? 10 : SURVIVAL::SurvivalData::CurrentWave;
+
+    if (SURVIVAL::SurvivalData::hardcore)
+        accuracyModifier = 10;
+
+    PED::SET_PED_ARMOUR(ped, SURVIVAL::SurvivalData::hardcore ? 150 : SURVIVAL::SurvivalData::CurrentWave * 10);
+    PED::SET_PED_ACCURACY(ped, 7 + (accuracyModifier * 3));
+    std::vector<DWORD> weapons = GetWeapons(pedModel);
+    size_t index = CALC::RanInt(weapons.size() - (size_t)1, (size_t)0);
+    DWORD weaponHash = weapons.at(index);
+    WEAPON::GIVE_WEAPON_TO_PED(ped, weaponHash, 1000, true, true);
+
+    if (passenger)
+        AI::TASK_VEHICLE_SHOOT_AT_PED(ped, PLAYER::PLAYER_PED_ID(), 40.0f);
+    else
+        AI::TASK_COMBAT_PED(ped, PLAYER::PLAYER_PED_ID(), 0, 16);
+
+    BLIPS::CreateForEnemyPed(ped);
     PED::SET_PED_COMBAT_MOVEMENT(ped, 2);
     int i = CALC::RanInt(100, 1);
 
@@ -492,7 +578,7 @@ void ENEMIES::ProcessJesus()
                 }
                 else
                 {
-                    InitializeEnemy(EnemiesData::enemyJesus.targetPed, false, false);
+                    InitializeEnemy(EnemiesData::enemyJesus.targetPed);
                 }
 
                 EnemiesData::footEnemies.push_back(EnemiesData::enemyJesus.targetPed);
@@ -511,6 +597,22 @@ void ENEMIES::Process()
 
     if (EnemiesData::canSpawnMore && !EnemiesData::limitReached)
     {
+        if ((SURVIVAL::SurvivalData::CurrentWave >= 7 || SURVIVAL::SurvivalData::hardcore) && SURVIVAL::SpawnerData::hasDogs && !EnemiesData::dogLimitReached)
+        {
+            if (TIMERS::ProcessDogTimer())
+            {
+                Ped ped = SURVIVAL::SpawnDog();
+                InitializeAnimal(ped);
+                EnemiesData::footEnemies.push_back(ped);
+                EnemiesData::currentDogCount += 1;
+
+                if (EnemiesData::currentDogCount > 2)
+                    EnemiesData::dogLimitReached = true;
+
+                TIMERS::RestartDogTimer();
+            }
+        }
+
         if (TIMERS::ProcessSpawnMoreTimer())
         {
             EnemiesData::currentWaveSize += 1;
@@ -525,7 +627,7 @@ void ENEMIES::Process()
             else
             {
                 ped = SURVIVAL::SpawnEnemy(SURVIVAL::SurvivalData::CurrentWave, !EnemiesData::jesusSpawned);
-                InitializeEnemy(ped, false, false);
+                InitializeEnemy(ped);
             }
 
             EnemiesData::footEnemies.push_back(ped);
@@ -537,7 +639,7 @@ void ENEMIES::Process()
             }
         }
 
-        if ((SURVIVAL::SurvivalData::CurrentWave >= 3 || SURVIVAL::SurvivalData::hardcore) && EnemiesData::currentVehicles < SURVIVAL::SurvivalData::MaxVehicles)
+        if (SURVIVAL::SpawnerData::hasVehicles && (SURVIVAL::SurvivalData::CurrentWave >= 3 || SURVIVAL::SurvivalData::hardcore) && EnemiesData::currentVehicles < SURVIVAL::SurvivalData::MaxVehicles)
         {
             if (TIMERS::ProcessVehicleTimer())
             {
@@ -546,7 +648,7 @@ void ENEMIES::Process()
 
                 for (size_t i = 0; i < peds.size(); i++)
                 {
-                    InitializeEnemy(peds.at(i), false, false);
+                    InitializeEnemyInVehicle(peds.at(i), i != 0);
                     EnemiesData::footEnemies.push_back(peds.at(i));
                 }
 
@@ -563,7 +665,7 @@ void ENEMIES::Process()
             }
         }
 
-        if ((SURVIVAL::SurvivalData::CurrentWave >= 5 || SURVIVAL::SurvivalData::hardcore) && EnemiesData::currentAircraft < SURVIVAL::SurvivalData::MaxAircraft)
+        if (SURVIVAL::SpawnerData::hasAircraft && (SURVIVAL::SurvivalData::CurrentWave >= 5 || SURVIVAL::SurvivalData::hardcore) && EnemiesData::currentAircraft < SURVIVAL::SurvivalData::MaxAircraft)
         {
             if (TIMERS::ProcessAircraftTimer())
             {
@@ -572,7 +674,7 @@ void ENEMIES::Process()
 
                 for (size_t i = 0; i < peds.size(); i++)
                 {
-                    InitializeEnemy(peds.at(i), i > 0, true);
+                    InitializeEnemyInAircraft(peds.at(i), i != 0);
                     EnemiesData::footEnemies.push_back(peds.at(i));
                 }
 
@@ -589,22 +691,6 @@ void ENEMIES::Process()
                 }
             }
         }
-
-        if ((SURVIVAL::SurvivalData::CurrentWave >= 7 || SURVIVAL::SurvivalData::hardcore) && SURVIVAL::SpawnerData::hasDogs && !EnemiesData::dogLimitReached)
-        {
-            if (TIMERS::ProcessDogTimer())
-            {
-                Ped ped = SURVIVAL::SpawnDog();
-                InitializeAnimal(ped);
-                EnemiesData::footEnemies.push_back(ped);
-                EnemiesData::currentDogCount += 1;
-
-                if (EnemiesData::currentDogCount > 2)
-                    EnemiesData::dogLimitReached = true;
-
-                TIMERS::RestartDogTimer();
-            }
-        }
     }
 
     if (SURVIVAL::SurvivalData::timed)
@@ -619,6 +705,9 @@ void ENEMIES::Process()
 
     if (EnemiesData::footEnemies.size() > 0)
     {
+        if (!TIMERS::LeavingZone::Started)
+            SCREEN::ShowSubtitle("Kill the ~r~enemies.", 8000);
+
         RemoveDeadEnemies();
         ProcessJesus();
         
@@ -649,11 +738,7 @@ void ENEMIES::Process()
     {
         if (SURVIVAL::SurvivalData::InfiniteWaves || SURVIVAL::SurvivalData::CurrentWave < 10)
         {
-            char subtitle[200];
-            strcpy_s(subtitle, "~g~Wave ");
-            strcat_s(subtitle, std::to_string(SURVIVAL::SurvivalData::CurrentWave).c_str());
-            strcat_s(subtitle, " survived!");
-            SCREEN::ShowSubtitle(subtitle, 8000);
+            SCREEN::ShowSubtitle("", 1);
             INTERMISSION::Start();
         }
         else

@@ -27,8 +27,8 @@ std::unordered_map<int, Position> contentSlots =
 
 std::unordered_map<int, Position> titleSlots =
 {
-	{0, Position(0.855f, 0.956f)},
-	{1, Position(0.855f, 0.904f)}
+	{0, Position(0.855f, 0.96f)},
+	{1, Position(0.855f, 0.91f)}
 };
 
 void SCREEN::ShowEnemyCountBadge(int count, int max, int wave)
@@ -178,7 +178,7 @@ void SCREEN::DrawBadge(const char* title, const char* content, bool red, int slo
 	Position tPos = titleSlots.at(slot);
 	DrawSprite(bPos.x, bPos.y, red);
 	DrawSpriteText(cPos.x, cPos.y, 0.42f, content, true);
-	DrawSpriteText(tPos.x, tPos.y, 0.38f, title, false);
+	DrawSpriteText(tPos.x, tPos.y, 0.295f, title, false);
 }
 
 void SCREEN::ShowControls()
@@ -201,4 +201,46 @@ void SCREEN::ShowControls()
 	UI::_ADD_TEXT_COMPONENT_STRING(controlA);
 	UI::_ADD_TEXT_COMPONENT_STRING(controlB);
 	UI::_DISPLAY_HELP_TEXT_FROM_STRING_LABEL(0, 0, false, 0);
+}
+
+int SCREEN::RequestScaleform()
+{
+	int handle = GRAPHICS::REQUEST_SCALEFORM_MOVIE((char*)"mp_big_message_freemode");
+
+	while (!GRAPHICS::HAS_SCALEFORM_MOVIE_LOADED(handle))
+		WAIT(1);
+
+	return handle;
+}
+
+void SCREEN::SetScaleformText(int scaleform, const char* title, const char* subtitle)
+{
+	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(scaleform, (char*)"SHOW_SHARD_CENTERED_TOP_MP_MESSAGE");
+	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_STRING((char*)title);
+	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_STRING((char*)subtitle);
+	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(5);
+	GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
+}
+
+void SCREEN::SetScaleformTextFailed(int scaleform, const char* title, const char* subtitle)
+{
+	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(scaleform, (char*)"SHOW_MISSION_END_MP_MESSAGE");
+	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_STRING((char*)title);
+	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_STRING((char*)subtitle);
+	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(5);
+	GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
+}
+
+void SCREEN::FadeOutScaleform(int handle, int duration)
+{
+	GRAPHICS::CALL_SCALEFORM_MOVIE_METHOD(handle, (char*)"SHARD_ANIM_OUT");
+	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(5);
+	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(duration);
+	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_BOOL(true);
+	GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
+}
+
+void SCREEN::FreeScaleform(int handle)
+{
+	GRAPHICS::SET_SCALEFORM_MOVIE_AS_NO_LONGER_NEEDED(&handle);
 }
