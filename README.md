@@ -29,6 +29,8 @@ Extract the compressed file and copy the contents to your GTA V directory
 - Rancho Survival
 - Xmas Survival
 - Police Station Survival
+- Cayo Perico Survival
+- Cayo Perico Mansion Survival
 
 
 # How to start a survival
