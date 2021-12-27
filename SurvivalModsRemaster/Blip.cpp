@@ -8,13 +8,14 @@ void BLIPS::SetBlipName(Blip blip, const char* name)
 	UI::END_TEXT_COMMAND_SET_BLIP_NAME(blip);
 }
 
-void BLIPS::CreateForMissionTriggerPed(Ped ped, const char* blipName)
+Blip BLIPS::CreateForMissionTriggerPed(Vector3 pos, const char* blipName)
 {
-	Blip blipHandle = UI::ADD_BLIP_FOR_ENTITY(ped);
+	Blip blipHandle = UI::ADD_BLIP_FOR_COORD(pos.x, pos.y, pos.z);
 	UI::SET_BLIP_SPRITE(blipHandle, 630);
 	UI::SET_BLIP_COLOUR(blipHandle, eBlipColor::BlipColorRed);
 	SetBlipName(blipHandle, blipName);
 	UI::SET_BLIP_AS_SHORT_RANGE(blipHandle, true);
+	return blipHandle;
 }
 
 void BLIPS::CreateForEnemyPed(Ped ped)

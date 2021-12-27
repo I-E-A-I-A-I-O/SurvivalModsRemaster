@@ -47,18 +47,9 @@ bool TIMERS::ProcessTimedSurvivalTimer(int endTime)
 			TimedSurvival::InterWaveTime = GAMEPLAY::GET_GAME_TIMER();
 			INTERMISSION::Start();
 			INTERMISSION::Process();
-
-			if (SURVIVAL::SurvivalData::CurrentWave < 10)
-			{
-				SCREEN::ShowSubtitle("~g~Difficulty increased!", 8000);
-			}
-			else
-			{
-				SCREEN::ShowSubtitle("~g~Pickups regenerated.", 8000);
-			}
 		}
 
-		TimedSurvival::timeLeft = (endTime / 1000) - ((TimedSurvival::CurrentTime - TimedSurvival::StartTime) / 1000);
+		TimedSurvival::timeLeft = endTime - (TimedSurvival::CurrentTime - TimedSurvival::StartTime);
 
 		if (TimedSurvival::CurrentTime - TimedSurvival::StartTime >= endTime)
 		{

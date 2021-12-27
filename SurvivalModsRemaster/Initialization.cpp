@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "Initialization.hpp"
 
-std::map<std::string, SpawnData> INIT::InitData::missionTriggerPeds;
-
 void INIT::LoadTriggerPeds()
 {
     nlohmann::json js;
@@ -18,14 +16,25 @@ void INIT::LoadTriggerPeds()
     std::vector<float> headings = js["Headings"];
     std::vector<std::string> tasks = js["Tasks"];
 
-    if (!InitData::missionTriggerPeds.empty())
-    {
-        InitData::missionTriggerPeds.clear();
-    }
+    TriggerPedsData::ClearTriggerPeds();
 
     for (int i = 0; i < names.size(); i++)
     {
-        InitData::missionTriggerPeds.insert(std::pair<std::string, SpawnData>(names.at(i), SpawnData(models.at(i), positionX.at(i), positionY.at(i), positionZ.at(i), headings.at(i), tasks.at(i))));
+        EntityPosition pos = EntityPosition();
+        pos.coords.x = positionX.at(i);
+        pos.coords.y = positionY.at(i);
+        pos.coords.z = positionZ.at(i);
+        pos.heading = headings.at(i);
+        std::string name = names.at(i);
+
+        TriggerPedsData::names.push_back(name);
+        TriggerPedsData::models.push_back(models.at(i));
+        TriggerPedsData::blips.push_back(BLIPS::CreateForMissionTriggerPed(pos.coords, name.c_str()));
+        TriggerPedsData::positions.push_back(pos);
+        TriggerPedsData::peds.push_back(0);
+        TriggerPedsData::starTime.push_back(0);
+        TriggerPedsData::tasks.push_back(tasks.at(i));
+        TriggerPedsData::timerActive.push_back(false);
     }
 }
 
@@ -55,40 +64,16 @@ Hash INIT::LoadModel(const char* modelName)
     return modelHash;
 }
 
-Ped INIT::SpawnTriggerPed(std::string id)
+Ped INIT::SpawnTriggerPed(size_t index)
 {
-    SpawnData pedData = InitData::missionTriggerPeds.at(id);
-    Hash model = LoadModel(pedData.modelName.c_str());
-    Ped handle = PED::CREATE_PED(0, model, pedData.position.x, pedData.position.y, pedData.position.z, pedData.heading, false, true);
+    EntityPosition pos = TriggerPedsData::positions.at(index);
+    Hash model = LoadModel(TriggerPedsData::models.at(index).c_str());
+    Ped handle = PED::CREATE_PED(0, model, pos.coords.x, pos.coords.y, pos.coords.z, pos.heading, false, true);
     UnloadModel(model);
 
     PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(handle, true);
     ENTITY::SET_ENTITY_INVINCIBLE(handle, true);
-    BLIPS::CreateForMissionTriggerPed(handle, (char*)id.c_str());
-    AI::TASK_START_SCENARIO_IN_PLACE(handle, (char*)pedData.taskName.c_str(), 0, true);
+    AI::TASK_START_SCENARIO_IN_PLACE(handle, (char*)TriggerPedsData::tasks.at(index).c_str(), 0, true);
 
     return handle;
-}
-
-std::map<std::string, Ped> INIT::SpawnMissionTriggerPeds()
-{
-    LoadTriggerPeds();
-
-    std::map<std::string, Ped> pedMap;
-
-    for (const auto& [key, value] : InitData::missionTriggerPeds)
-    {
-        Hash model = LoadModel(value.modelName.c_str());
-        Ped handle = PED::CREATE_PED(0, model, value.position.x, value.position.y, value.position.z, value.heading, false, true);
-        UnloadModel(model);
-
-        PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(handle, true);
-        ENTITY::SET_ENTITY_INVINCIBLE(handle, true);
-        BLIPS::CreateForMissionTriggerPed(handle, key.c_str());
-        AI::TASK_START_SCENARIO_IN_PLACE(handle, (char*)value.taskName.c_str(), 0, true);
-
-        pedMap.insert(std::pair<std::string, Ped>(key, handle));
-    }
-
-    return pedMap;
 }

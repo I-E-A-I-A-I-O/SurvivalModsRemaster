@@ -6,12 +6,27 @@ bool INTERMISSION::Data::Active;
 void INTERMISSION::Start()
 {
     Data::Active = true;
+    UIScript::Data::showScaleform = true;
 
-    if ((SURVIVAL::SurvivalData::CurrentWave > 0 && (SURVIVAL::SurvivalData::CurrentWave < 9 || SURVIVAL::SurvivalData::InfiniteWaves)) || SURVIVAL::SurvivalData::timed)
+    if (!SURVIVAL::SurvivalData::timed)
+    {
+        UIScript::Data::scaleformType = 0;
+    }
+    else
+    {
+        if (SURVIVAL::SurvivalData::CurrentWave == 0)
+            UIScript::Data::scaleformType = 0;
+        else if (SURVIVAL::SurvivalData::CurrentWave < 10)
+            UIScript::Data::scaleformType = 4;
+        else
+            UIScript::Data::scaleformType = 5;
+    }
+
+    if (SURVIVAL::SurvivalData::CurrentWave > 0 && !SURVIVAL::SurvivalData::timed)
     {
         MUSIC::LowIntensityTrack();
     }
-    else
+    else if (SURVIVAL::SurvivalData::CurrentWave == 9 && !SURVIVAL::SurvivalData::InfiniteWaves && !SURVIVAL::SurvivalData::timed)
     {
         MUSIC::StopTrack();
         MUSIC::FinalWaveMusic();

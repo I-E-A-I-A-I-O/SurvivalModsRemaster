@@ -85,11 +85,11 @@ void SCREEN::ShowTimeLeftBadge(int time)
 	const char* colorModifier;
 	bool red = false;
 
-	if (time > 20 / 1.5f)
+	if (time > 40000 / 1.5f)
 	{
 		colorModifier = "~g~";
 	}
-	else if (time > 20 / 3)
+	else if (time > 40000 / 3)
 	{
 		colorModifier = "~y~";
 	}
@@ -102,9 +102,22 @@ void SCREEN::ShowTimeLeftBadge(int time)
 	char title[40];
 	strcpy_s(title, colorModifier);
 	strcat_s(title, "TIME LEFT");
-	char content[40];
+	char content[100];
 	strcpy_s(content, colorModifier);
-	strcat_s(content, std::to_string(time).c_str());
+
+	int val = time / 1000 / 60;
+
+	if (val < 10)
+		strcat_s(content, "0");
+
+	strcat_s(content, std::to_string(val).c_str());
+	strcat_s(content, ":");
+	val = time / 1000 % 60;
+
+	if (val < 10)
+		strcat_s(content, "0");
+
+	strcat_s(content, std::to_string(val).c_str());
 	DrawBadge(title, content, red, 0);
 }
 

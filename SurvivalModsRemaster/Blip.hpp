@@ -1,10 +1,11 @@
 #pragma once
+
 #include "natives.h"
 #include "enums.h"
 
 namespace BLIPS
 {
-	void CreateForMissionTriggerPed(Ped ped, const char* blipName);
+	Blip CreateForMissionTriggerPed(Vector3 pos, const char* blipName);
 	void CreateForEnemyPed(Ped ped);
 	void CreateForEnemyVehicle(Vehicle vehicle);
 	Blip GetBlipForEntity(Entity entity);

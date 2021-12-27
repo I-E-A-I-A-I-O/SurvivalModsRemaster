@@ -15,10 +15,11 @@ bool SURVIVAL::SurvivalData::timed;
 int SURVIVAL::SurvivalData::timedTimeLeft;
 bool SURVIVAL::SurvivalData::cheated;
 bool SURVIVAL::SurvivalData::hardcore;
+Ped ped;
 
 void SURVIVAL::StartMission(bool infiniteWaves, bool timed, bool hardcore)
 {
-	SurvivalData::MissionID = Data::currentPedKey;
+	SurvivalData::MissionID = TriggerPedsData::names.at(Data::TPIndex);
 	LoadSurvival(SurvivalData::MissionID);
 	SurvivalData::IsActive = true;
 	SurvivalData::Started = false;
@@ -28,14 +29,7 @@ void SURVIVAL::StartMission(bool infiniteWaves, bool timed, bool hardcore)
 	SurvivalData::InfiniteWaves = infiniteWaves;
 	SurvivalData::timed = timed;
 	MUSIC::PrepareTracks();
-	Ped ped = Data::missionTriggerPeds.at(SurvivalData::MissionID);
-	Vector3 pedCoords = ENTITY::GET_ENTITY_COORDS(ped, true);
-	float pedHeading = ENTITY::GET_ENTITY_HEADING(ped);
-	Hash model = ENTITY::GET_ENTITY_MODEL(ped);
-	SpawnData triggerPedData = SpawnData(SurvivalData::MissionID);
-	Timers timer = Timers();
-	STORAGE::StoredData::peds.push_back(triggerPedData);
-	STORAGE::StoredData::timers.push_back(timer);
+	ped = TriggerPedsData::peds.at(Data::TPIndex);
 	ENTITY::SET_ENTITY_INVINCIBLE(ped, false);
 
 	if (!WEAPON::HAS_PED_GOT_WEAPON(PLAYER::PLAYER_PED_ID(), eWeapon::WeaponPistol, false))
@@ -91,8 +85,6 @@ void SURVIVAL::SetOffTrigger()
 		PLAYER::SET_PLAYER_WANTED_LEVEL(PLAYER::PLAYER_ID(), 0, 0);
 	}
 
-	Ped ped = Data::missionTriggerPeds.at(SurvivalData::MissionID);
-
 	if (!PED::IS_PED_DEAD_OR_DYING(ped, 1))
 	{
 		if (TIMERS::ProcessTriggerPedTimer())
@@ -107,9 +99,10 @@ void SURVIVAL::SetOffTrigger()
 
 	TIMERS::RestartTriggerPedTimer();
 	SurvivalData::Triggered = false;
-	Data::missionTriggerPeds.erase(SurvivalData::MissionID);
-	BLIPS::DeleteBlipForEntity(ped);
+	UI::REMOVE_BLIP(&TriggerPedsData::blips.at(Data::TPIndex));
+	TriggerPedsData::blips.at(Data::TPIndex) = 0;
 	ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
+	TriggerPedsData::peds.at(Data::TPIndex) = 0;
 	AI::CLEAR_PED_TASKS(PLAYER::PLAYER_PED_ID());
 	PLAYER::SET_PLAYER_CONTROL(PLAYER::PLAYER_ID(), true, 0);
 	Initialize();
@@ -167,8 +160,18 @@ void SURVIVAL::ProcessSurvival()
 
 void SURVIVAL::GiveReward(bool playerDied)
 {
+	int reward = 0;
+
 	if (SurvivalData::cheated)
 	{
+		std::string notification = "";
+		notification.append("Survival ended at wave ");
+		notification.append(std::to_string(SurvivalData::CurrentWave).c_str());
+		notification.append(". Reward: ~g~$");
+		notification.append(std::to_string(reward).c_str());
+		UIScript::Data::pendingNoti = true;
+		UIScript::Data::scaleformType = 3;
+		UIScript::Data::notiText = notification;
 		return;
 	}
 
@@ -194,13 +197,21 @@ void SURVIVAL::GiveReward(bool playerDied)
 	}
 	else
 	{
+		std::string notification = "";
+		notification.append("Survival ended at wave ");
+		notification.append(std::to_string(SurvivalData::CurrentWave).c_str());
+		notification.append(". Reward: ~g~$");
+		notification.append(std::to_string(reward).c_str());
+		UIScript::Data::pendingNoti = true;
+		UIScript::Data::scaleformType = 3;
+		UIScript::Data::notiText = notification;
 		return;
 	}
 
 
 	int playerMoney;
 	STATS::STAT_GET_INT(stat, &playerMoney, -1);
-	int reward = SurvivalData::CurrentWave * 5000;
+	reward = SurvivalData::CurrentWave * 5000;
 
 	if ((SurvivalData::CurrentWave == 10 && !playerDied) || SurvivalData::CurrentWave > 10)
 	{
@@ -226,20 +237,22 @@ void SURVIVAL::GiveReward(bool playerDied)
 		reward += bonus;
 	}
 
-	STATS::STAT_SET_INT(stat, playerMoney + reward, 1);
 	std::string notification = "";
 	notification.append("Survival ended at wave ");
 	notification.append(std::to_string(SurvivalData::CurrentWave).c_str());
 	notification.append(". Reward: ~g~$");
 	notification.append(std::to_string(reward).c_str());
 	UIScript::Data::pendingNoti = true;
+	UIScript::Data::scaleformType = 3;
 	UIScript::Data::notiText = notification;
+	STATS::STAT_SET_INT(stat, playerMoney + reward, 1);
 }
 
 void SURVIVAL::CompleteSurvival()
 {
 	MUSIC::MissionCompletedSound();
-	Data::showPassedScaleform = true;
+	UIScript::Data::showScaleform = true;
+	UIScript::Data::scaleformType = 1;
 	GiveReward(false);
 	PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(PLAYER::PLAYER_ID(), true);
 	ENEMIES::ClearVectors();
@@ -275,7 +288,8 @@ void SURVIVAL::QuitSurvival(bool playerDied)
 	}
 	else
 	{
-		SCREEN::ShowSubtitle("~r~Survival canceled.", 8000);
+		UIScript::Data::showScaleform = true;
+		UIScript::Data::scaleformType = 2;
 	}
 
 	MUSIC::StopTrack();
@@ -323,11 +337,14 @@ void SURVIVAL::ScriptQuit()
 
 void SURVIVAL::TriggerDelayedSpawn()
 {
-	for (int i = 0; i < STORAGE::StoredData::peds.size(); i++)
+	size_t size = TriggerPedsData::names.size();
+
+	for (size_t i = 0; i < size; i++)
 	{
-		if (STORAGE::StoredData::peds[i].stringName == SurvivalData::MissionID)
+		if (TriggerPedsData::names.at(i) == SurvivalData::MissionID)
 		{
-			STORAGE::StoredData::peds[i].timerActive = true;
+			TriggerPedsData::timerActive.at(i) = true;
+			TriggerPedsData::starTime.at(i) = GAMEPLAY::GET_GAME_TIMER();
 			return;
 		}
 	}

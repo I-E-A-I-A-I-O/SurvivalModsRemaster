@@ -177,7 +177,6 @@
     <ClInclude Include="Screen.hpp" />
     <ClInclude Include="Script.hpp" />
     <ClInclude Include="SpawnData.hpp" />
-    <ClInclude Include="Storage.hpp" />
     <ClInclude Include="Survival.hpp" />
     <ClInclude Include="SurvivalSpawner.hpp" />
     <ClInclude Include="Timers.hpp" />
@@ -203,7 +202,6 @@
     <ClCompile Include="Screen.cpp" />
     <ClCompile Include="Script.cpp" />
     <ClCompile Include="SpawnData.cpp" />
-    <ClCompile Include="Storage.cpp" />
     <ClCompile Include="Survival.cpp" />
     <ClCompile Include="SurvivalSpawner.cpp" />
     <ClCompile Include="Timers.cpp" />

@@ -36,22 +36,22 @@ void MUSIC::StartTrack()
     }
     case TrackGroups::Casino:
     {
-        AUDIO::TRIGGER_MUSIC_EVENT((char*)"CH_SUSPENSE_START");
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"CH_IDLE_START");
         break;
     }
     case TrackGroups::Casino2:
     {
-        AUDIO::TRIGGER_MUSIC_EVENT((char*)"VWC_SUSPENSE_START");
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"VWC_IDLE_START");
         break;
     }
     case TrackGroups::Tuner:
     {
-        AUDIO::TRIGGER_MUSIC_EVENT((char*)"TUNER_SUSPENSE_START");
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"TUNER_IDLE_START");
         break;
     }
     case TrackGroups::Contract:
     {
-        AUDIO::TRIGGER_MUSIC_EVENT((char*)"FIXER_SUSPENSE_START");
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"FIXER_IDLE_START");
         break;
     }
     default:
@@ -153,7 +153,7 @@ void MUSIC::MidIntensityTrack(int wave)
         }
         else
         {
-            AUDIO::TRIGGER_MUSIC_EVENT((char*)"VWC_GUNFIGHT");
+           AUDIO::TRIGGER_MUSIC_EVENT((char*)"VWC_GUNFIGHT"); 
         }
         break;
     }
@@ -161,7 +161,7 @@ void MUSIC::MidIntensityTrack(int wave)
     {
         if (wave <= 3)
         {
-            AUDIO::TRIGGER_MUSIC_EVENT((char*)"TUNER_MED_INTENSITY");
+           AUDIO::TRIGGER_MUSIC_EVENT((char*)"TUNER_MED_INTENSITY"); 
         }
         else
         {

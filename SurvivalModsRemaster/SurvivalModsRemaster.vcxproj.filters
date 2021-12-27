@@ -87,9 +87,6 @@
     <ClInclude Include="Timers.hpp">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Storage.hpp">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
     <ClInclude Include="UIScript.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -144,9 +141,6 @@
       <Filter>Source Files\Mission</Filter>
     </ClCompile>
     <ClCompile Include="Timers.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="Storage.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
     <ClCompile Include="UIScript.cpp">

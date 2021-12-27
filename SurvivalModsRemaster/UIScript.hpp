@@ -8,6 +8,8 @@ namespace UIScript
 {
 	struct Data
 	{
+		static bool showScaleform;
+		static int scaleformType;
 		static bool pendingNoti;
 		static std::string notiText;
 	};
