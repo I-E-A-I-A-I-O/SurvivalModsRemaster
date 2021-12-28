@@ -17,35 +17,7 @@ JESUS::Jesus ENEMIES::EnemiesData::enemyJesus;
 bool ENEMIES::EnemiesData::jesusSpawned;
 Ped ENEMIES::EnemiesData::enemyJuggernaut;
 
-std::vector<DWORD> ENEMIES::EnemiesData::weakWeapons =
-{
-    eWeapon::WeaponAPPistol,
-    eWeapon::WeaponPistol,
-    eWeapon::WeaponMicroSMG,
-    eWeapon::WeaponSawnOffShotgun
-};
-
-std::vector<DWORD> ENEMIES::EnemiesData::midWeapons =
-{
-    eWeapon::WeaponCombatPistol,
-    eWeapon::WeaponBullpupRifle,
-    eWeapon::WeaponCarbineRifle,
-    eWeapon::WeaponAssaultRifle,
-    eWeapon::WeaponPumpShotgun,
-    eWeapon::WeaponBullpupShotgun,
-};
-
-std::vector<DWORD> ENEMIES::EnemiesData::strongWeapons =
-{
-    eWeapon::WeaponMinigun,
-    eWeapon::WeaponAssaultShotgun,
-    0xDBBD7280,
-    0x969C3D67,
-    0x394F415C,
-    0x555AF99A
-};
-
-std::vector<DWORD> ENEMIES::EnemiesData::alienWeapons =
+std::vector<Hash> ENEMIES::EnemiesData::alienWeapons =
 {
     0x476BF155,
     0xB62D1F67
@@ -136,28 +108,29 @@ int ENEMIES::GetKillTime(Ped ped)
 
     switch (lastDamagedBone)
     {
-    case eBone::SKEL_Head:
-        SCREEN::ShowNotification("Headshot: ~g~+5 seconds");
-        return 5000;
-    case eBone::SKEL_Spine_Root:
-    case eBone::SKEL_Spine0:
-    case eBone::SKEL_Spine1:
-    case eBone::SKEL_Spine2:
-    case eBone::SKEL_Spine3:
-        SCREEN::ShowNotification("Torso: ~y~+2.5 seconds");
-        return 2500;
-    case eBone::SKEL_L_UpperArm:
-    case eBone::SKEL_R_UpperArm:
-    case eBone::SKEL_L_Forearm:
-    case eBone::SKEL_R_Forearm:
-    case eBone::SKEL_L_Thigh:
-    case eBone::SKEL_R_Thigh:
-    case eBone::SKEL_L_Calf:
-    case eBone::SKEL_R_Calf:
-        SCREEN::ShowNotification("Limb: ~r~+1 second");
-        return 1250;
-    default:
-        return 1000;
+        case eBone::SKEL_Head:
+            SCREEN::ShowNotification("Headshot: ~g~+5 seconds");
+            return 5000;
+        case eBone::SKEL_Spine_Root:
+        case eBone::SKEL_Spine0:
+        case eBone::SKEL_Spine1:
+        case eBone::SKEL_Spine2:
+        case eBone::SKEL_Spine3:
+            SCREEN::ShowNotification("Torso: ~y~+2.5 seconds");
+            return 2500;
+        case eBone::SKEL_L_UpperArm:
+        case eBone::SKEL_R_UpperArm:
+        case eBone::SKEL_L_Forearm:
+        case eBone::SKEL_R_Forearm:
+        case eBone::SKEL_L_Thigh:
+        case eBone::SKEL_R_Thigh:
+        case eBone::SKEL_L_Calf:
+        case eBone::SKEL_R_Calf:
+            SCREEN::ShowNotification("Limb: ~r~+1.25 seconds");
+            return 1250;
+        default:
+            SCREEN::ShowNotification("Other: ~c~+1 second");
+            return 1000;
     }
 }
 
@@ -276,7 +249,7 @@ void ENEMIES::RemoveUnusedVehicles()
     }
 }
 
-std::vector<DWORD> ENEMIES::GetWeapons(Hash pedModel)
+std::vector<Hash> ENEMIES::GetWeapons(Hash pedModel)
 {
     if (pedModel == 0x64611296)
     {
@@ -284,21 +257,21 @@ std::vector<DWORD> ENEMIES::GetWeapons(Hash pedModel)
     }
 
     if (SURVIVAL::SurvivalData::hardcore)
-        return EnemiesData::strongWeapons;
+        return SURVIVAL::SpawnerData::strongWeapons;
 
     switch (SURVIVAL::SurvivalData::CurrentWave)
     {
-    case 1:
-    case 2:
-    case 3:
-        return EnemiesData::weakWeapons;
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-        return EnemiesData::midWeapons;
-    default:
-        return EnemiesData::strongWeapons;
+        case 1:
+        case 2:
+        case 3:
+            return SURVIVAL::SpawnerData::weakWeapons;
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+            return SURVIVAL::SpawnerData::medWeapons;
+        default:
+            return SURVIVAL::SpawnerData::strongWeapons;
     }
 }
 
@@ -414,9 +387,9 @@ void ENEMIES::InitializeEnemy(Ped ped)
 
     PED::SET_PED_ARMOUR(ped, SURVIVAL::SurvivalData::hardcore ? 150 : SURVIVAL::SurvivalData::CurrentWave * 10);
     PED::SET_PED_ACCURACY(ped, 7 + (accuracyModifier * 3));
-    std::vector<DWORD> weapons = GetWeapons(pedModel);
+    std::vector<Hash> weapons = GetWeapons(pedModel);
     size_t index = CALC::RanInt(weapons.size() - (size_t)1, (size_t)0);
-    DWORD weaponHash = weapons.at(index);
+    Hash weaponHash = weapons.at(index);
     WEAPON::GIVE_WEAPON_TO_PED(ped, weaponHash, 1000, true, true);
     AI::TASK_COMBAT_PED(ped, PLAYER::PLAYER_PED_ID(), 0, 16);
     BLIPS::CreateForEnemyPed(ped);
@@ -435,17 +408,17 @@ void ENEMIES::InitializeEnemyInAircraft(Ped ped, bool passenger)
 
     switch (pedModel)
     {
-    case 0x5E3DA4A4:
-    case 0x15F8700D:
-    case 0x616C97B9:
-    case 0x72C0CAD2:
-    case 0x8D8F1B10:
-        PED::SET_PED_CONFIG_FLAG(ped, 155, false);
-        PED::SET_PED_CONFIG_FLAG(ped, 42, true);
-        PED::SET_PED_CONFIG_FLAG(ped, 301, true);
-        break;
-    default:
-        break;
+        case 0x5E3DA4A4:
+        case 0x15F8700D:
+        case 0x616C97B9:
+        case 0x72C0CAD2:
+        case 0x8D8F1B10:
+            PED::SET_PED_CONFIG_FLAG(ped, 155, false);
+            PED::SET_PED_CONFIG_FLAG(ped, 42, true);
+            PED::SET_PED_CONFIG_FLAG(ped, 301, true);
+            break;
+        default:
+            break;
     }
 
     if (pedModel == 0x64611296)
@@ -488,17 +461,17 @@ void ENEMIES::InitializeEnemyInVehicle(Ped ped, bool passenger)
 
     switch (pedModel)
     {
-    case 0x5E3DA4A4:
-    case 0x15F8700D:
-    case 0x616C97B9:
-    case 0x72C0CAD2:
-    case 0x8D8F1B10:
-        PED::SET_PED_CONFIG_FLAG(ped, 155, false);
-        PED::SET_PED_CONFIG_FLAG(ped, 42, true);
-        PED::SET_PED_CONFIG_FLAG(ped, 301, true);
-        break;
-    default:
-        break;
+        case 0x5E3DA4A4:
+        case 0x15F8700D:
+        case 0x616C97B9:
+        case 0x72C0CAD2:
+        case 0x8D8F1B10:
+            PED::SET_PED_CONFIG_FLAG(ped, 155, false);
+            PED::SET_PED_CONFIG_FLAG(ped, 42, true);
+            PED::SET_PED_CONFIG_FLAG(ped, 301, true);
+            break;
+        default:
+            break;
     }
 
     if (pedModel == 0x64611296)
@@ -515,9 +488,9 @@ void ENEMIES::InitializeEnemyInVehicle(Ped ped, bool passenger)
 
     PED::SET_PED_ARMOUR(ped, SURVIVAL::SurvivalData::hardcore ? 150 : SURVIVAL::SurvivalData::CurrentWave * 10);
     PED::SET_PED_ACCURACY(ped, 7 + (accuracyModifier * 3));
-    std::vector<DWORD> weapons = GetWeapons(pedModel);
+    std::vector<Hash> weapons = GetWeapons(pedModel);
     size_t index = CALC::RanInt(weapons.size() - (size_t)1, (size_t)0);
-    DWORD weaponHash = weapons.at(index);
+    Hash weaponHash = weapons.at(index);
     WEAPON::GIVE_WEAPON_TO_PED(ped, weaponHash, 1000, true, true);
 
     if (passenger)

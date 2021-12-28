@@ -30,10 +30,7 @@ namespace ENEMIES
 		static int kills;
 		static std::vector<Ped> footEnemies;
 		static std::vector<Vehicle> enemyVehicles;
-		static std::vector<DWORD> weakWeapons;
-		static std::vector<DWORD> midWeapons;
-		static std::vector<DWORD> strongWeapons;
-		static std::vector<DWORD> alienWeapons;
+		static std::vector<Hash> alienWeapons;
 		static std::vector<Ped> deadEnemies;
 		static JESUS::Jesus enemyJesus;
 		static Ped enemyJuggernaut;
@@ -45,7 +42,7 @@ namespace ENEMIES
 	void Process();
 	void RemoveDeadEnemies();
 	void ProcessJesus();
-	std::vector<DWORD> GetWeapons(Hash pedModel);
+	std::vector<Hash> GetWeapons(Hash pedModel);
 	void InitializeEnemyInAircraft(Ped ped, bool passenger);
 	void InitializeEnemyInVehicle(Ped ped, bool passenger);
 	void InitializeEnemy(Ped ped);

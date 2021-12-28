@@ -29,6 +29,9 @@ namespace SURVIVAL
         static std::vector<std::string> aircraftGroup1;
         static std::vector<std::string> aircraftGroup2;
         static std::vector<std::string> aircraftGroup3;
+        static std::vector<Hash> weakWeapons;
+        static std::vector<Hash> medWeapons;
+        static std::vector<Hash> strongWeapons;
         static std::vector<SpawnData> currentPedModels;
         static std::vector<std::string> currentAircraftModels;
         static std::vector<std::string> currentVehicleModels;

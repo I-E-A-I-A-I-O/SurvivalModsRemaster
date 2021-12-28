@@ -14,6 +14,9 @@ std::vector<std::string> SURVIVAL::SpawnerData::vehiclesGroup3;
 std::vector<std::string> SURVIVAL::SpawnerData::aircraftGroup1;
 std::vector<std::string> SURVIVAL::SpawnerData::aircraftGroup2;
 std::vector<std::string> SURVIVAL::SpawnerData::aircraftGroup3;
+std::vector<Hash> SURVIVAL::SpawnerData::weakWeapons;
+std::vector<Hash> SURVIVAL::SpawnerData::medWeapons;
+std::vector<Hash> SURVIVAL::SpawnerData::strongWeapons;
 std::vector<SpawnData> SURVIVAL::SpawnerData::currentPedModels;
 std::vector<std::string> SURVIVAL::SpawnerData::currentAircraftModels;
 std::vector<std::string> SURVIVAL::SpawnerData::currentVehicleModels;
@@ -341,6 +344,9 @@ void SURVIVAL::ClearVectors()
 	SpawnerData::pedsGroup1.clear();
 	SpawnerData::pedsGroup2.clear();
 	SpawnerData::pedsGroup3.clear();
+	SpawnerData::weakWeapons.clear();
+	SpawnerData::medWeapons.clear();
+	SpawnerData::strongWeapons.clear();
 	jugModels.clear();
 	dogModel.clear();
 }
@@ -381,6 +387,9 @@ void SURVIVAL::LoadSurvival(std::string survivalID)
 		std::vector<std::string> aircraftGroup1 = js["Models"]["aircraft"]["group1"];
 		std::vector<std::string> aircraftGroup2 = js["Models"]["aircraft"]["group2"];
 		std::vector<std::string> aircraftGroup3 = js["Models"]["aircraft"]["group3"];
+		std::vector<std::string> weapons1 = js["Weapons"]["weak"];
+		std::vector<std::string> weapons2 = js["Weapons"]["medium"];
+		std::vector<std::string> weapons3 = js["Weapons"]["strong"];
 		std::vector<std::string> pickupModels = js["Models"]["pickups"];
 		std::vector<std::string> jModels = js["Models"]["juggernaut"];
 		dogModel = js["Models"]["dog"];
@@ -396,6 +405,24 @@ void SURVIVAL::LoadSurvival(std::string survivalID)
 		SpawnerData::location.y = locationPoints.at(1);
 		SpawnerData::location.z = locationPoints.at(2);
 		
+		for (size_t i = 0; i < weapons1.size(); i++)
+		{
+			Hash weaponHash = GAMEPLAY::GET_HASH_KEY((char*)weapons1.at(i).c_str());
+			SpawnerData::weakWeapons.push_back(weaponHash);
+		}
+
+		for (size_t i = 0; i < weapons2.size(); i++)
+		{
+			Hash weaponHash = GAMEPLAY::GET_HASH_KEY((char*)weapons2.at(i).c_str());
+			SpawnerData::medWeapons.push_back(weaponHash);
+		}
+
+		for (size_t i = 0; i < weapons3.size(); i++)
+		{
+			Hash weaponHash = GAMEPLAY::GET_HASH_KEY((char*)weapons3.at(i).c_str());
+			SpawnerData::strongWeapons.push_back(weaponHash);
+		}
+
 		for (size_t i = 0; i < jModels.size(); i++)
 		{
 			jugModels.push_back(jModels.at(i));
