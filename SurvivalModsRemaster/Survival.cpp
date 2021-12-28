@@ -170,7 +170,7 @@ void SURVIVAL::GiveReward(bool playerDied)
 		notification.append(". Reward: ~g~$");
 		notification.append(std::to_string(reward).c_str());
 		UIScript::Data::pendingNoti = true;
-		UIScript::Data::scaleformType = 3;
+		UIScript::Data::scaleformType = SurvivalData::timed ? 6 : 3;
 		UIScript::Data::notiText = notification;
 		return;
 	}
@@ -203,7 +203,7 @@ void SURVIVAL::GiveReward(bool playerDied)
 		notification.append(". Reward: ~g~$");
 		notification.append(std::to_string(reward).c_str());
 		UIScript::Data::pendingNoti = true;
-		UIScript::Data::scaleformType = 3;
+		UIScript::Data::scaleformType = SurvivalData::timed ? 6 : 3;
 		UIScript::Data::notiText = notification;
 		return;
 	}
@@ -243,7 +243,7 @@ void SURVIVAL::GiveReward(bool playerDied)
 	notification.append(". Reward: ~g~$");
 	notification.append(std::to_string(reward).c_str());
 	UIScript::Data::pendingNoti = true;
-	UIScript::Data::scaleformType = 3;
+	UIScript::Data::scaleformType = SurvivalData::timed ? 6 : 3;
 	UIScript::Data::notiText = notification;
 	STATS::STAT_SET_INT(stat, playerMoney + reward, 1);
 }
@@ -288,8 +288,12 @@ void SURVIVAL::QuitSurvival(bool playerDied)
 	}
 	else
 	{
+		if (SurvivalData::timed && TIMERS::TimedSurvival::timeLeft <= 0)
+			UIScript::Data::scaleformType = 6;
+		else
+			UIScript::Data::scaleformType = 2;
+
 		UIScript::Data::showScaleform = true;
-		UIScript::Data::scaleformType = 2;
 	}
 
 	MUSIC::StopTrack();

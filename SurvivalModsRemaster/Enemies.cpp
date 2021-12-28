@@ -698,7 +698,6 @@ void ENEMIES::Process()
         if (TIMERS::ProcessTimedSurvivalTimer((SURVIVAL::SurvivalData::timedTimeLeft)))
         {
             SURVIVAL::QuitSurvival(true);
-            SCREEN::ShowSubtitle("~r~Survival ended!", 8000);
             return;
         }
     }

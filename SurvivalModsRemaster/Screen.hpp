@@ -23,4 +23,5 @@ namespace SCREEN
 	void FreeScaleform(int handle);
 	void DrawBar(float percentage);
 	void SetScaleformTextFailed(int scaleform, const char* title, const char* subtitle);
+	void SetScaleformTextPassed(int scaleform, const char* title, const char* subtitle);
 }

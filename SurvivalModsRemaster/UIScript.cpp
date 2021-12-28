@@ -54,7 +54,7 @@ void UIScriptMain()
 				scaleformRequested = true;
 				scaleform = SCREEN::RequestScaleform();
 				char title[150];
-				char subtitle[50];
+				char subtitle[100];
 
 				switch (UIScript::Data::scaleformType)
 				{
@@ -80,33 +80,65 @@ void UIScriptMain()
 							strcat_s(title, std::to_string(SURVIVAL::SurvivalData::CurrentWave).c_str());
 							strcat_s(title, " survived");
 							strcpy_s(subtitle, "Prepare for the next wave.");
+							AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"MP_WAVE_COMPLETE", (char*)"HUD_FRONTEND_DEFAULT_SOUNDSET", true);
 						}
+
+						SCREEN::SetScaleformText(scaleform, title, subtitle);
 						break;
 					case 1:
-						strcpy_s(title, "~g~survival passed");
-						strcpy_s(subtitle, " ");
+						strcpy_s(title, "~y~survival passed");
+						strcpy_s(subtitle, "");
+						SCREEN::SetScaleformTextPassed(scaleform, title, subtitle);
+						AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"Survival_Passed", (char*)"DLC_VW_Survival_Sounds", true);
 						break;
 					case 2:
 						strcpy_s(title, "~r~survival canceled");
-						strcpy_s(subtitle, " ");
+						strcpy_s(subtitle, "");
+						SCREEN::SetScaleformText(scaleform, title, subtitle);
+						AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"Survival_Failed", (char*)"DLC_VW_AS_Sounds", true);
 						break;
 					case 3:
 						strcpy_s(title, "~r~survival failed");
-						strcpy_s(subtitle, " ");
+						strcpy_s(subtitle, "");
+						SCREEN::SetScaleformText(scaleform, title, subtitle);
+						AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"Survival_Failed", (char*)"DLC_VW_AS_Sounds", true);
 						break;
 					case 4:
 						strcpy_s(title, "~y~difficulty increased");
 						strcpy_s(subtitle, "Pickups regenerated.");
+						SCREEN::SetScaleformText(scaleform, title, subtitle);
 						break;
 					case 5:
 						strcpy_s(title, "~y~Pickups regenerated");
-						strcpy_s(subtitle, " ");
+						strcpy_s(subtitle, "");
+						SCREEN::SetScaleformText(scaleform, title, subtitle);
 						break;
+					case 6:
+					{
+						strcpy_s(title, "~y~survival ended");
+						int total = TIMERS::TimedSurvival::CurrentTime - TIMERS::TimedSurvival::StartTime;
+						int val = total / 1000 / 60;
+						strcpy_s(subtitle, "Time survived: ");
+
+						if (val < 10)
+							strcat_s(subtitle, "0");
+
+						strcat_s(subtitle, std::to_string(val).c_str());
+						strcat_s(subtitle, ":");
+						val = total / 1000 % 60;
+
+						if (val < 10)
+							strcat_s(subtitle, "0");
+
+						strcat_s(subtitle, std::to_string(val).c_str());
+						SCREEN::SetScaleformTextPassed(scaleform, title, subtitle);
+						AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"Survival_Passed", (char*)"DLC_VW_Survival_Sounds", true);
+						break;
+					}
 					default:
 						break;
 				}
 
-				SCREEN::SetScaleformText(scaleform, title, subtitle);
 				scaleformST = GAMEPLAY::GET_GAME_TIMER();
 			}
 
