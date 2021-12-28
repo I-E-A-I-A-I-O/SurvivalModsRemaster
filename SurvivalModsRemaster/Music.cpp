@@ -130,7 +130,14 @@ void MUSIC::MidIntensityTrack(int wave)
     }
     case TrackGroups::BikerContracts:
     {
-        AUDIO::TRIGGER_MUSIC_EVENT((char*)"BIKER_DEFEND_POLICE_RAID_FIGHT");
+        if (wave <= 3)
+        {
+            AUDIO::TRIGGER_MUSIC_EVENT((char*)"BIKER_DEFEND_POLICE_RAID_FIGHT");
+        }
+        else
+        {
+            AUDIO::TRIGGER_MUSIC_EVENT((char*)"BIKER_SYG_ATTACKED");
+        }
         break;
     }
     case TrackGroups::Casino:
@@ -206,7 +213,7 @@ void MUSIC::HighIntensityTrack(int wave)
     }
     case TrackGroups::BikerContracts:
     {
-        AUDIO::TRIGGER_MUSIC_EVENT((char*)"BIKER_SYG_ATTACKED");
+        AUDIO::TRIGGER_MUSIC_EVENT((char*)"BIKER_DEFEND_CRASH_DEAL_DELIVERING");
         break;
     }
     case TrackGroups::Casino:
