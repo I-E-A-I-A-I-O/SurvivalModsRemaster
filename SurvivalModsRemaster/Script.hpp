@@ -13,6 +13,7 @@
 struct Data
 {
 	static Hash enemiesRelGroup;
+	static Hash neutralRelGroup;
 	static int intermissionDuration;
 	static Controls tenWaveControl;
 	static Controls infiniteWaveControl;
@@ -20,7 +21,7 @@ struct Data
 	static Controls hardcoreSurvivalControl;
 	static Controls cancelControl;
 	static Controls reloadTriggerPedsControl;
-	static bool canStartMission;
+	static bool showControls;
 	static int TPIndex;
 };
 
@@ -39,6 +40,7 @@ struct TriggerPedsData
 	static std::vector<Blip> blips;
 	static std::vector<bool> timerActive;
 	static std::vector<int> starTime;
+	static std::vector<bool> killedFlags;
 	static std::vector<std::string> tasks;
 
 	static void ClearTriggerPeds()
@@ -66,6 +68,7 @@ struct TriggerPedsData
 		starTime.clear();
 		tasks.clear();
 		peds.clear();
+		killedFlags.clear();
 	}
 };
 

@@ -29,22 +29,30 @@ void SURVIVAL::StartMission(bool infiniteWaves, bool timed, bool hardcore)
 	SurvivalData::InfiniteWaves = infiniteWaves;
 	SurvivalData::timed = timed;
 	MUSIC::PrepareTracks();
-	ped = TriggerPedsData::peds.at(Data::TPIndex);
-	ENTITY::SET_ENTITY_INVINCIBLE(ped, false);
 
-	if (!WEAPON::HAS_PED_GOT_WEAPON(PLAYER::PLAYER_PED_ID(), eWeapon::WeaponPistol, false))
+	if (!IsDefault())
 	{
-		WEAPON::GIVE_WEAPON_TO_PED(PLAYER::PLAYER_PED_ID(), eWeapon::WeaponPistol, 25, true, true);
+		ped = TriggerPedsData::peds.at(Data::TPIndex);
+		ENTITY::SET_ENTITY_INVINCIBLE(ped, false);
+
+		if (!WEAPON::HAS_PED_GOT_WEAPON(PLAYER::PLAYER_PED_ID(), eWeapon::WeaponPistol, false))
+		{
+			WEAPON::GIVE_WEAPON_TO_PED(PLAYER::PLAYER_PED_ID(), eWeapon::WeaponPistol, 25, true, true);
+		}
+		else
+		{
+			WEAPON::SET_CURRENT_PED_WEAPON(PLAYER::PLAYER_PED_ID(), eWeapon::WeaponPistol, true);
+		}
+
+		PLAYER::SET_PLAYER_CONTROL(PLAYER::PLAYER_ID(), false, 0);
+		AI::TASK_AIM_GUN_AT_ENTITY(PLAYER::PLAYER_PED_ID(), ped, -1, 0);
+		AI::TASK_SHOOT_AT_ENTITY(PLAYER::PLAYER_PED_ID(), ped, 60000, eFiringPattern::FiringPatternFullAuto);
+		SurvivalData::Triggered = true;
 	}
 	else
 	{
-		WEAPON::SET_CURRENT_PED_WEAPON(PLAYER::PLAYER_PED_ID(), eWeapon::WeaponPistol, true);
+		Initialize();
 	}
-
-	PLAYER::SET_PLAYER_CONTROL(PLAYER::PLAYER_ID(), false, 0);
-	AI::TASK_AIM_GUN_AT_ENTITY(PLAYER::PLAYER_PED_ID(), ped, -1, 0);
-	AI::TASK_SHOOT_AT_ENTITY(PLAYER::PLAYER_PED_ID(), ped, 60000, eFiringPattern::FiringPatternFullAuto);
-	SurvivalData::Triggered = true;
 }
 
 void SURVIVAL::Initialize()
@@ -76,6 +84,11 @@ void SURVIVAL::Initialize()
 	}
 
 	SurvivalData::Started = true;
+}
+
+bool SURVIVAL::IsDefault()
+{
+	return !SurvivalData::hardcore && !SurvivalData::timed && !SurvivalData::InfiniteWaves;
 }
 
 void SURVIVAL::SetOffTrigger()
@@ -170,7 +183,10 @@ void SURVIVAL::GiveReward(bool playerDied)
 		notification.append(". Reward: ~g~$");
 		notification.append(std::to_string(reward).c_str());
 		UIScript::Data::pendingNoti = true;
-		UIScript::Data::scaleformType = SurvivalData::timed ? 6 : 3;
+		
+		if (!UIScript::Data::showScaleform)
+			UIScript::Data::scaleformType = SurvivalData::timed ? 6 : 3;
+
 		UIScript::Data::notiText = notification;
 		return;
 	}
@@ -203,7 +219,10 @@ void SURVIVAL::GiveReward(bool playerDied)
 		notification.append(". Reward: ~g~$");
 		notification.append(std::to_string(reward).c_str());
 		UIScript::Data::pendingNoti = true;
-		UIScript::Data::scaleformType = SurvivalData::timed ? 6 : 3;
+		
+		if (!UIScript::Data::showScaleform)
+			UIScript::Data::scaleformType = SurvivalData::timed ? 6 : 3;
+
 		UIScript::Data::notiText = notification;
 		return;
 	}
@@ -243,7 +262,10 @@ void SURVIVAL::GiveReward(bool playerDied)
 	notification.append(". Reward: ~g~$");
 	notification.append(std::to_string(reward).c_str());
 	UIScript::Data::pendingNoti = true;
-	UIScript::Data::scaleformType = SurvivalData::timed ? 6 : 3;
+
+	if (!UIScript::Data::showScaleform)
+		UIScript::Data::scaleformType = SurvivalData::timed ? 6 : 3;
+
 	UIScript::Data::notiText = notification;
 	STATS::STAT_SET_INT(stat, playerMoney + reward, 1);
 }

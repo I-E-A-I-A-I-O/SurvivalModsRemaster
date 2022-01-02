@@ -222,19 +222,17 @@ void SCREEN::DrawBadge(const char* title, const char* content, bool red, int slo
 void SCREEN::ShowControls()
 {
 	char controlA[200];
-	strcpy_s(controlA, "Press ~");
-	strcat_s(controlA, controlsNames[static_cast<int>(Data::tenWaveControl)]);
-	strcat_s(controlA, "~ for 10 waves~n~");
-	strcat_s(controlA, "Press ~");
-	strcat_s(controlA, controlsNames[static_cast<int>(Data::infiniteWaveControl)]);
-	strcat_s(controlA, "~ for infinite waves");
 	char controlB[200];
-	strcpy_s(controlB, "~n~Press ~");
-	strcat_s(controlB, controlsNames[static_cast<int>(Data::timedSurvivalControl)]);
-	strcat_s(controlB, "~ for timed~n~");
+	strcpy_s(controlA, "Press ~");
+	strcat_s(controlA, controlsNames[static_cast<int>(Data::infiniteWaveControl)]);
+	strcat_s(controlA, "~ for endless survival\n");
+	strcat_s(controlA, "Press ~");
+	strcat_s(controlA, controlsNames[static_cast<int>(Data::timedSurvivalControl)]);
+	strcat_s(controlA, "~ for timed");
+	strcpy_s(controlB, "survival\n");
 	strcat_s(controlB, "Press ~");
 	strcat_s(controlB, controlsNames[static_cast<int>(Data::hardcoreSurvivalControl)]);
-	strcat_s(controlB, "~ for harcore");
+	strcat_s(controlB, "~ for harcore survival");
 	UI::_SET_TEXT_COMPONENT_FORMAT((char*)"TWOSTRINGS");
 	UI::_ADD_TEXT_COMPONENT_STRING(controlA);
 	UI::_ADD_TEXT_COMPONENT_STRING(controlB);

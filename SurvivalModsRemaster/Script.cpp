@@ -9,6 +9,7 @@ std::vector<Ped> TriggerPedsData::peds;
 std::vector<EntityPosition> TriggerPedsData::positions;
 std::vector<Blip> TriggerPedsData::blips;
 std::vector<bool> TriggerPedsData::timerActive;
+std::vector<bool> TriggerPedsData::killedFlags;
 std::vector<int> TriggerPedsData::starTime;
 std::vector<std::string> tasks;
 int Data::intermissionDuration;
@@ -18,10 +19,12 @@ Controls Data::timedSurvivalControl;
 Controls Data::cancelControl;
 Controls Data::reloadTriggerPedsControl;
 Controls Data::hardcoreSurvivalControl;
-bool Data::canStartMission;
+bool Data::showControls;
+bool canStart;
 int cancelStartTime;
 int cancelCurrentTime;
 Hash Data::enemiesRelGroup;
+Hash Data::neutralRelGroup;
 bool playerDied;
 bool initialized = false;
 nlohmann::json j;
@@ -30,9 +33,11 @@ int Data::TPIndex;
 
 void IsPlayerInMissionStartRange()
 {
-    if (SURVIVAL::SurvivalData::IsActive || PED::IS_PED_IN_ANY_VEHICLE(PLAYER::PLAYER_PED_ID(), false))
+    if (SURVIVAL::SurvivalData::IsActive || PLAYER::GET_PLAYER_WANTED_LEVEL(PLAYER::PLAYER_ID()) > 1 
+        || GAMEPLAY::GET_MISSION_FLAG())
     {
-        Data::canStartMission = false;
+        Data::showControls = false;
+        canStart = false;
         return;
     }
 
@@ -41,22 +46,29 @@ void IsPlayerInMissionStartRange()
 
     for (int i = 0; i < size; i++)
     {
-        Ped ped = TriggerPedsData::peds.at(i);
-        
-        if (ped == 0)
-            continue;
+        Vector3 survCoords = TriggerPedsData::positions.at(i).coords;
 
-        Vector3 coords = ENTITY::GET_ENTITY_COORDS(ped, false);
-
-        if (CALC::IsInRange_2(playerPosition, coords, 4.5f))
+        if (CALC::IsInRange_2(playerPosition, TriggerPedsData::positions.at(i).coords, 150.0f))
         {
-            Data::canStartMission = true;
             Data::TPIndex = i;
+            canStart = true;
+
+            Ped ped = TriggerPedsData::peds.at(i);
+
+            if (ped == 0)
+            {
+                Data::showControls = false;
+                return;
+            }
+
+            Vector3 coords = ENTITY::GET_ENTITY_COORDS(ped, false);
+            Data::showControls = CALC::IsInRange_2(playerPosition, coords, 4.5f) && !PED::IS_PED_IN_ANY_VEHICLE(PLAYER::PLAYER_PED_ID(), false);
             return;
         }
     }
 
-    Data::canStartMission = false;
+    Data::showControls = false;
+    canStart = false;
 }
 
 void ReadConfigAndSpawnTriggerPeds()
@@ -73,24 +85,23 @@ void ReadConfigAndSpawnTriggerPeds()
     Data::reloadTriggerPedsControl = static_cast<Controls>(j["Controls"]["ReloadTriggerPeds"]);
     Data::hardcoreSurvivalControl = static_cast<Controls>(j["Controls"]["StartHardcoreSurvival"]);
 
-    char relName[] = "SURVIVAL_MISSION_ENEMIES_REL_GROUP";
-    char playerRelName[] = "PLAYER";
-    char cougarRelName[] = "COUGAR";
-    Hash playerGroupHash = GAMEPLAY::GET_HASH_KEY(playerRelName);
-    Hash cougarGroupHash = GAMEPLAY::GET_HASH_KEY(cougarRelName);
-
-    PED::ADD_RELATIONSHIP_GROUP(relName, &Data::enemiesRelGroup);
+    Hash playerGroupHash = GAMEPLAY::GET_HASH_KEY((char*)"PLAYER");
+    Hash cougarGroupHash = GAMEPLAY::GET_HASH_KEY((char*)"COUGAR");
+    PED::ADD_RELATIONSHIP_GROUP((char*)"SURVIVAL_MISSION_ENEMIES_REL_GROUP", &Data::enemiesRelGroup);
+    PED::ADD_RELATIONSHIP_GROUP((char*)"SURVIVAL_MISSION_TRIGGER_REL_GROUP", &Data::neutralRelGroup);
     PED::SET_RELATIONSHIP_BETWEEN_GROUPS(5, Data::enemiesRelGroup, playerGroupHash);
     PED::SET_RELATIONSHIP_BETWEEN_GROUPS(5, playerGroupHash, Data::enemiesRelGroup);
     PED::SET_RELATIONSHIP_BETWEEN_GROUPS(0, Data::enemiesRelGroup, cougarGroupHash);
     PED::SET_RELATIONSHIP_BETWEEN_GROUPS(0, cougarGroupHash, Data::enemiesRelGroup);
+    PED::SET_RELATIONSHIP_BETWEEN_GROUPS(3, Data::neutralRelGroup, playerGroupHash);
+    PED::SET_RELATIONSHIP_BETWEEN_GROUPS(3, playerGroupHash, Data::neutralRelGroup);
 
     INIT::LoadTriggerPeds();
 }
 
 void ControlsWatch()
 {
-    if (!SURVIVAL::SurvivalData::IsActive && !Data::canStartMission)
+    if (!SURVIVAL::SurvivalData::IsActive && !canStart)
     {
         if (CONTROLS::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::reloadTriggerPedsControl)))
         {
@@ -98,12 +109,8 @@ void ControlsWatch()
         }
     }
 
-    if (Data::canStartMission) {
-        if (CONTROLS::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::tenWaveControl)))
-        {
-            SURVIVAL::StartMission(false, false, false);
-        }
-
+    if (Data::showControls) 
+    {
         if (CONTROLS::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::infiniteWaveControl)))
         {
             SURVIVAL::StartMission(true, false, false);
@@ -119,7 +126,8 @@ void ControlsWatch()
             SURVIVAL::StartMission(false, false, true);
         }
     }
-    else if (SURVIVAL::SurvivalData::IsActive) {
+    else if (SURVIVAL::SurvivalData::IsActive)
+    {
         if (CONTROLS::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::cancelControl)))
         {
             cancelStartTime = GAMEPLAY::GET_GAME_TIMER();
@@ -134,6 +142,24 @@ void ControlsWatch()
             }
         }
     }
+}
+
+bool KilledByPlayer(Ped ped)
+{
+    int player = PLAYER::PLAYER_PED_ID();
+    Entity killer = PED::_GET_PED_KILLER(ped);
+    Hash cause = PED::GET_PED_CAUSE_OF_DEATH(ped);
+
+    SCREEN::ShowSubtitle(std::to_string(killer).c_str(), 5000);
+    WAIT(1000);
+    SCREEN::ShowSubtitle(std::to_string(cause).c_str(), 5000);
+
+    if (PED::IS_PED_IN_ANY_VEHICLE(player, false) && PED::GET_VEHICLE_PED_IS_IN(player, false) == killer)
+        return true;
+    else if (killer == player)
+        return true;
+
+    return false;
 }
 
 void ProcessTriggerPeds()
@@ -153,16 +179,36 @@ void ProcessTriggerPeds()
                 bool inRange = CALC::IsInRange_2(playerPosition, TPPos.coords, 150.0f);
                 Ped ped = TriggerPedsData::peds.at(i);
 
-                if (ped == 0 && inRange)
+                if (ped == 0 && canStart)
                 {
-                    TriggerPedsData::peds.at(i) = INIT::SpawnTriggerPed(i);
+                    if (inRange && !TriggerPedsData::killedFlags.at(i))
+                        TriggerPedsData::peds.at(i) = INIT::SpawnTriggerPed(i);
+                    else if (!inRange)
+                        TriggerPedsData::killedFlags.at(i) = false;
                 }
-                else if (ped != 0 && !inRange)
+                else if (ped != 0)
                 {
-                    if (ENTITY::IS_ENTITY_A_MISSION_ENTITY(ped))
+                    if (!inRange || !canStart)
                     {
                         ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
                         TriggerPedsData::peds.at(i) = 0;
+                    }
+                    else if (ENTITY::IS_ENTITY_DEAD(ped))
+                    {
+                        if (KilledByPlayer(ped))
+                        {
+                            UI::REMOVE_BLIP(&TriggerPedsData::blips.at(i));
+                            TriggerPedsData::blips.at(i) = 0;
+                            ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
+                            TriggerPedsData::peds.at(i) = 0;
+                            SURVIVAL::StartMission(false, false, false);
+                        }
+                        else
+                        {
+                            ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
+                            TriggerPedsData::peds.at(i) = 0;
+                            TriggerPedsData::killedFlags.at(i) = true;
+                        }
                     }
                 }
             }
@@ -196,8 +242,8 @@ void main()
 
     while (true)
     {
-        ProcessTriggerPeds();
         IsPlayerInMissionStartRange();
+        ProcessTriggerPeds();
 
         if (SURVIVAL::SurvivalData::IsActive)
         {

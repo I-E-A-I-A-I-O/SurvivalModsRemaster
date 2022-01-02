@@ -35,6 +35,7 @@ void INIT::LoadTriggerPeds()
         TriggerPedsData::starTime.push_back(0);
         TriggerPedsData::tasks.push_back(tasks.at(i));
         TriggerPedsData::timerActive.push_back(false);
+        TriggerPedsData::killedFlags.push_back(false);
     }
 }
 
@@ -57,10 +58,12 @@ Hash INIT::LoadModel(const char* modelName)
 {
     Hash modelHash = GAMEPLAY::GET_HASH_KEY((char*)modelName);
     STREAMING::REQUEST_MODEL(modelHash);
+
     while (!STREAMING::HAS_MODEL_LOADED(modelHash))
     {
         WAIT(50);
     }
+
     return modelHash;
 }
 
@@ -70,10 +73,8 @@ Ped INIT::SpawnTriggerPed(size_t index)
     Hash model = LoadModel(TriggerPedsData::models.at(index).c_str());
     Ped handle = PED::CREATE_PED(0, model, pos.coords.x, pos.coords.y, pos.coords.z, pos.heading, false, true);
     UnloadModel(model);
-
-    PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(handle, true);
-    ENTITY::SET_ENTITY_INVINCIBLE(handle, true);
+    PED::SET_PED_RELATIONSHIP_GROUP_HASH(handle, Data::neutralRelGroup);
+    WEAPON::GIVE_WEAPON_TO_PED(handle, eWeapon::WeaponPistol, 100, true, false);
     AI::TASK_START_SCENARIO_IN_PLACE(handle, (char*)TriggerPedsData::tasks.at(index).c_str(), 0, true);
-
     return handle;
 }

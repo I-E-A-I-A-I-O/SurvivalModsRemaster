@@ -43,4 +43,5 @@ namespace SURVIVAL
     void ScriptQuit();
     bool PlayerCheated();
     void GiveReward(bool playerDied);
+    bool IsDefault();
 }

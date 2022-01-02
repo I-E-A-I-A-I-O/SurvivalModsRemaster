@@ -42,7 +42,7 @@ void UIScriptMain()
 			}
 		}
 
-		if (!SURVIVAL::SurvivalData::IsActive && Data::canStartMission)
+		if (!SURVIVAL::SurvivalData::IsActive && Data::showControls)
 		{
 			SCREEN::ShowControls();
 		}
