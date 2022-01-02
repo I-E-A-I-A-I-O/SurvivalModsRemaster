@@ -29,6 +29,7 @@ void SURVIVAL::StartMission(bool infiniteWaves, bool timed, bool hardcore)
 	SurvivalData::InfiniteWaves = infiniteWaves;
 	SurvivalData::timed = timed;
 	MUSIC::PrepareTracks();
+	AUDIO::SET_AUDIO_FLAG((char*)"WantedMusicDisabled", true);
 
 	if (!IsDefault())
 	{
@@ -154,6 +155,7 @@ void SURVIVAL::ProcessSurvival()
 		if (TIMERS::ProcessLeavingZoneTimer())
 		{
 			QuitSurvival(false);
+			return;
 		}
 	}
 	else if (TIMERS::LeavingZoneTimerStarted())
@@ -323,6 +325,7 @@ void SURVIVAL::QuitSurvival(bool playerDied)
 	ENEMIES::ClearVectors();
 	SURVIVAL::ClearVectors();
 	PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(PLAYER::PLAYER_ID(), true);
+	AUDIO::SET_AUDIO_FLAG((char*)"WantedMusicDisabled", false);
 
 	SurvivalData::IsActive = false;
 	SurvivalData::Started = false;
@@ -346,6 +349,7 @@ void SURVIVAL::ScriptQuit()
 	PICKUPS::Delete();
 	ENEMIES::ClearVectors();
 	PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(PLAYER::PLAYER_ID(), true);
+	AUDIO::SET_AUDIO_FLAG((char*)"WantedMusicDisabled", false);
 
 	SurvivalData::IsActive = false;
 	SurvivalData::Started = false;

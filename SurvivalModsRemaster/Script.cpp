@@ -48,7 +48,7 @@ void IsPlayerInMissionStartRange()
     {
         Vector3 survCoords = TriggerPedsData::positions.at(i).coords;
 
-        if (CALC::IsInRange_2(playerPosition, TriggerPedsData::positions.at(i).coords, 150.0f))
+        if (CALC::IsInRange_2(playerPosition, TriggerPedsData::positions.at(i).coords, 80.0f))
         {
             Data::TPIndex = i;
             canStart = true;
@@ -148,15 +148,8 @@ bool KilledByPlayer(Ped ped)
 {
     int player = PLAYER::PLAYER_PED_ID();
     Entity killer = PED::_GET_PED_KILLER(ped);
-    Hash cause = PED::GET_PED_CAUSE_OF_DEATH(ped);
 
-    SCREEN::ShowSubtitle(std::to_string(killer).c_str(), 5000);
-    WAIT(1000);
-    SCREEN::ShowSubtitle(std::to_string(cause).c_str(), 5000);
-
-    if (PED::IS_PED_IN_ANY_VEHICLE(player, false) && PED::GET_VEHICLE_PED_IS_IN(player, false) == killer)
-        return true;
-    else if (killer == player)
+    if (killer == player || killer == 0)
         return true;
 
     return false;
@@ -176,7 +169,7 @@ void ProcessTriggerPeds()
             {
                 Vector3 playerPosition = ENTITY::GET_ENTITY_COORDS(PLAYER::PLAYER_PED_ID(), true);
                 EntityPosition TPPos = TriggerPedsData::positions.at(i);
-                bool inRange = CALC::IsInRange_2(playerPosition, TPPos.coords, 150.0f);
+                bool inRange = CALC::IsInRange_2(playerPosition, TPPos.coords, 80.0f);
                 Ped ped = TriggerPedsData::peds.at(i);
 
                 if (ped == 0 && canStart)
@@ -188,7 +181,13 @@ void ProcessTriggerPeds()
                 }
                 else if (ped != 0)
                 {
-                    if (!inRange || !canStart)
+                    if (!canStart)
+                    {
+                        ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
+                        TriggerPedsData::peds.at(i) = 0;
+                        TriggerPedsData::killedFlags.at(i) = true;
+                    }
+                    else if (!inRange)
                     {
                         ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
                         TriggerPedsData::peds.at(i) = 0;
