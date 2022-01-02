@@ -77,6 +77,12 @@ Ped INIT::SpawnTriggerPed(size_t index)
 
     switch (model)
     {
+        case 0x585C0B52:
+        case 0x3AE4A33B:
+        case 0x5CDEF405:
+        case 0xEDBC7546:
+        case 0x26F067AD:
+        case 0x7B8B434B:
         case 0x5E3DA4A4:
         case 0x15F8700D:
         case 0x616C97B9:
