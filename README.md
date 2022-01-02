@@ -31,6 +31,7 @@ Extract the compressed file and copy the contents to your GTA V directory
 - Police Station Survival
 - Cayo Perico Survival
 - Cayo Perico Mansion Survival
+- El Burro Heights
 - Kortz Center Survival
 - Meth Lab Survival
 - Altruist Camp Survival
