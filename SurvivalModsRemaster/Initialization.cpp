@@ -15,10 +15,9 @@ void INIT::LoadTriggerPeds()
     std::vector<float> positionZ = js["Positions"]["z"];
     std::vector<float> headings = js["Headings"];
     std::vector<std::string> tasks = js["Tasks"];
-
     TriggerPedsData::ClearTriggerPeds();
 
-    for (int i = 0; i < names.size(); i++)
+    for (size_t i = 0; i < names.size(); i++)
     {
         EntityPosition pos = EntityPosition();
         pos.coords.x = positionX.at(i);
@@ -26,6 +25,15 @@ void INIT::LoadTriggerPeds()
         pos.coords.z = positionZ.at(i);
         pos.heading = headings.at(i);
         std::string name = names.at(i);
+        std::vector<std::string> allies = js["Allies"][name];
+
+        for (size_t c = 0; c < allies.size(); c++)
+        {
+            SurvivalAllies sa = SurvivalAllies();
+            sa.MissionID = name;
+            sa.RelGroupName = allies.at(c);
+            TriggerPedsData::allies.push_back(sa);
+        }
 
         TriggerPedsData::names.push_back(name);
         TriggerPedsData::models.push_back(models.at(i));

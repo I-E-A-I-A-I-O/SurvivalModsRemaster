@@ -31,8 +31,15 @@ struct EntityPosition
 	float heading;
 };
 
+struct SurvivalAllies
+{
+	std::string MissionID;
+	std::string RelGroupName;
+};
+
 struct TriggerPedsData
 {
+	static std::vector<SurvivalAllies> allies;
 	static std::vector<std::string> names;
 	static std::vector<std::string> models;
 	static std::vector<Ped> peds;
@@ -69,6 +76,7 @@ struct TriggerPedsData
 		tasks.clear();
 		peds.clear();
 		killedFlags.clear();
+		allies.clear();
 	}
 };
 

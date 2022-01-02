@@ -17,6 +17,38 @@ bool SURVIVAL::SurvivalData::cheated;
 bool SURVIVAL::SurvivalData::hardcore;
 Ped ped;
 
+void SetEnemyAllies()
+{
+	size_t size = TriggerPedsData::allies.size();
+
+	for (size_t i = 0; i < size; i++)
+	{
+		SurvivalAllies ally = TriggerPedsData::allies.at(i);
+
+		if (ally.MissionID == SURVIVAL::SurvivalData::MissionID)
+		{
+			PED::SET_RELATIONSHIP_BETWEEN_GROUPS(1, Data::enemiesRelGroup, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()));
+			PED::SET_RELATIONSHIP_BETWEEN_GROUPS(1, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()), Data::enemiesRelGroup);
+		}
+	}
+}
+
+void ClearEnemyAllies()
+{
+	size_t size = TriggerPedsData::allies.size();
+
+	for (size_t i = 0; i < size; i++)
+	{
+		SurvivalAllies ally = TriggerPedsData::allies.at(i);
+
+		if (ally.MissionID == SURVIVAL::SurvivalData::MissionID)
+		{
+			PED::SET_RELATIONSHIP_BETWEEN_GROUPS(3, Data::enemiesRelGroup, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()));
+			PED::SET_RELATIONSHIP_BETWEEN_GROUPS(3, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()), Data::enemiesRelGroup);
+		}
+	}
+}
+
 void SURVIVAL::StartMission(bool infiniteWaves, bool timed, bool hardcore)
 {
 	SurvivalData::MissionID = TriggerPedsData::names.at(Data::TPIndex);
@@ -28,6 +60,7 @@ void SURVIVAL::StartMission(bool infiniteWaves, bool timed, bool hardcore)
 	SurvivalData::timedTimeLeft = 60000;
 	SurvivalData::InfiniteWaves = infiniteWaves;
 	SurvivalData::timed = timed;
+	SetEnemyAllies();
 	MUSIC::PrepareTracks();
 	AUDIO::SET_AUDIO_FLAG((char*)"WantedMusicDisabled", true);
 
@@ -282,6 +315,7 @@ void SURVIVAL::CompleteSurvival()
 	ENEMIES::ClearVectors();
 	SURVIVAL::ClearVectors();
 	PICKUPS::Delete();
+	ClearEnemyAllies();
 
 	SurvivalData::IsActive = false;
 	SurvivalData::Started = false;
@@ -326,6 +360,7 @@ void SURVIVAL::QuitSurvival(bool playerDied)
 	SURVIVAL::ClearVectors();
 	PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(PLAYER::PLAYER_ID(), true);
 	AUDIO::SET_AUDIO_FLAG((char*)"WantedMusicDisabled", false);
+	ClearEnemyAllies();
 
 	SurvivalData::IsActive = false;
 	SurvivalData::Started = false;
@@ -350,6 +385,7 @@ void SURVIVAL::ScriptQuit()
 	ENEMIES::ClearVectors();
 	PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(PLAYER::PLAYER_ID(), true);
 	AUDIO::SET_AUDIO_FLAG((char*)"WantedMusicDisabled", false);
+	ClearEnemyAllies();
 
 	SurvivalData::IsActive = false;
 	SurvivalData::Started = false;

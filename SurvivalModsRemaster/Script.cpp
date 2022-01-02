@@ -2,6 +2,7 @@
 #include "Script.hpp"
 #include "json.hpp"
 
+std::vector<SurvivalAllies> TriggerPedsData::allies;
 std::vector<std::string> TriggerPedsData::names;
 std::vector<std::string> TriggerPedsData::models;
 std::vector<std::string> TriggerPedsData::tasks;
@@ -30,6 +31,40 @@ bool initialized = false;
 nlohmann::json j;
 std::string startSurvivalText;
 int Data::TPIndex;
+
+void SetAllies()
+{
+    size_t size = TriggerPedsData::allies.size();
+    std::string name = TriggerPedsData::names.at(Data::TPIndex);
+
+    for (size_t i = 0; i < size; i++)
+    {
+        SurvivalAllies ally = TriggerPedsData::allies.at(i);
+
+        if (ally.MissionID == name)
+        {
+            PED::SET_RELATIONSHIP_BETWEEN_GROUPS(1, Data::neutralRelGroup, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()));
+            PED::SET_RELATIONSHIP_BETWEEN_GROUPS(1, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()), Data::neutralRelGroup);
+        }
+    }
+}
+
+void ClearAllies(bool all = false)
+{
+    size_t size = TriggerPedsData::allies.size();
+    std::string name = TriggerPedsData::names.at(Data::TPIndex);
+
+    for (size_t i = 0; i < size; i++)
+    {
+        SurvivalAllies ally = TriggerPedsData::allies.at(i);
+
+        if (ally.MissionID == name || all)
+        {
+            PED::SET_RELATIONSHIP_BETWEEN_GROUPS(3, Data::neutralRelGroup, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()));
+            PED::SET_RELATIONSHIP_BETWEEN_GROUPS(3, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()), Data::neutralRelGroup);
+        }
+    }
+}
 
 void IsPlayerInMissionStartRange()
 {
@@ -71,7 +106,7 @@ void IsPlayerInMissionStartRange()
     canStart = false;
 }
 
-void ReadConfigAndSpawnTriggerPeds()
+void ReadConfig()
 {
     std::ifstream i("SurvivalsData\\config.json");
     i >> j;
@@ -113,16 +148,19 @@ void ControlsWatch()
     {
         if (CONTROLS::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::infiniteWaveControl)))
         {
+            ClearAllies();
             SURVIVAL::StartMission(true, false, false);
         }
 
         if (CONTROLS::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::timedSurvivalControl)))
         {
+            ClearAllies();
             SURVIVAL::StartMission(false, true, false);
         }
 
         if (CONTROLS::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::hardcoreSurvivalControl)))
         {
+            ClearAllies();
             SURVIVAL::StartMission(false, false, true);
         }
     }
@@ -175,22 +213,27 @@ void ProcessTriggerPeds()
                 if (ped == 0 && canStart)
                 {
                     if (inRange && !TriggerPedsData::killedFlags.at(i))
+                    {
                         TriggerPedsData::peds.at(i) = INIT::SpawnTriggerPed(i);
+                        SetAllies();
+                    }
                     else if (!inRange)
                         TriggerPedsData::killedFlags.at(i) = false;
                 }
                 else if (ped != 0)
                 {
-                    if (!canStart)
+                    if (!inRange)
+                    {
+                        ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
+                        TriggerPedsData::peds.at(i) = 0;
+                        ClearAllies();
+                    }
+                    else if (!canStart)
                     {
                         ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
                         TriggerPedsData::peds.at(i) = 0;
                         TriggerPedsData::killedFlags.at(i) = true;
-                    }
-                    else if (!inRange)
-                    {
-                        ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
-                        TriggerPedsData::peds.at(i) = 0;
+                        ClearAllies();
                     }
                     else if (ENTITY::IS_ENTITY_DEAD(ped))
                     {
@@ -208,6 +251,8 @@ void ProcessTriggerPeds()
                             TriggerPedsData::peds.at(i) = 0;
                             TriggerPedsData::killedFlags.at(i) = true;
                         }
+
+                        ClearAllies();
                     }
                 }
             }
@@ -237,7 +282,7 @@ void main()
         OnAbort();
     }
 
-    ReadConfigAndSpawnTriggerPeds();
+    ReadConfig();
 
     while (true)
     {
@@ -275,6 +320,7 @@ void ScriptMain()
 
 void OnAbort()
 {
+    ClearAllies(true);
     PLAYER::SET_PLAYER_CONTROL(PLAYER::PLAYER_ID(), true, 0);
     AI::CLEAR_PED_TASKS(PLAYER::PLAYER_PED_ID());
     PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(PLAYER::PLAYER_ID(), true);
