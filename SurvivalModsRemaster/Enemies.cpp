@@ -686,7 +686,7 @@ void ENEMIES::Process()
 
         RemoveDeadEnemies();
         ProcessJesus();
-        MUSIC::Process(EnemiesData::currentWaveSize, SURVIVAL::SurvivalData::MaxWaveSize, SURVIVAL::SurvivalData::CurrentWave);
+        MUSIC::Process(EnemiesData::kills, SURVIVAL::SurvivalData::MaxWaveSize, SURVIVAL::SurvivalData::CurrentWave);
         
         if (!SURVIVAL::SurvivalData::hardcore)
         {
