@@ -308,6 +308,7 @@ void SURVIVAL::GiveReward(bool playerDied)
 void SURVIVAL::CompleteSurvival()
 {
 	MUSIC::MissionCompletedSound();
+    GRAPHICS::_START_SCREEN_EFFECT((char*)"MinigameEndNeutral", 0, false);
 	UIScript::Data::showScaleform = true;
 	UIScript::Data::scaleformType = 1;
 	GiveReward(false);

@@ -242,23 +242,18 @@ void HighIntensityTrack(int wave)
     }
 }
 
-void MUSIC::Process(int enemyCount, int maxCount, int wave)
+void MUSIC::Process(int enemyCount, int maxCount)
 {
-    int intensity = ceil((static_cast<float>(enemyCount) / static_cast<float>(maxCount)) * 10.0f);
-    int max;
+    if (maxCount < 60)
+        maxCount = 60;
 
-    if (intensity <= 0)
+    int intensity = ceil((static_cast<float>(enemyCount) / static_cast<float>(maxCount)) * 10.0f);
+
+    if (intensity < 2)
         intensity = 2;
 
-    /*if (wave <= 3)
-        max = 3;*/
-    if (wave <= 6)
-        max = 6;
-    else
-        max = 10;
-
-    if (intensity > max)
-        intensity = max;
+    if (intensity > 10)
+        intensity = 10;
 
     if (intensity != last)
         last = intensity;

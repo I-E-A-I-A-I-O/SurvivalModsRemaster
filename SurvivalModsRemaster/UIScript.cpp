@@ -89,7 +89,7 @@ void UIScriptMain()
 						strcpy_s(title, "~y~survival passed");
 						strcpy_s(subtitle, "");
 						SCREEN::SetScaleformTextPassed(scaleform, title, subtitle);
-						AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"Survival_Passed", (char*)"DLC_VW_Survival_Sounds", true);
+						AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"BASE_JUMP_PASSED", (char*)"HUD_AWARDS", true);
 						break;
 					case 2:
 						strcpy_s(title, "~r~survival canceled");

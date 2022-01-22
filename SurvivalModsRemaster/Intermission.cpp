@@ -5,6 +5,7 @@ bool INTERMISSION::Data::Active;
 
 void INTERMISSION::Start()
 {
+    GRAPHICS::_START_SCREEN_EFFECT((char*)"SuccessNeutral", 0, false);
     Data::Active = true;
     UIScript::Data::showScaleform = true;
 
