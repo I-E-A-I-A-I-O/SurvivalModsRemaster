@@ -26,8 +26,7 @@ namespace MUSIC
 	void StopTrack();
 	void StartTrack();
 	void LowIntensityTrack();
-	void MidIntensityTrack(int wave);
-	void HighIntensityTrack(int wave);
+	void Process(int enemyCount, int maxCount, int wave);
 	void MissionCompletedSound();
 	void FinalWaveMusic();
 	void FinalWaveMusicHighIntensity();

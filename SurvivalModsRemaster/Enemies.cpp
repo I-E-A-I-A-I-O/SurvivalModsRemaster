@@ -230,18 +230,16 @@ void ENEMIES::RemoveUnusedVehicles()
             }
 
             ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&EnemiesData::enemyVehicles.at(i));
-
             EnemiesData::enemyVehicles.erase(EnemiesData::enemyVehicles.begin() + i);
             return;
         }
-        else if (!vehicleDestroyed && !driverGone)
+        else if (!driverGone)
         {
             Ped ped = VEHICLE::GET_PED_IN_VEHICLE_SEAT(EnemiesData::enemyVehicles.at(i), -1);
             if (PED::IS_PED_DEAD_OR_DYING(ped, 1))
             {
                 BLIPS::DeleteBlipForEntity(EnemiesData::enemyVehicles.at(i));
                 ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&EnemiesData::enemyVehicles.at(i));
-
                 EnemiesData::enemyVehicles.erase(EnemiesData::enemyVehicles.begin() + i);
                 return;
             }
@@ -681,13 +679,14 @@ void ENEMIES::Process()
         }
     }
 
-    if (EnemiesData::footEnemies.size() > 0)
+    if (!EnemiesData::footEnemies.empty())
     {
         if (!TIMERS::LeavingZone::Started)
             SCREEN::ShowSubtitle("Kill the ~r~enemies.", 8000);
 
         RemoveDeadEnemies();
         ProcessJesus();
+        MUSIC::Process(EnemiesData::currentWaveSize, SURVIVAL::SurvivalData::MaxWaveSize, SURVIVAL::SurvivalData::CurrentWave);
         
         if (!SURVIVAL::SurvivalData::hardcore)
         {

@@ -31,7 +31,7 @@ bool SURVIVAL::SpawnerData::hasAircraft;
 std::vector<std::string> jugModels;
 std::string dogModel;
 
-ePickupType SURVIVAL::GetPickupType(std::string pickupModel)
+ePickupType SURVIVAL::GetPickupType(const std::string& pickupModel)
 {
 	if (pickupModel == "prop_armour_pickup")
 	{
@@ -107,7 +107,7 @@ ePickupType SURVIVAL::GetPickupType(std::string pickupModel)
 	}
 }
 
-int SURVIVAL::GetQuantity(std::string pickupModel)
+int SURVIVAL::GetQuantity(const std::string& pickupModel)
 {
 	if (pickupModel == "prop_armour_pickup")
 	{
@@ -183,7 +183,7 @@ int SURVIVAL::GetQuantity(std::string pickupModel)
 	}
 }
 
-int SURVIVAL::GetSprite(std::string pickupModel)
+int SURVIVAL::GetSprite(const std::string& pickupModel)
 {
 	if (pickupModel == "prop_armour_pickup")
 	{
@@ -259,7 +259,7 @@ int SURVIVAL::GetSprite(std::string pickupModel)
 	}
 }
 
-std::string SURVIVAL::GetPickupName(std::string pickupModel)
+std::string SURVIVAL::GetPickupName(const std::string& pickupModel)
 {
 	if (pickupModel == "prop_armour_pickup")
 	{
@@ -351,7 +351,7 @@ void SURVIVAL::ClearVectors()
 	dogModel.clear();
 }
 
-void SURVIVAL::LoadSurvival(std::string survivalID)
+void SURVIVAL::LoadSurvival(const std::string& survivalID)
 {
 	try
 	{
@@ -405,86 +405,83 @@ void SURVIVAL::LoadSurvival(std::string survivalID)
 		SpawnerData::location.y = locationPoints.at(1);
 		SpawnerData::location.z = locationPoints.at(2);
 		
-		for (size_t i = 0; i < weapons1.size(); i++)
+		for (auto & item : weapons1)
 		{
-			Hash weaponHash = GAMEPLAY::GET_HASH_KEY((char*)weapons1.at(i).c_str());
+			Hash weaponHash = GAMEPLAY::GET_HASH_KEY((char*)item.c_str());
 			SpawnerData::weakWeapons.push_back(weaponHash);
 		}
 
-		for (size_t i = 0; i < weapons2.size(); i++)
+		for (auto & item : weapons2)
 		{
-			Hash weaponHash = GAMEPLAY::GET_HASH_KEY((char*)weapons2.at(i).c_str());
+			Hash weaponHash = GAMEPLAY::GET_HASH_KEY((char*)item.c_str());
 			SpawnerData::medWeapons.push_back(weaponHash);
 		}
 
-		for (size_t i = 0; i < weapons3.size(); i++)
+		for (auto & item : weapons3)
 		{
-			Hash weaponHash = GAMEPLAY::GET_HASH_KEY((char*)weapons3.at(i).c_str());
+			Hash weaponHash = GAMEPLAY::GET_HASH_KEY((char*)item.c_str());
 			SpawnerData::strongWeapons.push_back(weaponHash);
 		}
 
-		for (size_t i = 0; i < jModels.size(); i++)
+		for (auto & jModel : jModels)
 		{
-			jugModels.push_back(jModels.at(i));
+			jugModels.push_back(jModel);
 		}
 
-		for (size_t i = 0; i < pedSpawnpointsX.size(); i++)
+		for (size_t item = 0; item < pedSpawnpointsX.size(); item++)
 		{
 			Vector3 spawnpoint = Vector3();
-			spawnpoint.x = pedSpawnpointsX.at(i);
-			spawnpoint.y = pedSpawnpointsY.at(i);
-			spawnpoint.z = pedSpawnpointsZ.at(i);
+			spawnpoint.z = pedSpawnpointsZ.at(item);
+			spawnpoint.x = pedSpawnpointsX.at(item);
+			spawnpoint.y = pedSpawnpointsY.at(item);
 			SpawnerData::enemySpawnpoints.push_back(spawnpoint);
 		}
 
-		for (size_t i = 0; i < vehicleSpawnpointsX.size(); i++)
+		for (size_t n = 0; n < vehicleSpawnpointsX.size(); n++)
 		{
 			Vector3 spawnpoint = Vector3();
-			spawnpoint.x = vehicleSpawnpointsX.at(i);
-			spawnpoint.y = vehicleSpawnpointsY.at(i);
-			spawnpoint.z = vehicleSpawnpointsZ.at(i);
+			spawnpoint.x = vehicleSpawnpointsX.at(n);
+			spawnpoint.y = vehicleSpawnpointsY.at(n);
+			spawnpoint.z = vehicleSpawnpointsZ.at(n);
 			SpawnerData::vehicleSpawnpoints.push_back(spawnpoint);
 		}
 
-		for (size_t i = 0; i < aircraftSpawnpointsX.size(); i++)
+		for (size_t n = 0; n < aircraftSpawnpointsX.size(); n++)
 		{
 			Vector3 spawnpoint = Vector3();
-			spawnpoint.x = aircraftSpawnpointsX.at(i);
-			spawnpoint.y = aircraftSpawnpointsY.at(i);
-			spawnpoint.z = aircraftSpawnpointsZ.at(i);
+			spawnpoint.x = aircraftSpawnpointsX.at(n);
+			spawnpoint.y = aircraftSpawnpointsY.at(n);
+			spawnpoint.z = aircraftSpawnpointsZ.at(n);
 			SpawnerData::aircraftSpawnpoints.push_back(spawnpoint);
 		}
 
-		for (size_t i = 0; i < pickupModels.size(); i++)
+		for (size_t n = 0; n < pickupModels.size(); n++)
 		{
-			std::string model = pickupModels.at(i);
+			std::string model = pickupModels.at(n);
 			std::string pickNam = GetPickupName(model);
 			ePickupType pickType = GetPickupType(model);
 			int pickVal = GetQuantity(model);
 			int pickSpr = GetSprite(model);
 
-			SpawnData pickData = SpawnData(pickType, pickupSpawnpointsX.at(i), pickupSpawnpointsY.at(i), pickupSpawnpointsZ.at(i), model, pickVal, pickSpr, pickNam);
+			SpawnData pickData = SpawnData(pickType, pickupSpawnpointsX.at(n), pickupSpawnpointsY.at(n), pickupSpawnpointsZ.at(n), model, pickVal, pickSpr, pickNam);
 			SpawnerData::pickups.push_back(pickData);
 		}
 
-		for (size_t i = 0; i < pedsGroup1.size(); i++)
+		for (const auto& model : pedsGroup1)
 		{
-			std::string model = pedsGroup1.at(i);
-			SpawnData data = SpawnData(model, model.find("CUSTOM_") != std::string::npos, model.find("_M") != std::string::npos);
+            SpawnData data = SpawnData(model, model.find("CUSTOM_") != std::string::npos, model.find("_M") != std::string::npos);
 			SpawnerData::pedsGroup1.push_back(data);
 		}
 
-		for (size_t i = 0; i < pedsGroup2.size(); i++)
+		for (const auto& model : pedsGroup2)
 		{
-			std::string model = pedsGroup2.at(i);
-			SpawnData data = SpawnData(model, model.find("CUSTOM_") != std::string::npos, model.find("_M") != std::string::npos);
+            SpawnData data = SpawnData(model, model.find("CUSTOM_") != std::string::npos, model.find("_M") != std::string::npos);
 			SpawnerData::pedsGroup2.push_back(data);
 		}
 
-		for (size_t i = 0; i < pedsGroup3.size(); i++)
+		for (const auto& model : pedsGroup3)
 		{
-			std::string model = pedsGroup3.at(i);
-			SpawnData data = SpawnData(model, model.find("CUSTOM_") != std::string::npos, model.find("_M") != std::string::npos);
+            SpawnData data = SpawnData(model, model.find("CUSTOM_") != std::string::npos, model.find("_M") != std::string::npos);
 			SpawnerData::pedsGroup3.push_back(data);
 		}
 
@@ -509,7 +506,7 @@ void SURVIVAL::SetComponentVariation(Ped ped, int componentId, int drawableId, i
 	}
 }
 
-Ped SURVIVAL::SpawnFreemodeCustom(std::string outfit, bool isMale, bool inVehicle, Vehicle vehicle, int seat)
+Ped SURVIVAL::SpawnFreemodeCustom(const std::string& outfit, bool isMale, bool inVehicle, Vehicle vehicle, int seat)
 {
 	Hash model;
 
@@ -683,8 +680,8 @@ Ped SURVIVAL::SpawnJuggernaut()
 	{
 		Hash model = INIT::LoadModel(name.c_str());
 		Ped ped;
-		size_t index = CALC::RanInt(SpawnerData::enemySpawnpoints.size() - (size_t)1, (size_t)0);
-		Vector3 spawnpoint = SpawnerData::enemySpawnpoints.at(index);
+		size_t ranInt = CALC::RanInt(SpawnerData::enemySpawnpoints.size() - (size_t)1, (size_t)0);
+		Vector3 spawnpoint = SpawnerData::enemySpawnpoints.at(ranInt);
 		ped = PED::CREATE_PED(0, model, spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, false, true);
 		STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
 
@@ -726,7 +723,7 @@ Ped SURVIVAL::SpawnEnemy(int wave, bool canSpawnJesus)
 		else
 		{
 			Hash model = GAMEPLAY::GET_HASH_KEY((char*)data.modelName.c_str());
-			size_t index = CALC::RanInt(SpawnerData::enemySpawnpoints.size() - (size_t)1, (size_t)0);
+			index = CALC::RanInt(SpawnerData::enemySpawnpoints.size() - (size_t)1, (size_t)0);
 			Vector3 spawnpoint = SpawnerData::enemySpawnpoints.at(index);
 			INIT::LoadModel(model);
 			Ped ped = PED::CREATE_PED(0, model, spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, false, true);

@@ -15,7 +15,7 @@ namespace JESUS
 		bool revivingPed;
 		bool waiting = true;
 
-		Jesus(Ped handle);
+		explicit Jesus(Ped handle);
 		Jesus();
 		void SetHandle(Ped handle);
 		void SetTarget(Ped target);
@@ -23,8 +23,8 @@ namespace JESUS
 		void StartReviving();
 		void ReviveTarget();
 		void StartWaiting();
-		bool HasTarget();
-		bool IsInRange();
+		bool HasTarget() const;
+		bool IsInRange() const;
 		bool CanRevive();
 
 	private:

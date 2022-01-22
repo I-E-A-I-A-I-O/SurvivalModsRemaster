@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Calculations.hpp"
+#include <cmath>
 #include <cstdlib>
 #include <ctime>
 
@@ -19,8 +20,6 @@ bool CALC::IsInRange_2(Vector3 a, Vector3 b, float range)
 	dif.x = a.x - b.x;
 	dif.y = a.y - b.y;
 	dif.z = a.z - b.z;
-
 	float length = (dif.x * dif.x) + (dif.y * dif.y) + (dif.z * dif.z);
-
-	return sqrt(length) < range;
+	return std::sqrt(length) < range;
 }

@@ -66,20 +66,20 @@ void INTERMISSION::Process()
 
     if (SURVIVAL::SurvivalData::hardcore)
     {
-        MUSIC::HighIntensityTrack(10);
+        //MUSIC::HighIntensityTrack(10);
         SURVIVAL::SurvivalData::MaxVehicles = 5;
         SURVIVAL::SurvivalData::MaxAircraft = 3;
     }
     else
     {
-        if (SURVIVAL::SurvivalData::CurrentWave <= 6)
+        /*if (SURVIVAL::SurvivalData::CurrentWave <= 6)
         {
             MUSIC::MidIntensityTrack(SURVIVAL::SurvivalData::CurrentWave);
         }
         else if (SURVIVAL::SurvivalData::CurrentWave < 10 || SURVIVAL::SurvivalData::InfiniteWaves || SURVIVAL::SurvivalData::timed)
         {
             MUSIC::HighIntensityTrack(SURVIVAL::SurvivalData::CurrentWave);
-        }
+        }*/
 
         switch (SURVIVAL::SurvivalData::CurrentWave)
         {

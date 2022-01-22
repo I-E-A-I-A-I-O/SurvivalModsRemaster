@@ -183,7 +183,7 @@ void SURVIVAL::ProcessSurvival()
 
 	if (!CALC::IsInRange_2(ENTITY::GET_ENTITY_COORDS(PLAYER::PLAYER_PED_ID(), true), SURVIVAL::SpawnerData::location, 80))
 	{
-		GRAPHICS::DRAW_MARKER(1, SURVIVAL::SpawnerData::location.x, SURVIVAL::SpawnerData::location.y, SURVIVAL::SpawnerData::location.z, 0, 1, 0, 0, 0, 0, 160, 160, 160, 255, 255, 0, 100, false, false, 2, false, NULL, NULL, false);
+		GRAPHICS::DRAW_MARKER(1, SURVIVAL::SpawnerData::location.x, SURVIVAL::SpawnerData::location.y, SURVIVAL::SpawnerData::location.z, 0, 1, 0, 0, 0, 0, 160, 160, 160, 255, 255, 0, 100, false, false, 2, false, nullptr, nullptr, false);
 		
 		if (TIMERS::ProcessLeavingZoneTimer())
 		{
@@ -212,11 +212,11 @@ void SURVIVAL::GiveReward(bool playerDied)
 
 	if (SurvivalData::cheated)
 	{
-		std::string notification = "";
+		std::string notification;
 		notification.append("Survival ended at wave ");
-		notification.append(std::to_string(SurvivalData::CurrentWave).c_str());
+		notification.append(std::to_string(SurvivalData::CurrentWave));
 		notification.append(". Reward: ~g~$");
-		notification.append(std::to_string(reward).c_str());
+		notification.append(std::to_string(reward));
 		UIScript::Data::pendingNoti = true;
 		
 		if (!UIScript::Data::showScaleform)
@@ -231,8 +231,8 @@ void SURVIVAL::GiveReward(bool playerDied)
 	Hash trevorModel = GAMEPLAY::GET_HASH_KEY((char*)"PLAYER_TWO");
 
 	Hash stat;
-	Ped ped = PLAYER::GET_PLAYER_PED(PLAYER::PLAYER_ID());
-	Hash pedModel = ENTITY::GET_ENTITY_MODEL(ped);
+	Ped playerPed = PLAYER::GET_PLAYER_PED(PLAYER::PLAYER_ID());
+	Hash pedModel = ENTITY::GET_ENTITY_MODEL(playerPed);
 
 	if (pedModel == michaelModel)
 	{
@@ -248,11 +248,11 @@ void SURVIVAL::GiveReward(bool playerDied)
 	}
 	else
 	{
-		std::string notification = "";
+		std::string notification;
 		notification.append("Survival ended at wave ");
-		notification.append(std::to_string(SurvivalData::CurrentWave).c_str());
+		notification.append(std::to_string(SurvivalData::CurrentWave));
 		notification.append(". Reward: ~g~$");
-		notification.append(std::to_string(reward).c_str());
+		notification.append(std::to_string(reward));
 		UIScript::Data::pendingNoti = true;
 		
 		if (!UIScript::Data::showScaleform)
@@ -269,8 +269,8 @@ void SURVIVAL::GiveReward(bool playerDied)
 
 	if ((SurvivalData::CurrentWave == 10 && !playerDied) || SurvivalData::CurrentWave > 10)
 	{
-		int bonus = 0;
-		int bonusMultiplier = 0;
+		int bonus;
+		int bonusMultiplier;
 
 		if (SurvivalData::CurrentWave % 10 == 0)
 		{
@@ -291,11 +291,11 @@ void SURVIVAL::GiveReward(bool playerDied)
 		reward += bonus;
 	}
 
-	std::string notification = "";
+	std::string notification;
 	notification.append("Survival ended at wave ");
-	notification.append(std::to_string(SurvivalData::CurrentWave).c_str());
+	notification.append(std::to_string(SurvivalData::CurrentWave));
 	notification.append(". Reward: ~g~$");
-	notification.append(std::to_string(reward).c_str());
+	notification.append(std::to_string(reward));
 	UIScript::Data::pendingNoti = true;
 
 	if (!UIScript::Data::showScaleform)

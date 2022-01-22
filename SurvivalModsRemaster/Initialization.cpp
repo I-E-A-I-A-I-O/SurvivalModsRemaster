@@ -17,31 +17,31 @@ void INIT::LoadTriggerPeds()
     std::vector<std::string> tasks = js["Tasks"];
     TriggerPedsData::ClearTriggerPeds();
 
-    for (size_t i = 0; i < names.size(); i++)
+    for (size_t n = 0; n < names.size(); n++)
     {
         EntityPosition pos = EntityPosition();
-        pos.coords.x = positionX.at(i);
-        pos.coords.y = positionY.at(i);
-        pos.coords.z = positionZ.at(i);
-        pos.heading = headings.at(i);
-        std::string name = names.at(i);
+        pos.coords.x = positionX.at(n);
+        pos.coords.y = positionY.at(n);
+        pos.coords.z = positionZ.at(n);
+        pos.heading = headings.at(n);
+        std::string name = names.at(n);
         std::vector<std::string> allies = js["Allies"][name];
 
-        for (size_t c = 0; c < allies.size(); c++)
+        for (auto & allie : allies)
         {
             SurvivalAllies sa = SurvivalAllies();
             sa.MissionID = name;
-            sa.RelGroupName = allies.at(c);
+            sa.RelGroupName = allie;
             TriggerPedsData::allies.push_back(sa);
         }
 
         TriggerPedsData::names.push_back(name);
-        TriggerPedsData::models.push_back(models.at(i));
+        TriggerPedsData::models.push_back(models.at(n));
         TriggerPedsData::blips.push_back(BLIPS::CreateForMissionTriggerPed(pos.coords, name.c_str()));
         TriggerPedsData::positions.push_back(pos);
         TriggerPedsData::peds.push_back(0);
         TriggerPedsData::starTime.push_back(0);
-        TriggerPedsData::tasks.push_back(tasks.at(i));
+        TriggerPedsData::tasks.push_back(tasks.at(n));
         TriggerPedsData::timerActive.push_back(false);
         TriggerPedsData::killedFlags.push_back(false);
     }

@@ -23,7 +23,7 @@ public:
 
 	SpawnData(std::string m, bool mp, bool gender);
 	SpawnData(std::string m, float x, float y, float z, float h, std::string task);
-	SpawnData(std::string n);
+	explicit SpawnData(std::string n);
 	SpawnData(ePickupType pT, float x, float y, float z, std::string m, int v, int sprite, std::string pickupName);
 
 	void StarTimer();

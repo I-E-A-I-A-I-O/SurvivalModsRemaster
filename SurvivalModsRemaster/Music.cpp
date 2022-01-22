@@ -3,6 +3,7 @@
 
 MUSIC::TrackGroups MUSIC::MusicData::currentTrackGroup;
 bool MUSIC::MusicData::finalWaveHI;
+int last;
 
 void MUSIC::PrepareTracks()
 {
@@ -103,11 +104,11 @@ void MUSIC::LowIntensityTrack()
     }
 }
 
-void MUSIC::MidIntensityTrack(int wave)
+void MidIntensityTrack(int wave)
 {
-    switch (MusicData::currentTrackGroup)
+    switch (MUSIC::MusicData::currentTrackGroup)
     {
-    case TrackGroups::SurvivalPrimary:
+    case MUSIC::TrackGroups::SurvivalPrimary:
     {
         char evName[100];
         strcpy_s(evName, "SM_W");
@@ -116,7 +117,7 @@ void MUSIC::MidIntensityTrack(int wave)
         AUDIO::TRIGGER_MUSIC_EVENT(evName);
         break;
     }
-    case TrackGroups::BusinessBattle:
+    case MUSIC::TrackGroups::BusinessBattle:
     {
         if (wave <= 3)
         {
@@ -128,7 +129,7 @@ void MUSIC::MidIntensityTrack(int wave)
         }
         break;
     }
-    case TrackGroups::BikerContracts:
+    case MUSIC::TrackGroups::BikerContracts:
     {
         if (wave <= 3)
         {
@@ -140,7 +141,7 @@ void MUSIC::MidIntensityTrack(int wave)
         }
         break;
     }
-    case TrackGroups::Casino:
+    case MUSIC::TrackGroups::Casino:
     {
         if (wave <= 3)
         {
@@ -152,7 +153,7 @@ void MUSIC::MidIntensityTrack(int wave)
         }
         break;
     }
-    case TrackGroups::Casino2:
+    case MUSIC::TrackGroups::Casino2:
     {
         if (wave <= 3)
         {
@@ -164,7 +165,7 @@ void MUSIC::MidIntensityTrack(int wave)
         }
         break;
     }
-    case TrackGroups::Tuner:
+    case MUSIC::TrackGroups::Tuner:
     {
         if (wave <= 3)
         {
@@ -176,7 +177,7 @@ void MUSIC::MidIntensityTrack(int wave)
         }
         break;
     }
-    case TrackGroups::Contract:
+    case MUSIC::TrackGroups::Contract:
     {
         if (wave <= 3)
         {
@@ -193,11 +194,11 @@ void MUSIC::MidIntensityTrack(int wave)
     }
 }
 
-void MUSIC::HighIntensityTrack(int wave)
+void HighIntensityTrack(int wave)
 {
-    switch (MusicData::currentTrackGroup)
+    switch (MUSIC::MusicData::currentTrackGroup)
     {
-    case TrackGroups::SurvivalPrimary:
+    case MUSIC::TrackGroups::SurvivalPrimary:
     {
         char evName[100];
         strcpy_s(evName, "SM_W");
@@ -206,32 +207,32 @@ void MUSIC::HighIntensityTrack(int wave)
         AUDIO::TRIGGER_MUSIC_EVENT(evName);
         break;
     }
-    case TrackGroups::BusinessBattle:
+    case MUSIC::TrackGroups::BusinessBattle:
     {
         AUDIO::TRIGGER_MUSIC_EVENT((char*)"BTL_VEHICLE_ACTION");
         break;
     }
-    case TrackGroups::BikerContracts:
+    case MUSIC::TrackGroups::BikerContracts:
     {
         AUDIO::TRIGGER_MUSIC_EVENT((char*)"BIKER_DEFEND_CRASH_DEAL_DELIVERING");
         break;
     }
-    case TrackGroups::Casino:
+    case MUSIC::TrackGroups::Casino:
     {
         AUDIO::TRIGGER_MUSIC_EVENT((char*)"CH_VEHICLE_ACTION");
         break;
     }
-    case TrackGroups::Casino2:
+    case MUSIC::TrackGroups::Casino2:
     {
         AUDIO::TRIGGER_MUSIC_EVENT((char*)"VWC_VEHICLE_ACTION");
         break;
     }
-    case TrackGroups::Tuner:
+    case MUSIC::TrackGroups::Tuner:
     {
         AUDIO::TRIGGER_MUSIC_EVENT((char*)"TUNER_VEHICLE_ACTION");
         break;
     }
-    case TrackGroups::Contract:
+    case MUSIC::TrackGroups::Contract:
     {
         AUDIO::TRIGGER_MUSIC_EVENT((char*)"FIXER_VEHICLE_ACTION");
         break;
@@ -239,6 +240,35 @@ void MUSIC::HighIntensityTrack(int wave)
     default:
         break;
     }
+}
+
+void MUSIC::Process(int enemyCount, int maxCount, int wave)
+{
+    int intensity = ceil((static_cast<float>(maxCount) / static_cast<float>(enemyCount)) * 10.0f);
+    int max;
+
+    if (intensity <= 0)
+        intensity = 2;
+
+    if (wave <= 3)
+        max = 3;
+    else if (wave <= 6)
+        max = 6;
+    else
+        max = 10;
+
+    if (intensity > max)
+        intensity = max;
+
+    if (intensity != last)
+        last = intensity;
+    else
+        return;
+
+    if (max == 10)
+        HighIntensityTrack(last);
+    else
+        MidIntensityTrack(last);
 }
 
 void MUSIC::MissionCompletedSound()

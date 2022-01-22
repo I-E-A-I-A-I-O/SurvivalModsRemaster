@@ -4,7 +4,7 @@
 bool PICKUPS::PickupsData::regenerating;
 std::vector<Pickup> PICKUPS::PickupsData::pickups;
 
-Pickup PICKUPS::SpawnPickup(SpawnData pickup)
+Pickup PICKUPS::SpawnPickup(const SpawnData& pickup)
 {
 	Hash modelHash = INIT::LoadModel(pickup.modelName.c_str());
 	Pickup pickupHandle = OBJECT::CREATE_PICKUP(pickup.pickupType, pickup.position.x, pickup.position.y, pickup.position.z, 0, pickup.value, true, modelHash);
@@ -17,7 +17,7 @@ Pickup PICKUPS::SpawnPickup(SpawnData pickup)
 
 void PICKUPS::Initialize()
 {
-	for (SpawnData pickup : SURVIVAL::SpawnerData::pickups)
+	for (const SpawnData& pickup : SURVIVAL::SpawnerData::pickups)
 	{
 		Pickup handle = SpawnPickup(pickup);
 		PickupsData::pickups.push_back(handle);

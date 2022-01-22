@@ -6,8 +6,8 @@ JESUS::Jesus::Jesus()
 	movingToPed = false;
 	revivingPed = false;
 	waiting = true;
-	targetPed = NULL;
-	ped = NULL;
+	targetPed = 0;
+	ped = 0;
 }
 
 void JESUS::Jesus::SetHandle(Ped handle)
@@ -20,7 +20,7 @@ JESUS::Jesus::Jesus(Ped handle)
 	movingToPed = false;
 	revivingPed = false;
 	waiting = true;
-	targetPed = NULL;
+	targetPed = 0;
 	ped = handle;
 
 	StartWaiting();
@@ -86,12 +86,12 @@ bool JESUS::Jesus::CanRevive()
 	}
 }
 
-bool JESUS::Jesus::HasTarget()
+bool JESUS::Jesus::HasTarget() const
 {
-	return targetPed != NULL;
+	return targetPed != 0;
 }
 
-bool JESUS::Jesus::IsInRange()
+bool JESUS::Jesus::IsInRange() const
 {
 	return CALC::IsInRange_2(ENTITY::GET_ENTITY_COORDS(ped, true), ENTITY::GET_ENTITY_COORDS(targetPed, true), 2);
 }

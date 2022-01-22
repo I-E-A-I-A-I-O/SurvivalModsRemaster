@@ -31,8 +31,6 @@ std::unordered_map<int, Position> titleSlots =
 	{1, Position(0.855f, 0.91f)}
 };
 
-bool increased;
-
 void SCREEN::ShowEnemyCountBadge(int count, int max, int wave)
 {
 	DrawBadge("WAVE", std::to_string(wave).c_str(), false, 1);
@@ -45,18 +43,9 @@ void SCREEN::ShowEnemyCountBadge(int count, int max, int wave)
 		strcpy_s(title, "~r~ENEMIES");
 		strcpy_s(enemyCount, "~r~OVERFLOW");
 		red = true;
-
-		if (!increased)
-		{
-			increased = true;
-			MUSIC::HighIntensityTrack(10);
-		}
 	}
 	else
 	{
-		if (increased)
-			increased = false;
-
 		strcpy_s(title, "ENEMIES");
 		strcpy_s(enemyCount, std::to_string(count).c_str());
 		strcat_s(enemyCount, "/");

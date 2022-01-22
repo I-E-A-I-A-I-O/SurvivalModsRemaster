@@ -15,7 +15,7 @@ namespace PICKUPS
 	};
 
 	void Initialize();
-	Pickup SpawnPickup(SpawnData pickup);
+	Pickup SpawnPickup(const SpawnData& pickup);
 	void Delete();
 	void Regenerate();
 	void Process();

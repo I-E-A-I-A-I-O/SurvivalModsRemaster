@@ -32,7 +32,6 @@ void BLIPS::CreateForEnemyPed(Ped ped)
 void BLIPS::CreateForEnemyPed(Ped ped, int sprite, const char* name)
 {
 	Blip blipHandle = UI::ADD_BLIP_FOR_ENTITY(ped);
-
 	UI::SET_BLIP_SPRITE(blipHandle, sprite);
 	UI::SET_BLIP_SCALE(blipHandle, 0.8f);
 	UI::SET_BLIP_COLOUR(blipHandle, eBlipColor::BlipColorRed);
@@ -43,7 +42,6 @@ void BLIPS::CreateForEnemyPed(Ped ped, int sprite, const char* name)
 void BLIPS::CreateForEnemyVehicle(Vehicle vehicle)
 {
 	Blip blipHandle = UI::ADD_BLIP_FOR_ENTITY(vehicle);
-
 	Hash model = ENTITY::GET_ENTITY_MODEL(vehicle);
 
 	if (VEHICLE::IS_THIS_MODEL_A_CAR(model))

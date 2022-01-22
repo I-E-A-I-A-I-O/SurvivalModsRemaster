@@ -6,7 +6,7 @@
 #include "Initialization.hpp"
 #include "natives.h"
 #include "enums.h"
-#include "json.hpp"
+#include "nlohmann/json.hpp"
 #include <fstream>
 #include <vector>
 #include <string>
@@ -44,7 +44,7 @@ namespace SURVIVAL
         static bool hasAircraft;
 	};
 
-    void LoadSurvival(std::string survivalID);
+    void LoadSurvival(const std::string& survivalID);
     Ped SpawnEnemy(int wave, bool canSpawnJesus);
     Ped SpawnDog();
     Ped SpawnJuggernaut();
@@ -52,11 +52,11 @@ namespace SURVIVAL
     Vehicle SpawnAircraft();
     void UpdateModels(int curretnWave);
     std::vector<Ped> SpawnEnemiesInVehicle(Vehicle vehicle, int wave);
-    Ped SpawnFreemodeCustom(std::string outfit, bool isMale, bool inVehicle = false, Vehicle vehicle = 0, int seat = -1);
+    Ped SpawnFreemodeCustom(const std::string& outfit, bool isMale, bool inVehicle = false, Vehicle vehicle = 0, int seat = -1);
     void SetComponentVariation(Ped ped, int componentId, int drawableId, int textureId);
-    ePickupType GetPickupType(std::string pickupModel);
-    int GetQuantity(std::string pickupModel);
-    int GetSprite(std::string pickupModel);
-    std::string GetPickupName(std::string pickupModel);
+    ePickupType GetPickupType(const std::string& pickupModel);
+    int GetQuantity(const std::string& pickupModel);
+    int GetSprite(const std::string& pickupModel);
+    std::string GetPickupName(const std::string& pickupModel);
     void ClearVectors();
 }

@@ -15,8 +15,7 @@ struct Data
 	static Hash enemiesRelGroup;
 	static Hash neutralRelGroup;
 	static int intermissionDuration;
-	static Controls tenWaveControl;
-	static Controls infiniteWaveControl;
+    static Controls infiniteWaveControl;
 	static Controls timedSurvivalControl;
 	static Controls hardcoreSurvivalControl;
 	static Controls cancelControl;

@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "SpawnData.hpp"
-#include "Screen.hpp"
 
 SpawnData::SpawnData(std::string m, float x, float y, float z, float h, std::string task)
 {
@@ -11,7 +10,7 @@ SpawnData::SpawnData(std::string m, float x, float y, float z, float h, std::str
 	vector.z = z;
 	position = vector;
 	heading = h;
-	taskName = task;
+	taskName = std::move(task);
 }
 
 SpawnData::SpawnData(ePickupType pT, float x, float y, float z, std::string m, int v, int sprite, std::string pickupName)
@@ -25,7 +24,7 @@ SpawnData::SpawnData(ePickupType pT, float x, float y, float z, std::string m, i
 	modelName = m;
 	value = v;
 	pickupSprite = sprite;
-	stringName = pickupName;
+	stringName = std::move(pickupName);
 }
 
 SpawnData::SpawnData(std::string n)

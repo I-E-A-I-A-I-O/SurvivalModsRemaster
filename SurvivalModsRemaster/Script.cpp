@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Script.hpp"
-#include "json.hpp"
+#include "nlohmann/json.hpp"
 
 std::vector<SurvivalAllies> TriggerPedsData::allies;
 std::vector<std::string> TriggerPedsData::names;
@@ -14,7 +14,6 @@ std::vector<bool> TriggerPedsData::killedFlags;
 std::vector<int> TriggerPedsData::starTime;
 std::vector<std::string> tasks;
 int Data::intermissionDuration;
-Controls Data::tenWaveControl;
 Controls Data::infiniteWaveControl;
 Controls Data::timedSurvivalControl;
 Controls Data::cancelControl;
@@ -26,10 +25,8 @@ int cancelStartTime;
 int cancelCurrentTime;
 Hash Data::enemiesRelGroup;
 Hash Data::neutralRelGroup;
-bool playerDied;
 bool initialized = false;
 nlohmann::json j;
-std::string startSurvivalText;
 int Data::TPIndex;
 
 void SetAllies()
@@ -81,8 +78,6 @@ void IsPlayerInMissionStartRange()
 
     for (int i = 0; i < size; i++)
     {
-        Vector3 survCoords = TriggerPedsData::positions.at(i).coords;
-
         if (CALC::IsInRange_2(playerPosition, TriggerPedsData::positions.at(i).coords, 80.0f))
         {
             Data::TPIndex = i;
@@ -113,7 +108,6 @@ void ReadConfig()
     i.close();
 
     Data::intermissionDuration = j["Gameplay"]["IntermissionDuration"];
-    Data::tenWaveControl = static_cast<Controls>(j["Controls"]["StartTenWave"]);
     Data::infiniteWaveControl = static_cast<Controls>(j["Controls"]["StartInfiniteWaves"]);
     Data::timedSurvivalControl = static_cast<Controls>(j["Controls"]["StartTimedSurvival"]);
     Data::cancelControl = static_cast<Controls>(j["Controls"]["CancelSurvival"]);
@@ -270,7 +264,7 @@ void ProcessTriggerPeds()
     }
 }
 
-void main()
+int main()
 {
     while (DLC2::GET_IS_LOADING_SCREEN_ACTIVE())
     {
