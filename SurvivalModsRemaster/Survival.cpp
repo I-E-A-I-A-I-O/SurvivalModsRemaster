@@ -4,7 +4,6 @@
 bool SURVIVAL::SurvivalData::IsActive;
 std::string SURVIVAL::SurvivalData::MissionID;
 bool SURVIVAL::SurvivalData::InfiniteWaves;
-int SURVIVAL::SurvivalData::RewardedMoney;
 int SURVIVAL::SurvivalData::CurrentWave;
 int SURVIVAL::SurvivalData::MaxAircraft;
 int SURVIVAL::SurvivalData::MaxVehicles;

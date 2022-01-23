@@ -23,32 +23,21 @@ namespace ENEMIES
 		static bool canSpawnMore;
 		static bool limitReached;
 		static int currentWaveSize;
-		static bool jugSpawned;
-		static bool dogLimitReached;
 		static int currentDogCount;
-		static bool jesusSpawned;
 		static int kills;
-		static std::vector<Ped> footEnemies;
-		static std::vector<Vehicle> enemyVehicles;
-		static std::vector<Hash> alienWeapons;
-		static std::vector<Ped> deadEnemies;
-		static JESUS::Jesus enemyJesus;
-		static Ped enemyJuggernaut;
 	};
 
+    struct Suicidal
+    {
+        Ped ped = 0;
+        bool timer = false;
+        bool exploded = false;
+        Vector3 deadCoords{};
+        int timeOfDeath = 0;
+    };
+
+    void Process();
+    void RemoveUnusedVehicles();
 	void ResetCounters();
 	void ClearVectors();
-	void RemoveUnusedVehicles();
-	void Process();
-	void RemoveDeadEnemies();
-	void ProcessJesus();
-	std::vector<Hash> GetWeapons(Hash pedModel);
-	void InitializeEnemyInAircraft(Ped ped, bool passenger);
-	void InitializeEnemyInVehicle(Ped ped, bool passenger);
-	void InitializeEnemy(Ped ped);
-	void InitializeJuggernaut(Ped ped);
-	void InitializeJesus(Ped ped);
-	void InitializeAnimal(Ped ped);
-	void InitializeRageEnemy(Ped ped);
-	int GetKillTime(Ped ped);
 }

@@ -42,6 +42,7 @@ namespace SURVIVAL
         static bool hasDogs;
         static bool hasVehicles;
         static bool hasAircraft;
+        static bool hasSuicidal;
 	};
 
     void LoadSurvival(const std::string& survivalID);

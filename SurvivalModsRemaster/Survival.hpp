@@ -18,7 +18,6 @@ namespace SURVIVAL
         static bool IsActive;
         static std::string MissionID;
         static bool InfiniteWaves;
-        static int RewardedMoney;
         static int CurrentWave;
         static int MaxAircraft;
         static int MaxVehicles;

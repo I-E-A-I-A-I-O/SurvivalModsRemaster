@@ -28,6 +28,7 @@ bool SURVIVAL::SpawnerData::hasJesus;
 bool SURVIVAL::SpawnerData::hasDogs;
 bool SURVIVAL::SpawnerData::hasVehicles;
 bool SURVIVAL::SpawnerData::hasAircraft;
+bool SURVIVAL::SpawnerData::hasSuicidal;
 std::vector<std::string> jugModels;
 std::string dogModel;
 
@@ -400,6 +401,7 @@ void SURVIVAL::LoadSurvival(const std::string& survivalID)
 		SpawnerData::hasJesus = js["Flags"]["jesus"];
 		SpawnerData::hasAircraft = js["Flags"]["aircraft"];
 		SpawnerData::hasVehicles = js["Flags"]["vehicles"];
+        SpawnerData::hasSuicidal = js["Flags"]["bombers"];
 
 		SpawnerData::location.x = locationPoints.at(0);
 		SpawnerData::location.y = locationPoints.at(1);
