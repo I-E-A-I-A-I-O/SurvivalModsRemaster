@@ -9,9 +9,9 @@ std::vector<Vector3> boatSpawnpoints;
 std::vector<SpawnData> pedGroup1;
 std::vector<SpawnData> pedGroup2;
 std::vector<SpawnData> pedGroup3;
-std::vector<std::string> vehiclesGroup1;
-std::vector<std::string> vehiclesGroup2;
-std::vector<std::string> vehiclesGroup3;
+std::vector<std::string> vehicleGroup1;
+std::vector<std::string> vehicleGroup2;
+std::vector<std::string> vehicleGroup3;
 std::vector<std::string> aircraftGroup1;
 std::vector<std::string> aircraftGroup2;
 std::vector<std::string> aircraftGroup3;
@@ -355,9 +355,9 @@ void SURVIVAL::ClearVectors()
 	pedGroup1.clear();
 	pedGroup2.clear();
 	pedGroup3.clear();
-    vehiclesGroup1.clear();
-    vehiclesGroup2.clear();
-    vehiclesGroup3.clear();
+    vehicleGroup1.clear();
+    vehicleGroup2.clear();
+    vehicleGroup3.clear();
 	SpawnerData::weakWeapons.clear();
 	SpawnerData::medWeapons.clear();
 	SpawnerData::strongWeapons.clear();
@@ -424,48 +424,48 @@ void SURVIVAL::LoadSurvival(const std::string& survivalID)
 
         if (SpawnerData::hasAircraft)
         {
-            std::vector<double> aircraftSpawnpointsX = js["Spawnpoints"]["aircraft"]["x"];
-            std::vector<double> aircraftSpawnpointsY = js["Spawnpoints"]["aircraft"]["y"];
-            std::vector<double> aircraftSpawnpointsZ = js["Spawnpoints"]["aircraft"]["z"];
-            std::vector<std::string> aircraftGroup1 = js["Models"]["aircraft"]["group1"];
-            std::vector<std::string> aircraftGroup2 = js["Models"]["aircraft"]["group2"];
-            std::vector<std::string> aircraftGroup3 = js["Models"]["aircraft"]["group3"];
+            std::vector<double> airSpawnpointsX = js["Spawnpoints"]["aircraft"]["x"];
+            std::vector<double> airSpawnpointsY = js["Spawnpoints"]["aircraft"]["y"];
+            std::vector<double> airSpawnpointsZ = js["Spawnpoints"]["aircraft"]["z"];
+            std::vector<std::string> airGroup1 = js["Models"]["aircraft"]["group1"];
+            std::vector<std::string> airGroup2 = js["Models"]["aircraft"]["group2"];
+            std::vector<std::string> airGroup3 = js["Models"]["aircraft"]["group3"];
 
-            for (size_t n = 0; n < aircraftSpawnpointsX.size(); n++)
+            for (size_t n = 0; n < airSpawnpointsX.size(); n++)
             {
                 Vector3 spawnpoint = Vector3();
-                spawnpoint.x = aircraftSpawnpointsX.at(n);
-                spawnpoint.y = aircraftSpawnpointsY.at(n);
-                spawnpoint.z = aircraftSpawnpointsZ.at(n);
+                spawnpoint.x = airSpawnpointsX.at(n);
+                spawnpoint.y = airSpawnpointsY.at(n);
+                spawnpoint.z = airSpawnpointsZ.at(n);
                 aircraftSpawnpoints.push_back(spawnpoint);
             }
 
-            aircraftGroup1 = aircraftGroup1;
-            aircraftGroup2 = aircraftGroup2;
-            aircraftGroup3 = aircraftGroup3;
+            aircraftGroup1 = airGroup1;
+            aircraftGroup2 = airGroup2;
+            aircraftGroup3 = airGroup3;
         }
 
         if (SpawnerData::hasVehicles)
         {
-            std::vector<double> vehicleSpawnpointsX = js["Spawnpoints"]["vehicles"]["x"];
-            std::vector<double> vehicleSpawnpointsY = js["Spawnpoints"]["vehicles"]["y"];
-            std::vector<double> vehicleSpawnpointsZ = js["Spawnpoints"]["vehicles"]["z"];
+            std::vector<double> vehiclesSpawnpointsX = js["Spawnpoints"]["vehicles"]["x"];
+            std::vector<double> vehiclesSpawnpointsY = js["Spawnpoints"]["vehicles"]["y"];
+            std::vector<double> vehiclesSpawnpointsZ = js["Spawnpoints"]["vehicles"]["z"];
             std::vector<std::string> vehiclesGroup1 = js["Models"]["vehicles"]["group1"];
             std::vector<std::string> vehiclesGroup2 = js["Models"]["vehicles"]["group2"];
             std::vector<std::string> vehiclesGroup3 = js["Models"]["vehicles"]["group3"];
 
-            for (size_t n = 0; n < vehicleSpawnpointsX.size(); n++)
+            for (size_t n = 0; n < vehiclesSpawnpointsX.size(); n++)
             {
                 Vector3 spawnpoint = Vector3();
-                spawnpoint.x = vehicleSpawnpointsX.at(n);
-                spawnpoint.y = vehicleSpawnpointsY.at(n);
-                spawnpoint.z = vehicleSpawnpointsZ.at(n);
+                spawnpoint.x = vehiclesSpawnpointsX.at(n);
+                spawnpoint.y = vehiclesSpawnpointsY.at(n);
+                spawnpoint.z = vehiclesSpawnpointsZ.at(n);
                 vehicleSpawnpoints.push_back(spawnpoint);
             }
 
-            vehiclesGroup1 = vehiclesGroup1;
-            vehiclesGroup2 = vehiclesGroup2;
-            vehiclesGroup3 = vehiclesGroup3;
+            vehicleGroup1 = vehiclesGroup1;
+            vehicleGroup2 = vehiclesGroup2;
+            vehicleGroup3 = vehiclesGroup3;
         }
 
         if (SpawnerData::hasBoats)
@@ -859,7 +859,7 @@ void SURVIVAL::UpdateModels(int currentWave)
 	if (SurvivalData::hardcore)
 	{
 		currentAircraftModels = aircraftGroup3;
-		currentVehicleModels = vehiclesGroup3;
+		currentVehicleModels = vehicleGroup3;
 		currentPedModels = pedGroup3;
         currentBoatModels = boatGroup3;
 	}
@@ -871,7 +871,7 @@ void SURVIVAL::UpdateModels(int currentWave)
 				currentPedModels = pedGroup1;
 				break;
 			case 3:
-				currentVehicleModels = vehiclesGroup1;
+				currentVehicleModels = vehicleGroup1;
                 currentBoatModels = boatGroup1;
 				break;
 			case 4:
@@ -879,14 +879,14 @@ void SURVIVAL::UpdateModels(int currentWave)
 				break;
 			case 5:
 				currentAircraftModels = aircraftGroup1;
-				currentVehicleModels = vehiclesGroup2;
+				currentVehicleModels = vehicleGroup2;
                 currentBoatModels = boatGroup2;
 				break;
 			case 6:
 				currentAircraftModels = aircraftGroup2;
 				break;
 			case 7:
-				currentVehicleModels = vehiclesGroup3;
+				currentVehicleModels = vehicleGroup3;
 				currentPedModels = pedGroup3;
                 currentBoatModels = boatGroup3;
 				break;
