@@ -473,9 +473,9 @@ void SURVIVAL::LoadSurvival(const std::string& survivalID)
             std::vector<double> boatSpawnpointsX = js["Spawnpoints"]["boats"]["x"];
             std::vector<double> boatSpawnpointsY = js["Spawnpoints"]["boats"]["y"];
             std::vector<double> boatSpawnpointsZ = js["Spawnpoints"]["boats"]["z"];
-            std::vector<std::string> boatGroup1 = js["Models"]["boats"]["group1"];
-            std::vector<std::string> boatGroup2 = js["Models"]["boats"]["group2"];
-            std::vector<std::string> boatGroup3 = js["Models"]["boats"]["group3"];
+            std::vector<std::string> boatsGroup1 = js["Models"]["boats"]["group1"];
+            std::vector<std::string> boatsGroup2 = js["Models"]["boats"]["group2"];
+            std::vector<std::string> boatsGroup3 = js["Models"]["boats"]["group3"];
 
             for (size_t n = 0; n < boatSpawnpointsX.size(); n++)
             {
@@ -486,9 +486,9 @@ void SURVIVAL::LoadSurvival(const std::string& survivalID)
                 boatSpawnpoints.push_back(spawnpoint);
             }
 
-            boatGroup1 = boatGroup1;
-            boatGroup2 = boatGroup2;
-            boatGroup3 = boatGroup3;
+            boatGroup1 = boatsGroup1;
+            boatGroup2 = boatsGroup2;
+            boatGroup3 = boatsGroup3;
         }
 		
 		for (auto & item : weapons1)
