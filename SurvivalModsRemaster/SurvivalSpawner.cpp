@@ -387,7 +387,7 @@ void SURVIVAL::LoadSurvival(const std::string& survivalID)
         SpawnerData::hasAircraft = js["Flags"]["aircraft"];
         SpawnerData::hasVehicles = js["Flags"]["vehicles"];
         SpawnerData::hasSuicidal = js["Flags"]["bombers"];
-        SpawnerData::hasBoats = js["Flags"]["Boats"];
+        SpawnerData::hasBoats = js["Flags"]["boats"];
 		std::vector<double> locationPoints = js["Location"];
 		std::vector<double> pedSpawnpointsX = js["Spawnpoints"]["peds"]["x"];
 		std::vector<double> pedSpawnpointsY = js["Spawnpoints"]["peds"]["y"];
