@@ -2,24 +2,29 @@
 #include "SurvivalSpawner.hpp"
 
 Vector3 SURVIVAL::SpawnerData::location;
-std::vector<Vector3> SURVIVAL::SpawnerData::enemySpawnpoints;
-std::vector<Vector3> SURVIVAL::SpawnerData::aircraftSpawnpoints;
-std::vector<Vector3> SURVIVAL::SpawnerData::vehicleSpawnpoints;
-std::vector<SpawnData> SURVIVAL::SpawnerData::pedsGroup1;
-std::vector<SpawnData> SURVIVAL::SpawnerData::pedsGroup2;
-std::vector<SpawnData> SURVIVAL::SpawnerData::pedsGroup3;
-std::vector<std::string> SURVIVAL::SpawnerData::vehiclesGroup1;
-std::vector<std::string> SURVIVAL::SpawnerData::vehiclesGroup2;
-std::vector<std::string> SURVIVAL::SpawnerData::vehiclesGroup3;
-std::vector<std::string> SURVIVAL::SpawnerData::aircraftGroup1;
-std::vector<std::string> SURVIVAL::SpawnerData::aircraftGroup2;
-std::vector<std::string> SURVIVAL::SpawnerData::aircraftGroup3;
+std::vector<Vector3> enemySpawnpoints;
+std::vector<Vector3> aircraftSpawnpoints;
+std::vector<Vector3> vehicleSpawnpoints;
+std::vector<Vector3> boatSpawnpoints;
+std::vector<SpawnData> pedGroup1;
+std::vector<SpawnData> pedGroup2;
+std::vector<SpawnData> pedGroup3;
+std::vector<std::string> vehiclesGroup1;
+std::vector<std::string> vehiclesGroup2;
+std::vector<std::string> vehiclesGroup3;
+std::vector<std::string> aircraftGroup1;
+std::vector<std::string> aircraftGroup2;
+std::vector<std::string> aircraftGroup3;
+std::vector<std::string> boatGroup1;
+std::vector<std::string> boatGroup2;
+std::vector<std::string> boatGroup3;
 std::vector<Hash> SURVIVAL::SpawnerData::weakWeapons;
 std::vector<Hash> SURVIVAL::SpawnerData::medWeapons;
 std::vector<Hash> SURVIVAL::SpawnerData::strongWeapons;
-std::vector<SpawnData> SURVIVAL::SpawnerData::currentPedModels;
-std::vector<std::string> SURVIVAL::SpawnerData::currentAircraftModels;
-std::vector<std::string> SURVIVAL::SpawnerData::currentVehicleModels;
+std::vector<SpawnData> currentPedModels;
+std::vector<std::string> currentAircraftModels;
+std::vector<std::string> currentVehicleModels;
+std::vector<std::string> currentBoatModels;
 std::vector<SpawnData> SURVIVAL::SpawnerData::pickups;
 bool SURVIVAL::SpawnerData::isXmas;
 bool SURVIVAL::SpawnerData::isHalloween;
@@ -29,6 +34,7 @@ bool SURVIVAL::SpawnerData::hasDogs;
 bool SURVIVAL::SpawnerData::hasVehicles;
 bool SURVIVAL::SpawnerData::hasAircraft;
 bool SURVIVAL::SpawnerData::hasSuicidal;
+bool SURVIVAL::SpawnerData::hasBoats;
 std::vector<std::string> jugModels;
 std::string dogModel;
 
@@ -338,13 +344,20 @@ std::string SURVIVAL::GetPickupName(const std::string& pickupModel)
 
 void SURVIVAL::ClearVectors()
 {
-	SpawnerData::enemySpawnpoints.clear();
-	SpawnerData::aircraftSpawnpoints.clear();
-	SpawnerData::vehicleSpawnpoints.clear();
+	enemySpawnpoints.clear();
+	aircraftSpawnpoints.clear();
+	vehicleSpawnpoints.clear();
+    boatSpawnpoints.clear();
+    boatGroup1.clear();
+    boatGroup2.clear();
+    boatGroup3.clear();
 	SpawnerData::pickups.clear();
-	SpawnerData::pedsGroup1.clear();
-	SpawnerData::pedsGroup2.clear();
-	SpawnerData::pedsGroup3.clear();
+	pedGroup1.clear();
+	pedGroup2.clear();
+	pedGroup3.clear();
+    vehiclesGroup1.clear();
+    vehiclesGroup2.clear();
+    vehiclesGroup3.clear();
 	SpawnerData::weakWeapons.clear();
 	SpawnerData::medWeapons.clear();
 	SpawnerData::strongWeapons.clear();
@@ -366,46 +379,117 @@ void SURVIVAL::LoadSurvival(const std::string& survivalID)
 		i >> js;
 		i.close();
 
+        SpawnerData::isXmas = js["Flags"]["xmas"];
+        SpawnerData::isHalloween = js["Flags"]["halloween"];
+        SpawnerData::hasJuggernaut = js["Flags"]["juggernaut"];
+        SpawnerData::hasDogs = js["Flags"]["dogs"];
+        SpawnerData::hasJesus = js["Flags"]["jesus"];
+        SpawnerData::hasAircraft = js["Flags"]["aircraft"];
+        SpawnerData::hasVehicles = js["Flags"]["vehicles"];
+        SpawnerData::hasSuicidal = js["Flags"]["bombers"];
+        SpawnerData::hasBoats = js["Flags"]["Boats"];
 		std::vector<double> locationPoints = js["Location"];
 		std::vector<double> pedSpawnpointsX = js["Spawnpoints"]["peds"]["x"];
 		std::vector<double> pedSpawnpointsY = js["Spawnpoints"]["peds"]["y"];
 		std::vector<double> pedSpawnpointsZ = js["Spawnpoints"]["peds"]["z"];
-		std::vector<double> vehicleSpawnpointsX = js["Spawnpoints"]["vehicles"]["x"];
-		std::vector<double> vehicleSpawnpointsY = js["Spawnpoints"]["vehicles"]["y"];
-		std::vector<double> vehicleSpawnpointsZ = js["Spawnpoints"]["vehicles"]["z"];
-		std::vector<double> aircraftSpawnpointsX = js["Spawnpoints"]["aircraft"]["x"];
-		std::vector<double> aircraftSpawnpointsY = js["Spawnpoints"]["aircraft"]["y"];
-		std::vector<double> aircraftSpawnpointsZ = js["Spawnpoints"]["aircraft"]["z"];
 		std::vector<double> pickupSpawnpointsX = js["Spawnpoints"]["pickups"]["x"];
 		std::vector<double> pickupSpawnpointsY = js["Spawnpoints"]["pickups"]["y"];
 		std::vector<double> pickupSpawnpointsZ = js["Spawnpoints"]["pickups"]["z"];
 		std::vector<std::string> pedsGroup1 = js["Models"]["peds"]["group1"];
 		std::vector<std::string> pedsGroup2 = js["Models"]["peds"]["group2"];
 		std::vector<std::string> pedsGroup3 = js["Models"]["peds"]["group3"];
-		std::vector<std::string> vehiclesGroup1 = js["Models"]["vehicles"]["group1"];
-		std::vector<std::string> vehiclesGroup2 = js["Models"]["vehicles"]["group2"];
-		std::vector<std::string> vehiclesGroup3 = js["Models"]["vehicles"]["group3"];
-		std::vector<std::string> aircraftGroup1 = js["Models"]["aircraft"]["group1"];
-		std::vector<std::string> aircraftGroup2 = js["Models"]["aircraft"]["group2"];
-		std::vector<std::string> aircraftGroup3 = js["Models"]["aircraft"]["group3"];
 		std::vector<std::string> weapons1 = js["Weapons"]["weak"];
 		std::vector<std::string> weapons2 = js["Weapons"]["medium"];
 		std::vector<std::string> weapons3 = js["Weapons"]["strong"];
 		std::vector<std::string> pickupModels = js["Models"]["pickups"];
-		std::vector<std::string> jModels = js["Models"]["juggernaut"];
-		dogModel = js["Models"]["dog"];
-		SpawnerData::isXmas = js["Flags"]["xmas"];
-		SpawnerData::isHalloween = js["Flags"]["halloween"];
-		SpawnerData::hasJuggernaut = js["Flags"]["juggernaut"];
-		SpawnerData::hasDogs = js["Flags"]["dogs"];
-		SpawnerData::hasJesus = js["Flags"]["jesus"];
-		SpawnerData::hasAircraft = js["Flags"]["aircraft"];
-		SpawnerData::hasVehicles = js["Flags"]["vehicles"];
-        SpawnerData::hasSuicidal = js["Flags"]["bombers"];
 
 		SpawnerData::location.x = locationPoints.at(0);
 		SpawnerData::location.y = locationPoints.at(1);
 		SpawnerData::location.z = locationPoints.at(2);
+
+        if (SpawnerData::hasDogs)
+        {
+            dogModel = js["Models"]["dog"];
+        }
+
+        if (SpawnerData::hasJuggernaut)
+        {
+            std::vector<std::string> jModels = js["Models"]["juggernaut"];
+
+            for (auto & jModel : jModels)
+            {
+                jugModels.push_back(jModel);
+            }
+        }
+
+        if (SpawnerData::hasAircraft)
+        {
+            std::vector<double> aircraftSpawnpointsX = js["Spawnpoints"]["aircraft"]["x"];
+            std::vector<double> aircraftSpawnpointsY = js["Spawnpoints"]["aircraft"]["y"];
+            std::vector<double> aircraftSpawnpointsZ = js["Spawnpoints"]["aircraft"]["z"];
+            std::vector<std::string> aircraftGroup1 = js["Models"]["aircraft"]["group1"];
+            std::vector<std::string> aircraftGroup2 = js["Models"]["aircraft"]["group2"];
+            std::vector<std::string> aircraftGroup3 = js["Models"]["aircraft"]["group3"];
+
+            for (size_t n = 0; n < aircraftSpawnpointsX.size(); n++)
+            {
+                Vector3 spawnpoint = Vector3();
+                spawnpoint.x = aircraftSpawnpointsX.at(n);
+                spawnpoint.y = aircraftSpawnpointsY.at(n);
+                spawnpoint.z = aircraftSpawnpointsZ.at(n);
+                aircraftSpawnpoints.push_back(spawnpoint);
+            }
+
+            aircraftGroup1 = aircraftGroup1;
+            aircraftGroup2 = aircraftGroup2;
+            aircraftGroup3 = aircraftGroup3;
+        }
+
+        if (SpawnerData::hasVehicles)
+        {
+            std::vector<double> vehicleSpawnpointsX = js["Spawnpoints"]["vehicles"]["x"];
+            std::vector<double> vehicleSpawnpointsY = js["Spawnpoints"]["vehicles"]["y"];
+            std::vector<double> vehicleSpawnpointsZ = js["Spawnpoints"]["vehicles"]["z"];
+            std::vector<std::string> vehiclesGroup1 = js["Models"]["vehicles"]["group1"];
+            std::vector<std::string> vehiclesGroup2 = js["Models"]["vehicles"]["group2"];
+            std::vector<std::string> vehiclesGroup3 = js["Models"]["vehicles"]["group3"];
+
+            for (size_t n = 0; n < vehicleSpawnpointsX.size(); n++)
+            {
+                Vector3 spawnpoint = Vector3();
+                spawnpoint.x = vehicleSpawnpointsX.at(n);
+                spawnpoint.y = vehicleSpawnpointsY.at(n);
+                spawnpoint.z = vehicleSpawnpointsZ.at(n);
+                vehicleSpawnpoints.push_back(spawnpoint);
+            }
+
+            vehiclesGroup1 = vehiclesGroup1;
+            vehiclesGroup2 = vehiclesGroup2;
+            vehiclesGroup3 = vehiclesGroup3;
+        }
+
+        if (SpawnerData::hasBoats)
+        {
+            std::vector<double> boatSpawnpointsX = js["Spawnpoints"]["boats"]["x"];
+            std::vector<double> boatSpawnpointsY = js["Spawnpoints"]["boats"]["y"];
+            std::vector<double> boatSpawnpointsZ = js["Spawnpoints"]["boats"]["z"];
+            std::vector<std::string> boatGroup1 = js["Models"]["boats"]["group1"];
+            std::vector<std::string> boatGroup2 = js["Models"]["boats"]["group2"];
+            std::vector<std::string> boatGroup3 = js["Models"]["boats"]["group3"];
+
+            for (size_t n = 0; n < boatSpawnpointsX.size(); n++)
+            {
+                Vector3 spawnpoint = Vector3();
+                spawnpoint.x = boatSpawnpointsX.at(n);
+                spawnpoint.y = boatSpawnpointsY.at(n);
+                spawnpoint.z = boatSpawnpointsZ.at(n);
+                boatSpawnpoints.push_back(spawnpoint);
+            }
+
+            boatGroup1 = boatGroup1;
+            boatGroup2 = boatGroup2;
+            boatGroup3 = boatGroup3;
+        }
 		
 		for (auto & item : weapons1)
 		{
@@ -425,36 +509,13 @@ void SURVIVAL::LoadSurvival(const std::string& survivalID)
 			SpawnerData::strongWeapons.push_back(weaponHash);
 		}
 
-		for (auto & jModel : jModels)
-		{
-			jugModels.push_back(jModel);
-		}
-
 		for (size_t item = 0; item < pedSpawnpointsX.size(); item++)
 		{
 			Vector3 spawnpoint = Vector3();
 			spawnpoint.z = pedSpawnpointsZ.at(item);
 			spawnpoint.x = pedSpawnpointsX.at(item);
 			spawnpoint.y = pedSpawnpointsY.at(item);
-			SpawnerData::enemySpawnpoints.push_back(spawnpoint);
-		}
-
-		for (size_t n = 0; n < vehicleSpawnpointsX.size(); n++)
-		{
-			Vector3 spawnpoint = Vector3();
-			spawnpoint.x = vehicleSpawnpointsX.at(n);
-			spawnpoint.y = vehicleSpawnpointsY.at(n);
-			spawnpoint.z = vehicleSpawnpointsZ.at(n);
-			SpawnerData::vehicleSpawnpoints.push_back(spawnpoint);
-		}
-
-		for (size_t n = 0; n < aircraftSpawnpointsX.size(); n++)
-		{
-			Vector3 spawnpoint = Vector3();
-			spawnpoint.x = aircraftSpawnpointsX.at(n);
-			spawnpoint.y = aircraftSpawnpointsY.at(n);
-			spawnpoint.z = aircraftSpawnpointsZ.at(n);
-			SpawnerData::aircraftSpawnpoints.push_back(spawnpoint);
+			enemySpawnpoints.push_back(spawnpoint);
 		}
 
 		for (size_t n = 0; n < pickupModels.size(); n++)
@@ -472,27 +533,20 @@ void SURVIVAL::LoadSurvival(const std::string& survivalID)
 		for (const auto& model : pedsGroup1)
 		{
             SpawnData data = SpawnData(model, model.find("CUSTOM_") != std::string::npos, model.find("_M") != std::string::npos);
-			SpawnerData::pedsGroup1.push_back(data);
+			pedGroup1.push_back(data);
 		}
 
 		for (const auto& model : pedsGroup2)
 		{
             SpawnData data = SpawnData(model, model.find("CUSTOM_") != std::string::npos, model.find("_M") != std::string::npos);
-			SpawnerData::pedsGroup2.push_back(data);
+			pedGroup2.push_back(data);
 		}
 
 		for (const auto& model : pedsGroup3)
 		{
             SpawnData data = SpawnData(model, model.find("CUSTOM_") != std::string::npos, model.find("_M") != std::string::npos);
-			SpawnerData::pedsGroup3.push_back(data);
+			pedGroup3.push_back(data);
 		}
-
-		SpawnerData::vehiclesGroup1 = vehiclesGroup1;
-		SpawnerData::vehiclesGroup2 = vehiclesGroup2;
-		SpawnerData::vehiclesGroup3 = vehiclesGroup3;
-		SpawnerData::aircraftGroup1 = aircraftGroup1;
-		SpawnerData::aircraftGroup2 = aircraftGroup2;
-		SpawnerData::aircraftGroup3 = aircraftGroup3;
 	}
 	catch (std::exception& e)
 	{
@@ -532,8 +586,8 @@ Ped SURVIVAL::SpawnFreemodeCustom(const std::string& outfit, bool isMale, bool i
 
 	if (!inVehicle)
 	{
-		size_t index = CALC::RanInt(SpawnerData::enemySpawnpoints.size() - (size_t)1, (size_t)0);
-		Vector3 spawnpoint = SpawnerData::enemySpawnpoints.at(index);
+		size_t index = CALC::RanInt(enemySpawnpoints.size() - (size_t)1, (size_t)0);
+		Vector3 spawnpoint = enemySpawnpoints.at(index);
 		ped = PED::CREATE_PED(0, model, spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, false, true);
 	}
 	else
@@ -682,8 +736,8 @@ Ped SURVIVAL::SpawnJuggernaut()
 	{
 		Hash model = INIT::LoadModel(name.c_str());
 		Ped ped;
-		size_t ranInt = CALC::RanInt(SpawnerData::enemySpawnpoints.size() - (size_t)1, (size_t)0);
-		Vector3 spawnpoint = SpawnerData::enemySpawnpoints.at(ranInt);
+		size_t ranInt = CALC::RanInt(enemySpawnpoints.size() - (size_t)1, (size_t)0);
+		Vector3 spawnpoint = enemySpawnpoints.at(ranInt);
 		ped = PED::CREATE_PED(0, model, spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, false, true);
 		STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
 
@@ -693,8 +747,8 @@ Ped SURVIVAL::SpawnJuggernaut()
 
 Ped SURVIVAL::SpawnDog()
 {
-	size_t index = CALC::RanInt(SpawnerData::enemySpawnpoints.size() - (size_t)1, (size_t)0);
-	Vector3 spawnpoint = SpawnerData::enemySpawnpoints.at(index);
+	size_t index = CALC::RanInt(enemySpawnpoints.size() - (size_t)1, (size_t)0);
+	Vector3 spawnpoint = enemySpawnpoints.at(index);
 	Hash model = INIT::LoadModel(dogModel.c_str());
 	Ped ped = PED::CREATE_PED(0, model, spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, false, true);
 	INIT::UnloadModel(model);
@@ -707,8 +761,8 @@ Ped SURVIVAL::SpawnEnemy(int wave, bool canSpawnJesus)
 	if (SpawnerData::hasJesus && canSpawnJesus && (wave >= 7 || SURVIVAL::SurvivalData::hardcore))
 	{
 		Hash model = 0xCE2CB751;
-		size_t index = CALC::RanInt(SpawnerData::enemySpawnpoints.size() - (size_t)1, (size_t)0);
-		Vector3 spawnpoint = SpawnerData::enemySpawnpoints.at(index);
+		size_t index = CALC::RanInt(enemySpawnpoints.size() - (size_t)1, (size_t)0);
+		Vector3 spawnpoint = enemySpawnpoints.at(index);
 		INIT::LoadModel(model);
 		Ped ped = PED::CREATE_PED(0, model, spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, false, true);
 		INIT::UnloadModel(model);
@@ -717,16 +771,16 @@ Ped SURVIVAL::SpawnEnemy(int wave, bool canSpawnJesus)
 	}
 	else
 	{
-		size_t index = CALC::RanInt(SpawnerData::currentPedModels.size() - (size_t)1, (size_t)0);
-		SpawnData data = SpawnerData::currentPedModels.at(index);
+		size_t index = CALC::RanInt(currentPedModels.size() - (size_t)1, (size_t)0);
+		SpawnData data = currentPedModels.at(index);
 
 		if (data.isMp)
 			return SpawnFreemodeCustom(data.modelName, data.isMale);
 		else
 		{
 			Hash model = GAMEPLAY::GET_HASH_KEY((char*)data.modelName.c_str());
-			index = CALC::RanInt(SpawnerData::enemySpawnpoints.size() - (size_t)1, (size_t)0);
-			Vector3 spawnpoint = SpawnerData::enemySpawnpoints.at(index);
+			index = CALC::RanInt(enemySpawnpoints.size() - (size_t)1, (size_t)0);
+			Vector3 spawnpoint = enemySpawnpoints.at(index);
 			INIT::LoadModel(model);
 			Ped ped = PED::CREATE_PED(0, model, spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, false, true);
 			INIT::UnloadModel(model);
@@ -736,24 +790,38 @@ Ped SURVIVAL::SpawnEnemy(int wave, bool canSpawnJesus)
 	}
 }
 
-Vehicle SURVIVAL::SpawnVehicle()
+Vehicle SURVIVAL::SpawnVehicle(bool boat)
 {
-	size_t index = CALC::RanInt(SpawnerData::currentVehicleModels.size() - (size_t)1, (size_t)0);
-	std::string modelName = SpawnerData::currentVehicleModels.at(index);
-	index = CALC::RanInt(SpawnerData::vehicleSpawnpoints.size() - (size_t)1, (size_t)0);
-	Vector3 spawnPoint = SpawnerData::vehicleSpawnpoints.at(index);
+    std::string modelName;
+    Vector3 spawnpoint;
+
+    if (boat)
+    {
+        size_t index = CALC::RanInt(currentBoatModels.size() - (size_t)1, (size_t)0);
+        modelName = currentBoatModels.at(index);
+        index = CALC::RanInt(boatSpawnpoints.size() - (size_t)1, (size_t)0);
+        spawnpoint = boatSpawnpoints.at(index);
+    }
+    else
+    {
+        size_t index = CALC::RanInt(currentVehicleModels.size() - (size_t)1, (size_t)0);
+        modelName = currentVehicleModels.at(index);
+        index = CALC::RanInt(vehicleSpawnpoints.size() - (size_t)1, (size_t)0);
+        spawnpoint = vehicleSpawnpoints.at(index);
+    }
+
 	Hash model = INIT::LoadModel(modelName.c_str());
-	Vehicle vehicle = VEHICLE::CREATE_VEHICLE(model, spawnPoint.x, spawnPoint.y, spawnPoint.z, 0, false, true);
+	Vehicle vehicle = VEHICLE::CREATE_VEHICLE(model, spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, false, true);
 	INIT::UnloadModel(model);
 	return vehicle;
 }
 
 Vehicle SURVIVAL::SpawnAircraft()
 {
-	size_t index = CALC::RanInt(SpawnerData::currentAircraftModels.size() - (size_t)1, (size_t)0);
-	std::string modelName = SpawnerData::currentAircraftModels.at(index);
-	index = CALC::RanInt(SpawnerData::aircraftSpawnpoints.size() - (size_t)1, (size_t)0);
-	Vector3 spawnPoint = SpawnerData::aircraftSpawnpoints.at(index);
+	size_t index = CALC::RanInt(currentAircraftModels.size() - (size_t)1, (size_t)0);
+	std::string modelName = currentAircraftModels.at(index);
+	index = CALC::RanInt(aircraftSpawnpoints.size() - (size_t)1, (size_t)0);
+	Vector3 spawnPoint = aircraftSpawnpoints.at(index);
 	Hash model = INIT::LoadModel(modelName.c_str());
 	Vehicle vehicle = VEHICLE::CREATE_VEHICLE(model, spawnPoint.x, spawnPoint.y, spawnPoint.z, 0, false, true);
 	INIT::UnloadModel(model);
@@ -768,8 +836,8 @@ std::vector<Ped> SURVIVAL::SpawnEnemiesInVehicle(Vehicle vehicle, int wave)
 
 	for (int i = -1; i < seats; i++)
 	{
-		size_t index = CALC::RanInt(SpawnerData::currentPedModels.size() - (size_t)1, (size_t)0);
-		SpawnData data = SpawnerData::currentPedModels.at(index);
+		size_t index = CALC::RanInt(currentPedModels.size() - (size_t)1, (size_t)0);
+		SpawnData data = currentPedModels.at(index);
 
 		if (data.isMp)
 			ped = SpawnFreemodeCustom(data.modelName, data.isMale, true, vehicle, i);
@@ -790,36 +858,40 @@ void SURVIVAL::UpdateModels(int currentWave)
 {
 	if (SurvivalData::hardcore)
 	{
-		SpawnerData::currentAircraftModels = SpawnerData::aircraftGroup3;
-		SpawnerData::currentVehicleModels = SpawnerData::vehiclesGroup3;
-		SpawnerData::currentPedModels = SpawnerData::pedsGroup3;
+		currentAircraftModels = aircraftGroup3;
+		currentVehicleModels = vehiclesGroup3;
+		currentPedModels = pedGroup3;
+        currentBoatModels = boatGroup3;
 	}
 	else
 	{
 		switch (currentWave)
 		{
 			case 1:
-				SpawnerData::currentPedModels = SpawnerData::pedsGroup1;
+				currentPedModels = pedGroup1;
 				break;
 			case 3:
-				SpawnerData::currentVehicleModels = SpawnerData::vehiclesGroup1;
+				currentVehicleModels = vehiclesGroup1;
+                currentBoatModels = boatGroup1;
 				break;
 			case 4:
-				SpawnerData::currentPedModels = SpawnerData::pedsGroup2;
+				currentPedModels = pedGroup2;
 				break;
 			case 5:
-				SpawnerData::currentAircraftModels = SpawnerData::aircraftGroup1;
-				SpawnerData::currentVehicleModels = SpawnerData::vehiclesGroup2;
+				currentAircraftModels = aircraftGroup1;
+				currentVehicleModels = vehiclesGroup2;
+                currentBoatModels = boatGroup2;
 				break;
 			case 6:
-				SpawnerData::currentAircraftModels = SpawnerData::aircraftGroup2;
+				currentAircraftModels = aircraftGroup2;
 				break;
 			case 7:
-				SpawnerData::currentVehicleModels = SpawnerData::vehiclesGroup3;
-				SpawnerData::currentPedModels = SpawnerData::pedsGroup3;
+				currentVehicleModels = vehiclesGroup3;
+				currentPedModels = pedGroup3;
+                currentBoatModels = boatGroup3;
 				break;
 			case 8:
-				SpawnerData::currentAircraftModels = SpawnerData::aircraftGroup3;
+				currentAircraftModels = aircraftGroup3;
 				break;
 			default:
 				break;

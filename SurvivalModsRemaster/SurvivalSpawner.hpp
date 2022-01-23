@@ -17,24 +17,9 @@ namespace SURVIVAL
 	{
 		static Vector3 location;
 		static std::vector<SpawnData> pickups;
-        static std::vector<Vector3> enemySpawnpoints;
-        static std::vector<Vector3> aircraftSpawnpoints;
-        static std::vector<Vector3> vehicleSpawnpoints;
-        static std::vector<SpawnData> pedsGroup1;
-        static std::vector<SpawnData> pedsGroup2;
-        static std::vector<SpawnData> pedsGroup3;
-        static std::vector<std::string> vehiclesGroup1;
-        static std::vector<std::string> vehiclesGroup2;
-        static std::vector<std::string> vehiclesGroup3;
-        static std::vector<std::string> aircraftGroup1;
-        static std::vector<std::string> aircraftGroup2;
-        static std::vector<std::string> aircraftGroup3;
         static std::vector<Hash> weakWeapons;
         static std::vector<Hash> medWeapons;
         static std::vector<Hash> strongWeapons;
-        static std::vector<SpawnData> currentPedModels;
-        static std::vector<std::string> currentAircraftModels;
-        static std::vector<std::string> currentVehicleModels;
         static bool isXmas;
         static bool isHalloween;
         static bool hasJuggernaut;
@@ -43,13 +28,14 @@ namespace SURVIVAL
         static bool hasVehicles;
         static bool hasAircraft;
         static bool hasSuicidal;
+        static bool hasBoats;
 	};
 
     void LoadSurvival(const std::string& survivalID);
     Ped SpawnEnemy(int wave, bool canSpawnJesus);
     Ped SpawnDog();
     Ped SpawnJuggernaut();
-    Vehicle SpawnVehicle();
+    Vehicle SpawnVehicle(bool boat);
     Vehicle SpawnAircraft();
     void UpdateModels(int curretnWave);
     std::vector<Ped> SpawnEnemiesInVehicle(Vehicle vehicle, int wave);

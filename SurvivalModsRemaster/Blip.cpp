@@ -59,7 +59,10 @@ void BLIPS::CreateForEnemyVehicle(Vehicle vehicle)
 	else if (VEHICLE::IS_THIS_MODEL_A_PLANE(model))
 	{
 		UI::SET_BLIP_SPRITE(blipHandle, eBlipSprite::BlipSpritePlane);
-	}
+	} else if (VEHICLE::IS_THIS_MODEL_A_BOAT(model))
+    {
+        UI::SET_BLIP_SPRITE(blipHandle, eBlipSprite::BlipSpriteBoat);
+    }
 
 	UI::SET_BLIP_SCALE(blipHandle, 0.8f);
 	UI::SET_BLIP_COLOUR(blipHandle, eBlipColor::BlipColorRed);

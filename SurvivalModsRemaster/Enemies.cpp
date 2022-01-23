@@ -740,7 +740,8 @@ void ENEMIES::Process()
         {
             if (TIMERS::ProcessVehicleTimer())
             {
-                Vehicle vehicle = SURVIVAL::SpawnVehicle();
+                bool boat = SURVIVAL::SpawnerData::hasBoats && CALC::RanInt(100, 1) <= 20;
+                Vehicle vehicle = SURVIVAL::SpawnVehicle(boat);
                 std::vector<Ped> peds = SURVIVAL::SpawnEnemiesInVehicle(vehicle, SURVIVAL::SurvivalData::CurrentWave);
 
                 for (size_t i = 0; i < peds.size(); i++)
