@@ -12,7 +12,6 @@ std::vector<Blip> TriggerPedsData::blips;
 std::vector<bool> TriggerPedsData::timerActive;
 std::vector<bool> TriggerPedsData::killedFlags;
 std::vector<int> TriggerPedsData::starTime;
-std::vector<std::string> tasks;
 int Data::intermissionDuration;
 Controls Data::infiniteWaveControl;
 Controls Data::timedSurvivalControl;
@@ -25,7 +24,6 @@ int cancelStartTime;
 int cancelCurrentTime;
 Hash Data::enemiesRelGroup;
 Hash Data::neutralRelGroup;
-bool initialized = false;
 nlohmann::json j;
 int Data::TPIndex;
 
@@ -264,6 +262,8 @@ void ProcessTriggerPeds()
     }
 }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
 int main()
 {
     while (DLC2::GET_IS_LOADING_SCREEN_ACTIVE())
@@ -301,10 +301,10 @@ int main()
         }
 
         ControlsWatch();
-
         WAIT(0);
     }
 }
+#pragma clang diagnostic pop
 
 void ScriptMain()
 {

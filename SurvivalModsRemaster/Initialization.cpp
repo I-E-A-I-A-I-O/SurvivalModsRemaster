@@ -80,8 +80,11 @@ Ped INIT::SpawnTriggerPed(size_t index)
     EntityPosition pos = TriggerPedsData::positions.at(index);
     Hash model = LoadModel(TriggerPedsData::models.at(index).c_str());
     Ped handle = PED::CREATE_PED(0, model, pos.coords.x, pos.coords.y, pos.coords.z, pos.heading, false, true);
-    ENTITY::SET_ENTITY_LOAD_COLLISION_FLAG(handle, true);
     UnloadModel(model);
+    ENTITY::SET_ENTITY_LOAD_COLLISION_FLAG(handle, true);
+    float zCoord;
+    GAMEPLAY::GET_GROUND_Z_FOR_3D_COORD(pos.coords.x, pos.coords.y, pos.coords.z, &zCoord, 0);
+    ENTITY::SET_ENTITY_COORDS(handle, pos.coords.x, pos.coords.y, zCoord, 1, 0, 0, 1);
 
     switch (model)
     {

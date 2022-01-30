@@ -6,14 +6,25 @@
 
 namespace UIScript
 {
+    enum class ScaleformType: int {
+        WAVE_SURVIVED,
+        SURVIVAL_CANCELED,
+        SURVIVAL_PASSED,
+        PLAYER_DIED,
+        SURVIVAL_START,
+        PICKUPS_REGEN,
+        DIFFICULTY_INC,
+        SURVIVAL_PASSED_TIMED
+    };
+
 	struct Data
 	{
 		static bool showScaleform;
-		static int scaleformType;
+		static ScaleformType scaleformType;
 		static bool pendingNoti;
-		static std::string notiText;
 	};
 
+    void Clean();
 	void ScriptMain();
 	void OnAbort();
 }

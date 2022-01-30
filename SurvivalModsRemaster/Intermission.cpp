@@ -7,21 +7,25 @@ void INTERMISSION::Start()
 {
     GRAPHICS::_START_SCREEN_EFFECT((char*)"SuccessNeutral", 0, false);
     Data::Active = true;
-    UIScript::Data::showScaleform = true;
 
     if (!SURVIVAL::SurvivalData::timed)
     {
-        UIScript::Data::scaleformType = 0;
+        if (SURVIVAL::SurvivalData::CurrentWave == 0)
+            UIScript::Data::scaleformType = UIScript::ScaleformType::SURVIVAL_START;
+        else
+            UIScript::Data::scaleformType = UIScript::ScaleformType::WAVE_SURVIVED;
     }
     else
     {
         if (SURVIVAL::SurvivalData::CurrentWave == 0)
-            UIScript::Data::scaleformType = 0;
+            UIScript::Data::scaleformType = UIScript::ScaleformType::SURVIVAL_START;
         else if (SURVIVAL::SurvivalData::CurrentWave < 10)
-            UIScript::Data::scaleformType = 4;
+            UIScript::Data::scaleformType = UIScript::ScaleformType::DIFFICULTY_INC;
         else
-            UIScript::Data::scaleformType = 5;
+            UIScript::Data::scaleformType = UIScript::ScaleformType::PICKUPS_REGEN;
     }
+
+    UIScript::Data::showScaleform = true;
 
     if (SURVIVAL::SurvivalData::CurrentWave > 0 && !SURVIVAL::SurvivalData::timed)
     {

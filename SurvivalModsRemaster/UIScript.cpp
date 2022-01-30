@@ -2,10 +2,9 @@
 #include "UIScript.hpp"
 
 bool UIScript::Data::pendingNoti;
-std::string UIScript::Data::notiText;
 bool UIScript::Data::showScaleform;
-int UIScript::Data::scaleformType;
-int scaleform = 0;
+UIScript::ScaleformType UIScript::Data::scaleformType;
+std::vector<int> scaleformHandles = std::vector<int>();
 int scaleformST;
 bool scaleformRequested;
 bool scaleformFading;
@@ -25,9 +24,24 @@ bool ShowTimeLeft()
 	return SURVIVAL::SurvivalData::IsActive && SURVIVAL::SurvivalData::Started && !INTERMISSION::Data::Active && SURVIVAL::SurvivalData::timed;
 }
 
+void UIScript::Clean() {
+    UIScript::Data::showScaleform = false;
+    scaleformRequested = false;
+    scaleformFading = false;
+
+    for (const int& handle : scaleformHandles) {
+        SCREEN::FreeScaleform(handle);
+    }
+
+    scaleformHandles.clear();
+}
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
 void UIScriptMain()
 {
-	SCREEN::LoadSprites();
+    while (DLC2::GET_IS_LOADING_SCREEN_ACTIVE())
+        WAIT(1);
 
 	while (true)
 	{
@@ -36,9 +50,7 @@ void UIScriptMain()
 			if (CAM::IS_SCREEN_FADED_IN() && !PLAYER::IS_PLAYER_DEAD(PLAYER::PLAYER_ID()))
 			{
 				UIScript::Data::showScaleform = true;
-				SCREEN::ShowNotification(UIScript::Data::notiText.c_str());
 				UIScript::Data::pendingNoti = false;
-				UIScript::Data::notiText = "";
 			}
 		}
 
@@ -52,89 +64,87 @@ void UIScriptMain()
 			if (!scaleformRequested)
 			{
 				scaleformRequested = true;
-				scaleform = SCREEN::RequestScaleform();
 				char title[150];
 				char subtitle[100];
 
 				switch (UIScript::Data::scaleformType)
 				{
-					case 0:
-						if (SURVIVAL::SurvivalData::CurrentWave == 0)
-						{
-							strcpy_s(title, "~y~");
-							strcat_s(title, SURVIVAL::SurvivalData::MissionID.c_str());
-							strcpy_s(subtitle, "Mode: ");
+                    case UIScript::ScaleformType::SURVIVAL_START: {
+                        scaleformHandles.push_back(SCREEN::RequestScaleform());
+                        int h = scaleformHandles.at(0);
+                        strcpy_s(title, "~y~");
+                        strcat_s(title, SURVIVAL::SurvivalData::MissionID.c_str());
+                        strcpy_s(subtitle, "Mode: ");
 
-							if (SURVIVAL::SurvivalData::timed)
-								strcat_s(subtitle, "Timed survival.");
-							else if (SURVIVAL::SurvivalData::hardcore)
-								strcat_s(subtitle, "Hardcore survival.");
-							else if (SURVIVAL::SurvivalData::InfiniteWaves)
-								strcat_s(subtitle, "Endless waves survival.");
-							else
-								strcat_s(subtitle, "Ten waves survival.");
-						}
-						else
-						{
-							strcpy_s(title, "~y~wave ");
-							strcat_s(title, std::to_string(SURVIVAL::SurvivalData::CurrentWave).c_str());
-							strcat_s(title, " survived");
-							strcpy_s(subtitle, "Prepare for the next wave.");
-							AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"MP_WAVE_COMPLETE", (char*)"HUD_FRONTEND_DEFAULT_SOUNDSET", true);
-						}
+                        if (SURVIVAL::SurvivalData::timed)
+                            strcat_s(subtitle, "Timed survival.");
+                        else if (SURVIVAL::SurvivalData::hardcore)
+                            strcat_s(subtitle, "Hardcore survival.");
+                        else if (SURVIVAL::SurvivalData::InfiniteWaves)
+                            strcat_s(subtitle, "Endless waves survival.");
+                        else
+                            strcat_s(subtitle, "Ten waves survival.");
 
-						SCREEN::SetScaleformText(scaleform, title, subtitle);
-						break;
-					case 1:
-						strcpy_s(title, "~y~survival passed");
-						strcpy_s(subtitle, "");
-						SCREEN::SetScaleformTextPassed(scaleform, title, subtitle);
-						AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"BASE_JUMP_PASSED", (char*)"HUD_AWARDS", true);
-						break;
-					case 2:
-						strcpy_s(title, "~r~survival canceled");
-						strcpy_s(subtitle, "");
-						SCREEN::SetScaleformText(scaleform, title, subtitle);
-						AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"Survival_Failed", (char*)"DLC_VW_AS_Sounds", true);
-						break;
-					case 3:
-						strcpy_s(title, "~r~survival failed");
-						strcpy_s(subtitle, "");
-						SCREEN::SetScaleformText(scaleform, title, subtitle);
-						AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"Survival_Failed", (char*)"DLC_VW_AS_Sounds", true);
-						break;
-					case 4:
-						strcpy_s(title, "~y~difficulty increased");
-						strcpy_s(subtitle, "Pickups regenerated.");
-						SCREEN::SetScaleformText(scaleform, title, subtitle);
-						break;
-					case 5:
-						strcpy_s(title, "~y~Pickups regenerated");
-						strcpy_s(subtitle, "");
-						SCREEN::SetScaleformText(scaleform, title, subtitle);
-						break;
-					case 6:
+                        SCREEN::SetScaleformText(h, title, subtitle);
+                        break;
+                    }
+					case UIScript::ScaleformType::SURVIVAL_PASSED: {
+                        AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"BASE_JUMP_PASSED", (char*)"HUD_AWARDS", true);
+                        scaleformHandles = SCREEN::LoadWallStat(SURVIVAL::SurvivalData::earnedMoney,
+                                0,0,true,true,false,false);
+                        break;
+                    }
+					case UIScript::ScaleformType::SURVIVAL_CANCELED: {
+                        scaleformHandles.push_back(SCREEN::RequestScaleform());
+                        int h = scaleformHandles.at(0);
+                        strcpy_s(title, "~r~survival canceled");
+                        strcpy_s(subtitle, "");
+                        SCREEN::SetScaleformText(h, title, subtitle);
+                        AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"Survival_Failed", (char*)"DLC_VW_AS_Sounds", true);
+                        break;
+                    }
+					case UIScript::ScaleformType::PLAYER_DIED: {
+                        AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"Survival_Failed", (char*)"DLC_VW_AS_Sounds", true);
+                        scaleformHandles = SCREEN::LoadWallStat(SURVIVAL::SurvivalData::earnedMoney,
+                                                                SURVIVAL::SurvivalData::CurrentWave,
+                                                                0,false,true,
+                                                                false,false);
+                        break;
+                    }
+					case UIScript::ScaleformType::DIFFICULTY_INC: {
+                        scaleformHandles.push_back(SCREEN::RequestScaleform());
+                        int h = scaleformHandles.at(0);
+                        strcpy_s(title, "~y~difficulty increased");
+                        strcpy_s(subtitle, "Pickups regenerated.");
+                        SCREEN::SetScaleformText(h, title, subtitle);
+                        break;
+                    }
+					case UIScript::ScaleformType::PICKUPS_REGEN: {
+                        scaleformHandles.push_back(SCREEN::RequestScaleform());
+                        int h = scaleformHandles.at(0);
+                        strcpy_s(title, "~y~Pickups regenerated");
+                        strcpy_s(subtitle, "");
+                        SCREEN::SetScaleformText(h, title, subtitle);
+                        break;
+                    }
+					case UIScript::ScaleformType::SURVIVAL_PASSED_TIMED:
 					{
-						strcpy_s(title, "~y~survival ended");
 						int total = TIMERS::TimedSurvival::CurrentTime - TIMERS::TimedSurvival::StartTime;
-						int val = total / 1000 / 60;
-						strcpy_s(subtitle, "Time survived: ");
-
-						if (val < 10)
-							strcat_s(subtitle, "0");
-
-						strcat_s(subtitle, std::to_string(val).c_str());
-						strcat_s(subtitle, ":");
-						val = total / 1000 % 60;
-
-						if (val < 10)
-							strcat_s(subtitle, "0");
-
-						strcat_s(subtitle, std::to_string(val).c_str());
-						SCREEN::SetScaleformTextPassed(scaleform, title, subtitle);
 						AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"Survival_Passed", (char*)"DLC_VW_Survival_Sounds", true);
-						break;
+                        scaleformHandles = SCREEN::LoadWallStat(SURVIVAL::SurvivalData::earnedMoney,
+                                                                0,
+                                                                total,true,true,
+                                                                false,true);
+                        break;
 					}
+                    case UIScript::ScaleformType::WAVE_SURVIVED: {
+                        AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"MP_WAVE_COMPLETE", (char*)"HUD_FRONTEND_DEFAULT_SOUNDSET", true);
+                        scaleformHandles = SCREEN::LoadWallStat(SURVIVAL::SurvivalData::earnedMoney,
+                                                                SURVIVAL::SurvivalData::CurrentWave,
+                                                                0,false,false,
+                                                                true,false);
+                        break;
+                    }
 					default:
 						break;
 				}
@@ -142,21 +152,40 @@ void UIScriptMain()
 				scaleformST = GAMEPLAY::GET_GAME_TIMER();
 			}
 
-			GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(scaleform, 255, 255, 0, 255, 0);
+            if (scaleformHandles.size() > (size_t)1) {
+                for (const int& handle: scaleformHandles) {
+                    GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(handle, 255, 255, 0, 255, 0);
 
-			if (GAMEPLAY::GET_GAME_TIMER() - scaleformST >= 8000 && !scaleformFading)
-			{
-				scaleformFading = true;
-				SCREEN::FadeOutScaleform(scaleform, 2000);
-				scaleformST = GAMEPLAY::GET_GAME_TIMER();
-			}
-			else if (GAMEPLAY::GET_GAME_TIMER() - scaleformST >= 2000 && scaleformFading)
-			{
-				UIScript::Data::showScaleform = false;
-				scaleformRequested = false;
-				scaleformFading = false;
-				SCREEN::FreeScaleform(scaleform);
-			}
+                    if (GAMEPLAY::GET_GAME_TIMER() - scaleformST >= 15000)
+                    {
+                        UIScript::Data::showScaleform = false;
+                        scaleformRequested = false;
+                        scaleformFading = false;
+                        SCREEN::FreeScaleform(handle);
+                    }
+                }
+
+                if (!UIScript::Data::showScaleform)
+                    scaleformHandles.clear();
+            } else {
+                int handle = scaleformHandles.at(0);
+                GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(handle, 255, 255, 0, 255, 0);
+
+                if (GAMEPLAY::GET_GAME_TIMER() - scaleformST >= 8000 && !scaleformFading)
+                {
+                    scaleformFading = true;
+                    SCREEN::FadeOutScaleform(handle, 2000);
+                    scaleformST = GAMEPLAY::GET_GAME_TIMER();
+                }
+                else if (GAMEPLAY::GET_GAME_TIMER() - scaleformST >= 2000 && scaleformFading)
+                {
+                    UIScript::Data::showScaleform = false;
+                    scaleformRequested = false;
+                    scaleformFading = false;
+                    SCREEN::FreeScaleform(handle);
+                    scaleformHandles.clear();
+                }
+            }
 		}
 
 		if (ShowCount())
@@ -177,6 +206,7 @@ void UIScriptMain()
 		WAIT(0);
 	}
 }
+#pragma clang diagnostic pop
 
 void UIScript::ScriptMain()
 {
@@ -187,8 +217,9 @@ void UIScript::OnAbort()
 {
 	SCREEN::UnloadSprites();
 	Data::pendingNoti = false;
-	Data::notiText = (char*)"";
 
-	if (scaleform != 0)
-		SCREEN::FreeScaleform(scaleform);
+    for (const auto& scaleform : scaleformHandles) {
+        if (scaleform != 0)
+            SCREEN::FreeScaleform(scaleform);
+    }
 }

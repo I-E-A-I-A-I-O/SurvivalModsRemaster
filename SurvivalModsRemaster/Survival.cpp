@@ -11,6 +11,7 @@ int SURVIVAL::SurvivalData::MaxWaveSize;
 bool SURVIVAL::SurvivalData::Triggered;
 bool SURVIVAL::SurvivalData::Started;
 bool SURVIVAL::SurvivalData::timed;
+int SURVIVAL::SurvivalData::earnedMoney;
 int SURVIVAL::SurvivalData::timedTimeLeft;
 bool SURVIVAL::SurvivalData::cheated;
 bool SURVIVAL::SurvivalData::hardcore;
@@ -208,20 +209,22 @@ void SURVIVAL::ProcessSurvival()
 void SURVIVAL::GiveReward(bool playerDied)
 {
 	int reward = 0;
+    SurvivalData::earnedMoney = 0;
+
+    if (UIScript::Data::showScaleform)
+        UIScript::Clean();
+
+    if (SurvivalData::timed) {
+        UIScript::Data::scaleformType = UIScript::ScaleformType::SURVIVAL_PASSED_TIMED;
+    } else if (playerDied) {
+        UIScript::Data::scaleformType = UIScript::ScaleformType::PLAYER_DIED;
+    } else {
+        UIScript::Data::scaleformType = UIScript::ScaleformType::SURVIVAL_PASSED;
+    }
 
 	if (SurvivalData::cheated)
 	{
-		std::string notification;
-		notification.append("Survival ended at wave ");
-		notification.append(std::to_string(SurvivalData::CurrentWave));
-		notification.append(". Reward: ~g~$");
-		notification.append(std::to_string(reward));
 		UIScript::Data::pendingNoti = true;
-		
-		if (!UIScript::Data::showScaleform)
-			UIScript::Data::scaleformType = SurvivalData::timed ? 6 : 3;
-
-		UIScript::Data::notiText = notification;
 		return;
 	}
 
@@ -247,17 +250,7 @@ void SURVIVAL::GiveReward(bool playerDied)
 	}
 	else
 	{
-		std::string notification;
-		notification.append("Survival ended at wave ");
-		notification.append(std::to_string(SurvivalData::CurrentWave));
-		notification.append(". Reward: ~g~$");
-		notification.append(std::to_string(reward));
 		UIScript::Data::pendingNoti = true;
-		
-		if (!UIScript::Data::showScaleform)
-			UIScript::Data::scaleformType = SurvivalData::timed ? 6 : 3;
-
-		UIScript::Data::notiText = notification;
 		return;
 	}
 
@@ -290,17 +283,8 @@ void SURVIVAL::GiveReward(bool playerDied)
 		reward += bonus;
 	}
 
-	std::string notification;
-	notification.append("Survival ended at wave ");
-	notification.append(std::to_string(SurvivalData::CurrentWave));
-	notification.append(". Reward: ~g~$");
-	notification.append(std::to_string(reward));
+    SurvivalData::earnedMoney = reward;
 	UIScript::Data::pendingNoti = true;
-
-	if (!UIScript::Data::showScaleform)
-		UIScript::Data::scaleformType = SurvivalData::timed ? 6 : 3;
-
-	UIScript::Data::notiText = notification;
 	STATS::STAT_SET_INT(stat, playerMoney + reward, 1);
 }
 
@@ -308,8 +292,6 @@ void SURVIVAL::CompleteSurvival()
 {
 	MUSIC::MissionCompletedSound();
     GRAPHICS::_START_SCREEN_EFFECT((char*)"MinigameEndNeutral", 0, false);
-	UIScript::Data::showScaleform = true;
-	UIScript::Data::scaleformType = 1;
 	GiveReward(false);
 	PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(PLAYER::PLAYER_ID(), true);
 	ENEMIES::ClearVectors();
@@ -347,9 +329,9 @@ void SURVIVAL::QuitSurvival(bool playerDied)
 	else
 	{
 		if (SurvivalData::timed && TIMERS::TimedSurvival::timeLeft <= 0)
-			UIScript::Data::scaleformType = 6;
+			UIScript::Data::scaleformType = UIScript::ScaleformType::SURVIVAL_PASSED_TIMED;
 		else
-			UIScript::Data::scaleformType = 2;
+			UIScript::Data::scaleformType = UIScript::ScaleformType::SURVIVAL_CANCELED;
 
 		UIScript::Data::showScaleform = true;
 	}

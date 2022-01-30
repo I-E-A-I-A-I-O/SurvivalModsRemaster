@@ -135,12 +135,12 @@ void SCREEN::ShowTimeLeftBadge(int time)
 	DrawBadge(title, content, red, 0);
 }
 
-void SCREEN::ShowHelpTextThisFrame(const char* text, bool beep)
+/*void SCREEN::ShowHelpTextThisFrame(const char* text, bool beep)
 {
 	UI::_SET_TEXT_COMPONENT_FORMAT((char*)"STRING");
 	UI::_ADD_TEXT_COMPONENT_STRING((char*)text);
 	UI::_DISPLAY_HELP_TEXT_FROM_STRING_LABEL(0, 0, beep, 0);
-}
+}*/
 
 void SCREEN::ShowSubtitle(const char* text, int time)
 {
@@ -154,11 +154,6 @@ void SCREEN::ShowNotification(const char* text)
 	UI::_SET_NOTIFICATION_TEXT_ENTRY((char*)"STRING");
 	UI::_ADD_TEXT_COMPONENT_STRING((char*)text);
 	UI::_DRAW_NOTIFICATION(1, 1);
-}
-
-void SCREEN::DrawMarker(int type, Vector3 position, Vector3 scale)
-{
-	GRAPHICS::DRAW_MARKER(type, position.x, position.y, position.z, 0, 0, 1, 0, 0, 0, scale.x, scale.y, scale.z, 255, 255, 0, 100, false, false, 2, false, NULL, NULL, false);
 }
 
 void SCREEN::LoadSprites()
@@ -238,6 +233,116 @@ int SCREEN::RequestScaleform()
 	return handle;
 }
 
+int CreateWallBG(bool doCash, bool time) {
+    int handle = GRAPHICS::REQUEST_SCALEFORM_MOVIE((char*)"mp_celebration_bg");
+
+    while (!GRAPHICS::HAS_SCALEFORM_MOVIE_LOADED(handle))
+        WAIT(1);
+
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(handle, (char*)"CREATE_STAT_WALL");
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(5);
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_STRING((char*)"HUD_COLOUR_BLACK");
+    GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
+
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(handle, (char*)"ADD_WAVE_REACHED_TO_WALL");
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(5);
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_STRING((char*)"a");
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_STRING((char*)"CELEB_FAILED");
+    GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
+
+    if (time) {
+        GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(handle, (char*)"ADD_TIME_TO_WALL");
+        GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(5);
+        GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(10000);
+        GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_STRING((char*)"CELEB_TIME");
+        GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
+    }
+
+    if (doCash) {
+        GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(handle, (char*)"ADD_CASH_TO_WALL");
+        GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(5);
+        GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(5000);
+        GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
+    }
+
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(handle, (char*)"ADD_BACKGROUND_TO_WALL");
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(5);
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(75);
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(2);
+    GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
+
+    return handle;
+}
+
+int CreateWallFG(int cash, int wave, int milis, bool passed, bool doCash, bool isWave, bool time) {
+    char text[70];
+    char label[70];
+
+    if (passed || time) {
+        strcpy_s(text, "PASSED");
+    } else {
+        strcpy_s(text, "WAVE ");
+        strcat_s(text, std::to_string(wave).c_str());
+    }
+
+    if (passed || time) {
+        strcpy_s(label, "CELEB_SURVIVAL");
+    } else {
+        if (isWave) {
+            strcpy_s(label, "CELEB_SURVIVED");
+        } else {
+            strcpy_s(label, "CELEB_REACHED");
+        }
+    }
+
+    int handleB = GRAPHICS::REQUEST_SCALEFORM_MOVIE((char*)"mp_celebration");
+
+    while (!GRAPHICS::HAS_SCALEFORM_MOVIE_LOADED(handleB))
+        WAIT(1);
+
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(handleB, (char*)"CREATE_STAT_WALL");
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(6);
+    GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
+
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(handleB, (char*)"ADD_WAVE_REACHED_TO_WALL");
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(6);
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_STRING(text);
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_STRING(label);
+    GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
+
+    if (time) {
+        GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(handleB, (char*)"ADD_TIME_TO_WALL");
+        GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(6);
+        GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(milis);
+        GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_STRING((char*)"CELEB_TIME");
+        GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
+    }
+
+    if (doCash) {
+        GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(handleB, (char*)"ADD_CASH_TO_WALL");
+        GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(6);
+        GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(cash);
+        GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
+    }
+
+    return handleB;
+}
+
+std::vector<int> SCREEN::LoadWallStat(int cash, int wave, int milis, bool passed, bool doCash, bool isWave, bool time) {
+    int fgHandle = CreateWallFG(cash, wave, milis, passed , doCash, isWave, time);
+    int bgHandle = CreateWallBG(doCash, time);
+
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(bgHandle, (char*)"SHOW_STAT_WALL");
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(5);
+    GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
+
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(fgHandle, (char*)"SHOW_STAT_WALL");
+    GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(6);
+    GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
+
+    return std::vector<int> { bgHandle, fgHandle };
+}
+
 void SCREEN::SetScaleformText(int scaleform, const char* title, const char* subtitle)
 {
 	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(scaleform, (char*)"SHOW_SHARD_CENTERED_TOP_MP_MESSAGE");
@@ -256,15 +361,6 @@ void SCREEN::SetScaleformTextPassed(int scaleform, const char* title, const char
 	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_BOOL(true);
 	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(0);
 	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_BOOL(true);
-	GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
-}
-
-void SCREEN::SetScaleformTextFailed(int scaleform, const char* title, const char* subtitle)
-{
-	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(scaleform, (char*)"SHOW_MISSION_END_MP_MESSAGE");
-	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_STRING((char*)title);
-	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_STRING((char*)subtitle);
-	GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(5);
 	GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
 }
 
