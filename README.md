@@ -37,6 +37,8 @@ Extract the compressed file and copy the contents to your GTA V directory
 - Altruist Camp Survival
 - Cargo Survival
 - Vanilla Unicorn Survival
+- Bunker Survival
+- Nuclear Silo Survival
 
 
 # How to start a survival
