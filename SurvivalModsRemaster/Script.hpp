@@ -59,7 +59,7 @@ struct TriggerPedsData
 			Ped ped = peds.at(i);
 
 			if (blip != 0)
-				UI::REMOVE_BLIP(&blip);
+				HUD::REMOVE_BLIP(&blip);
 
 			if (ped != 0)
 				ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);

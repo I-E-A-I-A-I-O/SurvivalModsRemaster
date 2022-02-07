@@ -64,7 +64,7 @@ void INIT::LoadModel(Hash model)
 
 Hash INIT::LoadModel(const char* modelName)
 {
-    Hash modelHash = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+    Hash modelHash = MISC::GET_HASH_KEY(modelName);
     STREAMING::REQUEST_MODEL(modelHash);
 
     while (!STREAMING::HAS_MODEL_LOADED(modelHash))
@@ -81,9 +81,9 @@ Ped INIT::SpawnTriggerPed(size_t index)
     Hash model = LoadModel(TriggerPedsData::models.at(index).c_str());
     Ped handle = PED::CREATE_PED(0, model, pos.coords.x, pos.coords.y, pos.coords.z, pos.heading, false, true);
     UnloadModel(model);
-    ENTITY::SET_ENTITY_LOAD_COLLISION_FLAG(handle, true);
+    ENTITY::SET_ENTITY_LOAD_COLLISION_FLAG(handle, true, true);
     float zCoord;
-    GAMEPLAY::GET_GROUND_Z_FOR_3D_COORD(pos.coords.x, pos.coords.y, pos.coords.z, &zCoord, 0);
+    MISC::GET_GROUND_Z_FOR_3D_COORD(pos.coords.x, pos.coords.y, pos.coords.z, &zCoord, 0, 0);
     ENTITY::SET_ENTITY_COORDS(handle, pos.coords.x, pos.coords.y, zCoord, 1, 0, 0, 1);
 
     switch (model)
@@ -109,6 +109,6 @@ Ped INIT::SpawnTriggerPed(size_t index)
 
     PED::SET_PED_RELATIONSHIP_GROUP_HASH(handle, Data::neutralRelGroup);
     WEAPON::GIVE_WEAPON_TO_PED(handle, eWeapon::WeaponPistol, 100, true, false);
-    AI::TASK_START_SCENARIO_IN_PLACE(handle, (char*)TriggerPedsData::tasks.at(index).c_str(), 0, true);
+    TASK::TASK_START_SCENARIO_IN_PLACE(handle, TriggerPedsData::tasks.at(index).c_str(), 0, true);
     return handle;
 }

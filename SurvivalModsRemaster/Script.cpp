@@ -26,46 +26,72 @@ Hash Data::enemiesRelGroup;
 Hash Data::neutralRelGroup;
 nlohmann::json j;
 int Data::TPIndex;
+bool tpPointsEnabled;
+int playerId;
 
-void SetAllies()
-{
+/*struct TPPoint {
+    float x;
+    float y;
+    float z;
+
+    TPPoint(float x, float y, float z) {
+        this->x = x;
+        this->y = y;
+        this->z = z;
+    }
+};*/
+
+/*enum eMarkers {
+    BunkerEntrance,
+    BunkerExit,
+    LabEntrance,
+    LabExit
+};*/
+
+/*static std::vector<TPPoint> teleportPoints = std::vector<TPPoint>{
+        TPPoint(1571.56f, 2225.47f, 77.32f),
+        TPPoint(895.4349f, -3245.51123f, -99.25251f),
+        TPPoint(456.766663f, 5571.864f, 780.1841f),
+        TPPoint(244.57f, 6163.39f, -160.42f),
+};*/
+
+static std::vector<Blip> entranceBlips = std::vector<Blip>();
+
+void SetAllies() {
     size_t size = TriggerPedsData::allies.size();
     std::string name = TriggerPedsData::names.at(Data::TPIndex);
 
-    for (size_t i = 0; i < size; i++)
-    {
+    for (size_t i = 0; i < size; i++) {
         SurvivalAllies ally = TriggerPedsData::allies.at(i);
 
-        if (ally.MissionID == name)
-        {
-            PED::SET_RELATIONSHIP_BETWEEN_GROUPS(1, Data::neutralRelGroup, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()));
-            PED::SET_RELATIONSHIP_BETWEEN_GROUPS(1, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()), Data::neutralRelGroup);
+        if (ally.MissionID == name) {
+            PED::SET_RELATIONSHIP_BETWEEN_GROUPS(1, Data::neutralRelGroup,
+                                                 MISC::GET_HASH_KEY(ally.RelGroupName.c_str()));
+            PED::SET_RELATIONSHIP_BETWEEN_GROUPS(1, MISC::GET_HASH_KEY(ally.RelGroupName.c_str()),
+                                                 Data::neutralRelGroup);
         }
     }
 }
 
-void ClearAllies(bool all = false)
-{
+void ClearAllies(bool all = false) {
     size_t size = TriggerPedsData::allies.size();
     std::string name = TriggerPedsData::names.at(Data::TPIndex);
 
-    for (size_t i = 0; i < size; i++)
-    {
+    for (size_t i = 0; i < size; i++) {
         SurvivalAllies ally = TriggerPedsData::allies.at(i);
 
-        if (ally.MissionID == name || all)
-        {
-            PED::SET_RELATIONSHIP_BETWEEN_GROUPS(3, Data::neutralRelGroup, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()));
-            PED::SET_RELATIONSHIP_BETWEEN_GROUPS(3, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()), Data::neutralRelGroup);
+        if (ally.MissionID == name || all) {
+            PED::SET_RELATIONSHIP_BETWEEN_GROUPS(3, Data::neutralRelGroup,
+                                                 MISC::GET_HASH_KEY(ally.RelGroupName.c_str()));
+            PED::SET_RELATIONSHIP_BETWEEN_GROUPS(3, MISC::GET_HASH_KEY(ally.RelGroupName.c_str()),
+                                                 Data::neutralRelGroup);
         }
     }
 }
 
-void IsPlayerInMissionStartRange()
-{
-    if (SURVIVAL::SurvivalData::IsActive || PLAYER::GET_PLAYER_WANTED_LEVEL(PLAYER::PLAYER_ID()) > 1 
-        || GAMEPLAY::GET_MISSION_FLAG())
-    {
+void IsPlayerInMissionStartRange() {
+    if (SURVIVAL::SurvivalData::IsActive || PLAYER::GET_PLAYER_WANTED_LEVEL(playerId) > 1
+        || MISC::GET_MISSION_FLAG()) {
         Data::showControls = false;
         canStart = false;
         return;
@@ -74,23 +100,21 @@ void IsPlayerInMissionStartRange()
     Vector3 playerPosition = ENTITY::GET_ENTITY_COORDS(PLAYER::PLAYER_PED_ID(), true);
     size_t size = TriggerPedsData::peds.size();
 
-    for (int i = 0; i < size; i++)
-    {
-        if (CALC::IsInRange_2(playerPosition, TriggerPedsData::positions.at(i).coords, 80.0f))
-        {
+    for (int i = 0; i < size; i++) {
+        if (CALC::IsInRange_2(playerPosition, TriggerPedsData::positions.at(i).coords, 80.0f)) {
             Data::TPIndex = i;
             canStart = true;
 
             Ped ped = TriggerPedsData::peds.at(i);
 
-            if (ped == 0)
-            {
+            if (ped == 0) {
                 Data::showControls = false;
                 return;
             }
 
             Vector3 coords = ENTITY::GET_ENTITY_COORDS(ped, false);
-            Data::showControls = CALC::IsInRange_2(playerPosition, coords, 4.5f) && !PED::IS_PED_IN_ANY_VEHICLE(PLAYER::PLAYER_PED_ID(), false);
+            Data::showControls = CALC::IsInRange_2(playerPosition, coords, 4.5f) &&
+                                 !PED::IS_PED_IN_ANY_VEHICLE(PLAYER::PLAYER_PED_ID(), false);
             return;
         }
     }
@@ -99,23 +123,23 @@ void IsPlayerInMissionStartRange()
     canStart = false;
 }
 
-void ReadConfig()
-{
+void ReadConfig() {
     std::ifstream i("SurvivalsData\\config.json");
     i >> j;
     i.close();
 
     Data::intermissionDuration = j["Gameplay"]["IntermissionDuration"];
+    //tpPointsEnabled = j["Gameplay"]["TPMarkers"];
     Data::infiniteWaveControl = static_cast<Controls>(j["Controls"]["StartInfiniteWaves"]);
     Data::timedSurvivalControl = static_cast<Controls>(j["Controls"]["StartTimedSurvival"]);
     Data::cancelControl = static_cast<Controls>(j["Controls"]["CancelSurvival"]);
     Data::reloadTriggerPedsControl = static_cast<Controls>(j["Controls"]["ReloadTriggerPeds"]);
     Data::hardcoreSurvivalControl = static_cast<Controls>(j["Controls"]["StartHardcoreSurvival"]);
 
-    Hash playerGroupHash = GAMEPLAY::GET_HASH_KEY((char*)"PLAYER");
-    Hash cougarGroupHash = GAMEPLAY::GET_HASH_KEY((char*)"COUGAR");
-    PED::ADD_RELATIONSHIP_GROUP((char*)"SURVIVAL_MISSION_ENEMIES_REL_GROUP", &Data::enemiesRelGroup);
-    PED::ADD_RELATIONSHIP_GROUP((char*)"SURVIVAL_MISSION_TRIGGER_REL_GROUP", &Data::neutralRelGroup);
+    Hash playerGroupHash = MISC::GET_HASH_KEY("PLAYER");
+    Hash cougarGroupHash = MISC::GET_HASH_KEY("COUGAR");
+    PED::ADD_RELATIONSHIP_GROUP("SURVIVAL_MISSION_ENEMIES_REL_GROUP", &Data::enemiesRelGroup);
+    PED::ADD_RELATIONSHIP_GROUP("SURVIVAL_MISSION_TRIGGER_REL_GROUP", &Data::neutralRelGroup);
     PED::SET_RELATIONSHIP_BETWEEN_GROUPS(5, Data::enemiesRelGroup, playerGroupHash);
     PED::SET_RELATIONSHIP_BETWEEN_GROUPS(5, playerGroupHash, Data::enemiesRelGroup);
     PED::SET_RELATIONSHIP_BETWEEN_GROUPS(0, Data::enemiesRelGroup, cougarGroupHash);
@@ -126,58 +150,106 @@ void ReadConfig()
     INIT::LoadTriggerPeds();
 }
 
-void ControlsWatch()
-{
-    if (!SURVIVAL::SurvivalData::IsActive && !canStart)
-    {
-        if (CONTROLS::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::reloadTriggerPedsControl)))
-        {
+/*void createTPBlips() {
+    TPPoint coords = teleportPoints.at(eMarkers::BunkerEntrance);
+    entranceBlips.push_back(BLIPS::Create(coords.x, coords.y, coords.z, 557, eBlipColor::BlipColorWhite, "Bunker"));
+    coords = teleportPoints.at(eMarkers::LabEntrance);
+    entranceBlips.push_back(BLIPS::Create(coords.x, coords.y, coords.z, 499, eBlipColor::BlipColorWhite, "Secret Lab"));
+}*/
+
+/*const char* getHelpText(size_t index) {
+    switch (index) {
+        case 0:
+            return "Press ~INPUT_CONTEXT~ to enter the bunker.";
+        case 1:
+            return "Press ~INPUT_CONTEXT~ to exit the bunker.";
+        case 2:
+            return "Press ~INPUT_CONTEXT~ to enter the lab.";
+        case 3:
+            return "Press ~INPUT_CONTEXT~ to exit the lab.";
+        default:
+            return "INVALID INDEX";
+    }
+}*/
+
+/*void processMarkers() {
+    size_t size = teleportPoints.size();
+    
+    for (size_t i = 0; i < size; i++) {
+        TPPoint coords = teleportPoints.at(i);
+        Vector3 v3Coords = Vector3();
+        v3Coords.x = coords.x;
+        v3Coords.y = coords.y;
+        v3Coords.z = coords.z;
+        Vector3 playerCoords = ENTITY::GET_ENTITY_COORDS(playerId, true);
+
+        if (!CALC::IsInRange_2(v3Coords, playerCoords, 200))
+            continue;
+
+        GRAPHICS::DRAW_MARKER(1, coords.x, coords.y, coords.z, 0, 1, 0, 0, 0, 0, 2, 2, 2, 255, 255, 0, 100, false, false, 2, false, nullptr, nullptr, false);
+
+        if (!CALC::IsInRange_2(v3Coords, playerCoords, 2))
+            continue;
+
+        SCREEN::ShowHelpText(getHelpText(i), true);
+
+        if (PAD::IS_CONTROL_JUST_PRESSED(0, 51)) {
+            CAM::DO_SCREEN_FADE_OUT(1000);
+            WAIT(1200);
+            size_t index;
+
+            if (i % 2 == 0)
+                index = i + 1;
+            else
+                index = i - 1;
+
+            coords = teleportPoints.at(index);
+            ENTITY::SET_ENTITY_COORDS(playerId, coords.x, coords.y, coords.z + (i == 0 ? 1.0f : 0.0f), 1, 0, 0, 1);
+            WAIT(2000);
+            CAM::DO_SCREEN_FADE_IN(1000);
+        }
+    }
+}*/
+
+void ControlsWatch() {
+    if (!SURVIVAL::SurvivalData::IsActive && !canStart) {
+        if (PAD::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::reloadTriggerPedsControl))) {
             INIT::LoadTriggerPeds();
         }
     }
 
-    if (Data::showControls) 
-    {
-        if (CONTROLS::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::infiniteWaveControl)))
-        {
+    if (Data::showControls) {
+        if (PAD::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::infiniteWaveControl))) {
             ClearAllies();
             SURVIVAL::StartMission(true, false, false);
         }
 
-        if (CONTROLS::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::timedSurvivalControl)))
-        {
+        if (PAD::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::timedSurvivalControl))) {
             ClearAllies();
             SURVIVAL::StartMission(false, true, false);
         }
 
-        if (CONTROLS::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::hardcoreSurvivalControl)))
-        {
+        if (PAD::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::hardcoreSurvivalControl))) {
             ClearAllies();
             SURVIVAL::StartMission(false, false, true);
         }
-    }
-    else if (SURVIVAL::SurvivalData::IsActive)
-    {
-        if (CONTROLS::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::cancelControl)))
-        {
-            cancelStartTime = GAMEPLAY::GET_GAME_TIMER();
+    } else if (SURVIVAL::SurvivalData::IsActive) {
+        if (PAD::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::cancelControl))) {
+            cancelStartTime = MISC::GET_GAME_TIMER();
         }
 
-        if (CONTROLS::IS_CONTROL_PRESSED(0, static_cast<int>(Data::cancelControl)))
-        {
-            cancelCurrentTime = GAMEPLAY::GET_GAME_TIMER();
-            if (cancelCurrentTime - cancelStartTime >= 3000)
-            {
+        if (PAD::IS_CONTROL_PRESSED(0, static_cast<int>(Data::cancelControl))) {
+            cancelCurrentTime = MISC::GET_GAME_TIMER();
+            if (cancelCurrentTime - cancelStartTime >= 3000) {
                 SURVIVAL::QuitSurvival(false);
             }
         }
     }
 }
 
-bool KilledByPlayer(Ped ped)
-{
+bool KilledByPlayer(Ped ped) {
     int player = PLAYER::PLAYER_PED_ID();
-    Entity killer = PED::_GET_PED_KILLER(ped);
+    Entity killer = PED::GET_PED_SOURCE_OF_DEATH(ped);
 
     if (killer == player || killer == 0)
         return true;
@@ -185,60 +257,43 @@ bool KilledByPlayer(Ped ped)
     return false;
 }
 
-void ProcessTriggerPeds()
-{
+void ProcessTriggerPeds() {
     size_t size = TriggerPedsData::timerActive.size();
 
-    for (size_t i = 0; i < size; i++)
-    {
+    for (size_t i = 0; i < size; i++) {
         bool active = TriggerPedsData::timerActive.at(i);
-        
-        if (!active)
-        {
-            if (!SURVIVAL::SurvivalData::IsActive)
-            {
+
+        if (!active) {
+            if (!SURVIVAL::SurvivalData::IsActive) {
                 Vector3 playerPosition = ENTITY::GET_ENTITY_COORDS(PLAYER::PLAYER_PED_ID(), true);
                 EntityPosition TPPos = TriggerPedsData::positions.at(i);
                 bool inRange = CALC::IsInRange_2(playerPosition, TPPos.coords, 80.0f);
                 Ped ped = TriggerPedsData::peds.at(i);
 
-                if (ped == 0 && canStart)
-                {
-                    if (inRange && !TriggerPedsData::killedFlags.at(i))
-                    {
+                if (ped == 0 && canStart) {
+                    if (inRange && !TriggerPedsData::killedFlags.at(i)) {
                         TriggerPedsData::peds.at(i) = INIT::SpawnTriggerPed(i);
                         SetAllies();
-                    }
-                    else if (!inRange)
+                    } else if (!inRange)
                         TriggerPedsData::killedFlags.at(i) = false;
-                }
-                else if (ped != 0)
-                {
-                    if (!inRange)
-                    {
+                } else if (ped != 0) {
+                    if (!inRange) {
                         ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
                         TriggerPedsData::peds.at(i) = 0;
                         ClearAllies();
-                    }
-                    else if (!canStart)
-                    {
+                    } else if (!canStart) {
                         ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
                         TriggerPedsData::peds.at(i) = 0;
                         TriggerPedsData::killedFlags.at(i) = true;
                         ClearAllies();
-                    }
-                    else if (ENTITY::IS_ENTITY_DEAD(ped))
-                    {
-                        if (KilledByPlayer(ped))
-                        {
-                            UI::REMOVE_BLIP(&TriggerPedsData::blips.at(i));
+                    } else if (ENTITY::IS_ENTITY_DEAD(ped, true)) {
+                        if (KilledByPlayer(ped)) {
+                            HUD::REMOVE_BLIP(&TriggerPedsData::blips.at(i));
                             TriggerPedsData::blips.at(i) = 0;
                             ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
                             TriggerPedsData::peds.at(i) = 0;
                             SURVIVAL::StartMission(false, false, false);
-                        }
-                        else
-                        {
+                        } else {
                             ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
                             TriggerPedsData::peds.at(i) = 0;
                             TriggerPedsData::killedFlags.at(i) = true;
@@ -252,76 +307,81 @@ void ProcessTriggerPeds()
             continue;
         }
 
-        if (GAMEPLAY::GET_GAME_TIMER() - TriggerPedsData::starTime.at(i) < 300000)
-        {
+        if (MISC::GET_GAME_TIMER() - TriggerPedsData::starTime.at(i) < 300000) {
             continue;
         }
 
         TriggerPedsData::timerActive.at(i) = false;
-        TriggerPedsData::blips.at(i) = BLIPS::CreateForMissionTriggerPed(TriggerPedsData::positions.at(i).coords, TriggerPedsData::names.at(i).c_str());
+        TriggerPedsData::blips.at(i) = BLIPS::CreateForMissionTriggerPed(TriggerPedsData::positions.at(i).coords,
+                                                                         TriggerPedsData::names.at(i).c_str());
     }
 }
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
-int main()
-{
-    while (DLC2::GET_IS_LOADING_SCREEN_ACTIVE())
-    {
+
+int main() {
+    while (DLC::GET_IS_LOADING_SCREEN_ACTIVE()) {
         WAIT(0);
     }
 
-    if (SURVIVAL::SurvivalData::IsActive)
-    {
+    if (SURVIVAL::SurvivalData::IsActive) {
         OnAbort();
     }
 
     ReadConfig();
 
-    while (true)
-    {
+    /*if (tpPointsEnabled)
+        createTPBlips();*/
+
+    while (true) {
+        playerId = PLAYER::PLAYER_PED_ID();
         IsPlayerInMissionStartRange();
         ProcessTriggerPeds();
 
-        if (SURVIVAL::SurvivalData::IsActive)
-        {
-            if (SURVIVAL::SurvivalData::Triggered)
-            {
+        if (SURVIVAL::SurvivalData::IsActive) {
+            if (SURVIVAL::SurvivalData::Triggered) {
                 SURVIVAL::SetOffTrigger();
-            }
-            else if (SURVIVAL::SurvivalData::Started)
-            {
+            } else if (SURVIVAL::SurvivalData::Started) {
                 SURVIVAL::ProcessSurvival();
 
-                if (PLAYER::IS_PLAYER_DEAD(PLAYER::PLAYER_ID()))
-                {
+                if (PLAYER::IS_PLAYER_DEAD(0)) {
                     SURVIVAL::QuitSurvival(true);
                 }
             }
         }
+        /*else
+            processMarkers();*/
 
         ControlsWatch();
         WAIT(0);
     }
 }
+
 #pragma clang diagnostic pop
 
-void ScriptMain()
-{
+void ScriptMain() {
     srand(GetTickCount64());
-	main();
+    main();
 }
 
-void OnAbort()
-{
+void OnAbort() {
     ClearAllies(true);
-    PLAYER::SET_PLAYER_CONTROL(PLAYER::PLAYER_ID(), true, 0);
-    AI::CLEAR_PED_TASKS(PLAYER::PLAYER_PED_ID());
-    PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(PLAYER::PLAYER_ID(), true);
+    PLAYER::SET_PLAYER_CONTROL(playerId, true, 0);
+    TASK::CLEAR_PED_TASKS(PLAYER::PLAYER_PED_ID());
+    PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(playerId, true);
     TriggerPedsData::ClearTriggerPeds();
 
-    if (SURVIVAL::SurvivalData::IsActive)
-    {
+    if (SURVIVAL::SurvivalData::IsActive) {
         SURVIVAL::ScriptQuit();
     }
+    
+    /*if (!entranceBlips.empty()) {
+        for (Blip& blip : entranceBlips) {
+            HUD::REMOVE_BLIP(&blip);
+        }
+        
+        entranceBlips.clear();
+        unloadipl();
+    }*/
 }

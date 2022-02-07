@@ -12,8 +12,10 @@ namespace SCREEN
 	void ShowSubtitle(const char* text, int time);
 	void ShowNotification(const char* text);
 	void LoadSprites();
+    void ShowHelpText(const char* text, bool beep);
 	void UnloadSprites();
 	void DrawBadge(const char* title, const char* content, bool red, int slot);
+    void DrawBadge(const char* title, float percentage, int slot);
 	void ShowControls();
 	int RequestScaleform();
 	void SetScaleformText(int scaleform, const char* title, const char* subtitle);

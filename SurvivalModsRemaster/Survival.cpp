@@ -1,3 +1,4 @@
+#include <main.h>
 #include "pch.h"
 #include "Survival.hpp"
 
@@ -27,8 +28,8 @@ void SetEnemyAllies()
 
 		if (ally.MissionID == SURVIVAL::SurvivalData::MissionID)
 		{
-			PED::SET_RELATIONSHIP_BETWEEN_GROUPS(1, Data::enemiesRelGroup, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()));
-			PED::SET_RELATIONSHIP_BETWEEN_GROUPS(1, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()), Data::enemiesRelGroup);
+			PED::SET_RELATIONSHIP_BETWEEN_GROUPS(1, Data::enemiesRelGroup, MISC::GET_HASH_KEY(ally.RelGroupName.c_str()));
+			PED::SET_RELATIONSHIP_BETWEEN_GROUPS(1, MISC::GET_HASH_KEY(ally.RelGroupName.c_str()), Data::enemiesRelGroup);
 		}
 	}
 }
@@ -43,8 +44,8 @@ void ClearEnemyAllies()
 
 		if (ally.MissionID == SURVIVAL::SurvivalData::MissionID)
 		{
-			PED::SET_RELATIONSHIP_BETWEEN_GROUPS(3, Data::enemiesRelGroup, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()));
-			PED::SET_RELATIONSHIP_BETWEEN_GROUPS(3, GAMEPLAY::GET_HASH_KEY((char*)ally.RelGroupName.c_str()), Data::enemiesRelGroup);
+			PED::SET_RELATIONSHIP_BETWEEN_GROUPS(3, Data::enemiesRelGroup, MISC::GET_HASH_KEY(ally.RelGroupName.c_str()));
+			PED::SET_RELATIONSHIP_BETWEEN_GROUPS(3, MISC::GET_HASH_KEY(ally.RelGroupName.c_str()), Data::enemiesRelGroup);
 		}
 	}
 }
@@ -62,7 +63,7 @@ void SURVIVAL::StartMission(bool infiniteWaves, bool timed, bool hardcore)
 	SurvivalData::timed = timed;
 	SetEnemyAllies();
 	MUSIC::PrepareTracks();
-	AUDIO::SET_AUDIO_FLAG((char*)"WantedMusicDisabled", true);
+	AUDIO::SET_AUDIO_FLAG("WantedMusicDisabled", true);
 
 	if (!IsDefault())
 	{
@@ -79,8 +80,8 @@ void SURVIVAL::StartMission(bool infiniteWaves, bool timed, bool hardcore)
 		}
 
 		PLAYER::SET_PLAYER_CONTROL(PLAYER::PLAYER_ID(), false, 0);
-		AI::TASK_AIM_GUN_AT_ENTITY(PLAYER::PLAYER_PED_ID(), ped, -1, 0);
-		AI::TASK_SHOOT_AT_ENTITY(PLAYER::PLAYER_PED_ID(), ped, 60000, eFiringPattern::FiringPatternFullAuto);
+		TASK::TASK_AIM_GUN_AT_ENTITY(PLAYER::PLAYER_PED_ID(), ped, -1, 0);
+		TASK::TASK_SHOOT_AT_ENTITY(PLAYER::PLAYER_PED_ID(), ped, 60000, eFiringPattern::FiringPatternFullAuto);
 		SurvivalData::Triggered = true;
 	}
 	else
@@ -103,18 +104,18 @@ void SURVIVAL::Initialize()
 	if (PED::IS_PED_IN_ANY_VEHICLE(PLAYER::PLAYER_PED_ID(), false))
 	{
 		Vehicle ve = PED::GET_VEHICLE_PED_IS_IN(PLAYER::PLAYER_PED_ID(), false);
-		AI::TASK_LEAVE_VEHICLE(PLAYER::PLAYER_PED_ID(), ve, 0);
+		TASK::TASK_LEAVE_VEHICLE(PLAYER::PLAYER_PED_ID(), ve, 0);
 	}
 
 	if (SpawnerData::isHalloween)
 	{
-		GAMEPLAY::_SET_WEATHER_TYPE_OVER_TIME((char*)"HALLOWEEN", 30);
-		GAMEPLAY::_SET_RAIN_FX_INTENSITY(0.5f);
+		MISC::SET_WEATHER_TYPE_OVERTIME_PERSIST("HALLOWEEN", 30);
+		MISC::_SET_RAIN_LEVEL(0.5f);
 	}
 	else if (SpawnerData::isXmas)
 	{
-		GAMEPLAY::_SET_WEATHER_TYPE_OVER_TIME((char*)"BLIZZARD", 30);
-		GAMEPLAY::_SET_RAIN_FX_INTENSITY(0.5f);
+		MISC::SET_WEATHER_TYPE_OVERTIME_PERSIST("BLIZZARD", 30);
+		MISC::_SET_RAIN_LEVEL(0.5f);
 	}
 
 	SurvivalData::Started = true;
@@ -136,7 +137,7 @@ void SURVIVAL::SetOffTrigger()
 	{
 		if (TIMERS::ProcessTriggerPedTimer())
 		{
-			ENTITY::SET_ENTITY_HEALTH(ped, 0);
+			ENTITY::SET_ENTITY_HEALTH(ped, 0, 0);
 		}
 		else
 		{
@@ -146,11 +147,11 @@ void SURVIVAL::SetOffTrigger()
 
 	TIMERS::RestartTriggerPedTimer();
 	SurvivalData::Triggered = false;
-	UI::REMOVE_BLIP(&TriggerPedsData::blips.at(Data::TPIndex));
+	HUD::REMOVE_BLIP(&TriggerPedsData::blips.at(Data::TPIndex));
 	TriggerPedsData::blips.at(Data::TPIndex) = 0;
 	ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
 	TriggerPedsData::peds.at(Data::TPIndex) = 0;
-	AI::CLEAR_PED_TASKS(PLAYER::PLAYER_PED_ID());
+	TASK::CLEAR_PED_TASKS(PLAYER::PLAYER_PED_ID());
 	PLAYER::SET_PLAYER_CONTROL(PLAYER::PLAYER_ID(), true, 0);
 	Initialize();
 }
@@ -228,9 +229,9 @@ void SURVIVAL::GiveReward(bool playerDied)
 		return;
 	}
 
-	Hash michaelModel = GAMEPLAY::GET_HASH_KEY((char*)"PLAYER_ZERO");
-	Hash franklinModel = GAMEPLAY::GET_HASH_KEY((char*)"PLAYER_ONE");
-	Hash trevorModel = GAMEPLAY::GET_HASH_KEY((char*)"PLAYER_TWO");
+	Hash michaelModel = MISC::GET_HASH_KEY("PLAYER_ZERO");
+	Hash franklinModel = MISC::GET_HASH_KEY("PLAYER_ONE");
+	Hash trevorModel = MISC::GET_HASH_KEY("PLAYER_TWO");
 
 	Hash stat;
 	Ped playerPed = PLAYER::GET_PLAYER_PED(PLAYER::PLAYER_ID());
@@ -238,15 +239,15 @@ void SURVIVAL::GiveReward(bool playerDied)
 
 	if (pedModel == michaelModel)
 	{
-		stat = GAMEPLAY::GET_HASH_KEY((char*)"SP0_TOTAL_CASH");
+		stat = MISC::GET_HASH_KEY("SP0_TOTAL_CASH");
 	}
 	else if (pedModel == franklinModel)
 	{
-		stat = GAMEPLAY::GET_HASH_KEY((char*)"SP1_TOTAL_CASH");
+		stat = MISC::GET_HASH_KEY("SP1_TOTAL_CASH");
 	}
 	else if (pedModel == trevorModel)
 	{
-		stat = GAMEPLAY::GET_HASH_KEY((char*)"SP2_TOTAL_CASH");
+		stat = MISC::GET_HASH_KEY("SP2_TOTAL_CASH");
 	}
 	else
 	{
@@ -291,7 +292,7 @@ void SURVIVAL::GiveReward(bool playerDied)
 void SURVIVAL::CompleteSurvival()
 {
 	MUSIC::MissionCompletedSound();
-    GRAPHICS::_START_SCREEN_EFFECT((char*)"MinigameEndNeutral", 0, false);
+    GRAPHICS::ANIMPOSTFX_PLAY("MinigameEndNeutral", 0, false);
 	GiveReward(false);
 	PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(PLAYER::PLAYER_ID(), true);
 	ENEMIES::ClearVectors();
@@ -305,11 +306,11 @@ void SURVIVAL::CompleteSurvival()
 
 	if (SpawnerData::isXmas || SpawnerData::isHalloween)
 	{
-		GAMEPLAY::CLEAR_WEATHER_TYPE_PERSIST();
+		MISC::CLEAR_WEATHER_TYPE_PERSIST();
 		WAIT(0);
-		GAMEPLAY::_SET_WEATHER_TYPE_OVER_TIME((char*)"CLEAR", 30);
-		GAMEPLAY::_SET_RAIN_FX_INTENSITY(-1);
-		GAMEPLAY::CLEAR_WEATHER_TYPE_PERSIST();
+		MISC::SET_WEATHER_TYPE_OVERTIME_PERSIST("CLEAR", 30);
+		MISC::_SET_RAIN_LEVEL(-1);
+		MISC::CLEAR_WEATHER_TYPE_PERSIST();
 	}
 
 	TriggerDelayedSpawn();
@@ -341,7 +342,7 @@ void SURVIVAL::QuitSurvival(bool playerDied)
 	ENEMIES::ClearVectors();
 	SURVIVAL::ClearVectors();
 	PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(PLAYER::PLAYER_ID(), true);
-	AUDIO::SET_AUDIO_FLAG((char*)"WantedMusicDisabled", false);
+	AUDIO::SET_AUDIO_FLAG("WantedMusicDisabled", false);
 	ClearEnemyAllies();
 
 	SurvivalData::IsActive = false;
@@ -350,11 +351,11 @@ void SURVIVAL::QuitSurvival(bool playerDied)
 
 	if (SpawnerData::isXmas || SpawnerData::isHalloween)
 	{
-		GAMEPLAY::CLEAR_WEATHER_TYPE_PERSIST();
+		MISC::CLEAR_WEATHER_TYPE_PERSIST();
 		WAIT(0);
-		GAMEPLAY::_SET_WEATHER_TYPE_OVER_TIME((char*)"CLEAR", 30);
-		GAMEPLAY::_SET_RAIN_FX_INTENSITY(-1);
-		GAMEPLAY::CLEAR_WEATHER_TYPE_PERSIST();
+		MISC::SET_WEATHER_TYPE_OVERTIME_PERSIST("CLEAR", 30);
+		MISC::_SET_RAIN_LEVEL(-1);
+		MISC::CLEAR_WEATHER_TYPE_PERSIST();
 	}
 
 	TriggerDelayedSpawn();
@@ -366,7 +367,7 @@ void SURVIVAL::ScriptQuit()
 	PICKUPS::Delete();
 	ENEMIES::ClearVectors();
 	PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(PLAYER::PLAYER_ID(), true);
-	AUDIO::SET_AUDIO_FLAG((char*)"WantedMusicDisabled", false);
+	AUDIO::SET_AUDIO_FLAG("WantedMusicDisabled", false);
 	ClearEnemyAllies();
 
 	SurvivalData::IsActive = false;
@@ -375,11 +376,11 @@ void SURVIVAL::ScriptQuit()
 
 	if (SpawnerData::isXmas || SpawnerData::isHalloween)
 	{
-		GAMEPLAY::CLEAR_WEATHER_TYPE_PERSIST();
+		MISC::CLEAR_WEATHER_TYPE_PERSIST();
 		WAIT(0);
-		GAMEPLAY::_SET_WEATHER_TYPE_OVER_TIME((char*)"CLEAR", 30);
-		GAMEPLAY::_SET_RAIN_FX_INTENSITY(-1);
-		GAMEPLAY::CLEAR_WEATHER_TYPE_PERSIST();
+		MISC::SET_WEATHER_TYPE_OVERTIME_PERSIST("CLEAR", 30);
+		MISC::_SET_RAIN_LEVEL(-1);
+		MISC::CLEAR_WEATHER_TYPE_PERSIST();
 	}
 }
 
@@ -392,7 +393,7 @@ void SURVIVAL::TriggerDelayedSpawn()
 		if (TriggerPedsData::names.at(i) == SurvivalData::MissionID)
 		{
 			TriggerPedsData::timerActive.at(i) = true;
-			TriggerPedsData::starTime.at(i) = GAMEPLAY::GET_GAME_TIMER();
+			TriggerPedsData::starTime.at(i) = MISC::GET_GAME_TIMER();
 			return;
 		}
 	}

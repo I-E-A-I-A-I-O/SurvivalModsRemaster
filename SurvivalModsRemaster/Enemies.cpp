@@ -1,3 +1,4 @@
+#include <main.h>
 #include "pch.h"
 #include "Enemies.hpp"
 
@@ -71,7 +72,7 @@ void ENEMIES::ClearVectors()
 
 int GetKillTime(Ped ped)
 {
-    Entity killer = PED::_GET_PED_KILLER(ped);
+    Entity killer = PED::GET_PED_SOURCE_OF_DEATH(ped);
 
     if (killer != PLAYER::PLAYER_PED_ID())
     {
@@ -112,7 +113,7 @@ int GetKillTime(Ped ped)
         return 4000;
     }
 
-    Any lastDamagedBone;
+    int lastDamagedBone;
     PED::GET_PED_LAST_DAMAGE_BONE(ped, &lastDamagedBone);
 
     switch (lastDamagedBone)
@@ -167,7 +168,7 @@ void RemoveDeadEnemies()
         {
             if (PED::IS_PED_FLEEING(body) && !CALC::IsInRange_2(ENTITY::GET_ENTITY_COORDS(body, true), SURVIVAL::SpawnerData::location, 160))
             {
-                ENTITY::SET_ENTITY_HEALTH(body, 0);
+                ENTITY::SET_ENTITY_HEALTH(body, 0, 0);
             }
             else
             {
@@ -192,10 +193,10 @@ void RemoveDeadEnemies()
             PED::SET_PED_CAN_RAGDOLL(body, true);
         }
 
-        Blip blip = UI::GET_BLIP_FROM_ENTITY(body);
-        if (UI::DOES_BLIP_EXIST(blip))
+        Blip blip = HUD::GET_BLIP_FROM_ENTITY(body);
+        if (HUD::DOES_BLIP_EXIST(blip))
         {
-            UI::REMOVE_BLIP(&blip);
+            HUD::REMOVE_BLIP(&blip);
         }
 
         if (!jesusSpawned)
@@ -258,16 +259,14 @@ void RemoveDeadEnemies()
 void ENEMIES::RemoveUnusedVehicles()
 {
     bool vehicleDestroyed;
-    bool driverGone;
     int vehiclePassengers;
 
     for (size_t i = 0; i < enemyVehicles.size(); i++)
     {
-        vehicleDestroyed = ENTITY::IS_ENTITY_DEAD(enemyVehicles.at(i));
-        vehiclePassengers = VEHICLE::GET_VEHICLE_NUMBER_OF_PASSENGERS(enemyVehicles.at(i));
-        driverGone = VEHICLE::IS_VEHICLE_SEAT_FREE(enemyVehicles.at(i), -1);
+        vehicleDestroyed = ENTITY::IS_ENTITY_DEAD(enemyVehicles.at(i), 1);
+        vehiclePassengers = VEHICLE::GET_VEHICLE_NUMBER_OF_PASSENGERS(enemyVehicles.at(i), true, false);
 
-        if (vehicleDestroyed || (vehiclePassengers == 0 && driverGone))
+        if (vehicleDestroyed || vehiclePassengers == 0)
         {
             BLIPS::DeleteBlipForEntity(enemyVehicles.at(i));
 
@@ -281,9 +280,9 @@ void ENEMIES::RemoveUnusedVehicles()
             enemyVehicles.erase(enemyVehicles.begin() + i);
             return;
         }
-        else if (!driverGone)
+        else if (vehiclePassengers > 0)
         {
-            Ped ped = VEHICLE::GET_PED_IN_VEHICLE_SEAT(enemyVehicles.at(i), -1);
+            Ped ped = VEHICLE::GET_PED_IN_VEHICLE_SEAT(enemyVehicles.at(i), -1, 0);
             if (PED::IS_PED_DEAD_OR_DYING(ped, 1))
             {
                 BLIPS::DeleteBlipForEntity(enemyVehicles.at(i));
@@ -303,25 +302,25 @@ void ProcessSuicidals()
         {
             if (!enemy.timer)
             {
-                Any lastDamagedBone;
+                int lastDamagedBone;
                 PED::GET_PED_LAST_DAMAGE_BONE(enemy.ped, &lastDamagedBone);
 
                 if (lastDamagedBone == eBone::SKEL_Head)
                 {
                     Vector3 coords = ENTITY::GET_ENTITY_COORDS(enemy.ped, true);
-                    FIRE::ADD_EXPLOSION(coords.x, coords.y, coords.z, eExplosionType::ExplosionTypeStickyBomb, 5.0f, true, false, 2.0f);
+                    FIRE::ADD_EXPLOSION(coords.x, coords.y, coords.z, eExplosionType::ExplosionTypeStickyBomb, 5.0f, true, false, 2.0f, false);
                     enemy.exploded = true;
                     continue;
                 }
 
                 enemy.deadCoords = ENTITY::GET_ENTITY_COORDS(enemy.ped, true);
-                enemy.timeOfDeath = GAMEPLAY::GET_GAME_TIMER();
+                enemy.timeOfDeath = MISC::GET_GAME_TIMER();
                 enemy.timer = true;
             } else
             {
-                if (GAMEPLAY::GET_GAME_TIMER() - enemy.timeOfDeath >= 2000)
+                if (MISC::GET_GAME_TIMER() - enemy.timeOfDeath >= 2000)
                 {
-                    FIRE::ADD_EXPLOSION(enemy.deadCoords.x, enemy.deadCoords.y, enemy.deadCoords.z, eExplosionType::ExplosionTypeStickyBomb, 5.0f, true, false, 2.0f);
+                    FIRE::ADD_EXPLOSION(enemy.deadCoords.x, enemy.deadCoords.y, enemy.deadCoords.z, eExplosionType::ExplosionTypeStickyBomb, 5.0f, true, false, 2.0f, false);
                     enemy.exploded = true;
                 }
             }
@@ -333,7 +332,7 @@ void ProcessSuicidals()
 
             if (CALC::IsInRange_2(coords, playerCoords, 2.0f))
             {
-                FIRE::ADD_EXPLOSION(coords.x, coords.y, coords.z, eExplosionType::ExplosionTypeStickyBomb, 5.0f, true, false, 2.0f);
+                FIRE::ADD_EXPLOSION(coords.x, coords.y, coords.z, eExplosionType::ExplosionTypeStickyBomb, 5.0f, true, false, 2.0f, false);
                 enemy.exploded = true;
             }
         }
@@ -376,15 +375,15 @@ void InitializeJesus(Ped ped)
     PED::SET_PED_CAN_RAGDOLL(ped, false);
     PED::SET_PED_CONFIG_FLAG(ped, 281, false);
     PED::SET_PED_MAX_HEALTH(ped, 1000);
-    ENTITY::SET_ENTITY_HEALTH(ped, 1000);
+    ENTITY::SET_ENTITY_HEALTH(ped, 1000, 0);
     BLIPS::CreateForEnemyPed(ped, 305, "Jesus Christ");
 }
 
 void InitializeAnimal(Ped ped)
 {
     BLIPS::CreateForEnemyPed(ped, 463, "Enemy Animal");
-    PED::SET_PED_RELATIONSHIP_GROUP_HASH(ped, GAMEPLAY::GET_HASH_KEY((char*)"COUGAR"));
-    AI::TASK_PUT_PED_DIRECTLY_INTO_MELEE(ped, PLAYER::PLAYER_PED_ID(), 0, 0, 0, 0);
+    PED::SET_PED_RELATIONSHIP_GROUP_HASH(ped, MISC::GET_HASH_KEY("COUGAR"));
+    TASK::TASK_PUT_PED_DIRECTLY_INTO_MELEE(ped, PLAYER::PLAYER_PED_ID(), 0, 0, 0, 0);
     ENEMIES::EnemiesData::currentDogCount += 1;
 
     if (ENEMIES::EnemiesData::currentDogCount >= 3)
@@ -400,7 +399,7 @@ void InitializeJuggernaut(Ped ped)
     PED::SET_PED_CAN_RAGDOLL(ped, false);
     PED::SET_PED_CONFIG_FLAG(ped, 281, true);
     PED::SET_PED_MAX_HEALTH(ped, 1000);
-    ENTITY::SET_ENTITY_HEALTH(ped, 1000);
+    ENTITY::SET_ENTITY_HEALTH(ped, 1000, 0);
     BLIPS::CreateForEnemyPed(ped, 543, "Enemy Juggernaut");
     PED::SET_PED_RELATIONSHIP_GROUP_HASH(ped, Data::enemiesRelGroup);
     int accuracyModifier = SURVIVAL::SurvivalData::CurrentWave > 10 ? 10 : SURVIVAL::SurvivalData::CurrentWave;
@@ -413,7 +412,7 @@ void InitializeJuggernaut(Ped ped)
     WEAPON::GIVE_WEAPON_TO_PED(ped, eWeapon::WeaponMinigun, 9000, true, true);
     PED::SET_PED_FIRING_PATTERN(ped, eFiringPattern::FiringPatternFullAuto);
     PED::SET_PED_COMBAT_MOVEMENT(ped, 2);
-    AI::TASK_COMBAT_PED(ped, PLAYER::PLAYER_PED_ID(), 0, 16);
+    TASK::TASK_COMBAT_PED(ped, PLAYER::PLAYER_PED_ID(), 0, 16);
 }
 
 void InitializeRageEnemy(Ped ped)
@@ -422,8 +421,8 @@ void InitializeRageEnemy(Ped ped)
     PED::SET_PED_CAN_RAGDOLL(ped, false);
     PED::SET_PED_CONFIG_FLAG(ped, 281, true);
     PED::SET_PED_MAX_HEALTH(ped, 1250);
-    ENTITY::SET_ENTITY_HEALTH(ped, 1250);
-    AI::TASK_PUT_PED_DIRECTLY_INTO_MELEE(ped, PLAYER::PLAYER_PED_ID(), 0, -1, 0, 0);
+    ENTITY::SET_ENTITY_HEALTH(ped, 1250, 0);
+    TASK::TASK_PUT_PED_DIRECTLY_INTO_MELEE(ped, PLAYER::PLAYER_PED_ID(), 0, -1, 0, 0);
     PED::SET_AI_MELEE_WEAPON_DAMAGE_MODIFIER(100);
     BLIPS::CreateForEnemyPed(ped, 671, "Ragemode Sasquatch");
     PED::SET_PED_RELATIONSHIP_GROUP_HASH(ped, Data::enemiesRelGroup);
@@ -432,12 +431,12 @@ void InitializeRageEnemy(Ped ped)
 void InitializeSuicidal(Ped ped)
 {
     PED::SET_PED_MAX_HEALTH(ped, 420);
-    ENTITY::SET_ENTITY_HEALTH(ped, 420);
+    ENTITY::SET_ENTITY_HEALTH(ped, 420, 0);
     PED::SET_PED_CONFIG_FLAG(ped, 281, true);
     WEAPON::GIVE_WEAPON_TO_PED(ped, eWeapon::WeaponKnife, 1, true, true);
     WEAPON::GIVE_WEAPON_TO_PED(ped, eWeapon::WeaponHatchet, 1, true, true);
     WEAPON::GIVE_WEAPON_TO_PED(ped, eWeapon::WeaponHammer, 1, true, true);
-    AI::TASK_PUT_PED_DIRECTLY_INTO_MELEE(ped, PLAYER::PLAYER_PED_ID(), 0, -1, 0, 0);
+    TASK::TASK_PUT_PED_DIRECTLY_INTO_MELEE(ped, PLAYER::PLAYER_PED_ID(), 0, -1, 0, 0);
     BLIPS::CreateForEnemyPed(ped, 486, "Suicide Bomber");
     PED::SET_PED_RELATIONSHIP_GROUP_HASH(ped, Data::enemiesRelGroup);
 }
@@ -503,7 +502,7 @@ void InitializeEnemy(Ped ped)
     Hash weaponHash = weapons.at(index);
     PED::SET_PED_CONFIG_FLAG(ped, 281, true);
     WEAPON::GIVE_WEAPON_TO_PED(ped, weaponHash, 1000, true, true);
-    AI::TASK_COMBAT_PED(ped, PLAYER::PLAYER_PED_ID(), 0, 16);
+    TASK::TASK_COMBAT_PED(ped, PLAYER::PLAYER_PED_ID(), 0, 16);
     BLIPS::CreateForEnemyPed(ped);
     PED::SET_PED_COMBAT_MOVEMENT(ped, 2);
     int i = CALC::RanInt(100, 1);
@@ -554,9 +553,9 @@ void InitializeEnemyInAircraft(Ped ped, bool passenger)
     WEAPON::GIVE_WEAPON_TO_PED(ped, weaponHash, 1000, true, true);
 
     if (passenger)
-        AI::TASK_SHOOT_AT_ENTITY(ped, PLAYER::PLAYER_PED_ID(), 18000000, eFiringPattern::FiringPatternBurstFire);
+        TASK::TASK_SHOOT_AT_ENTITY(ped, PLAYER::PLAYER_PED_ID(), 18000000, eFiringPattern::FiringPatternBurstFire);
     else
-        AI::TASK_COMBAT_PED(ped, PLAYER::PLAYER_PED_ID(), 0, 16);
+        TASK::TASK_COMBAT_PED(ped, PLAYER::PLAYER_PED_ID(), 0, 16);
 
     BLIPS::CreateForEnemyPed(ped);
     PED::SET_PED_COMBAT_MOVEMENT(ped, 2);
@@ -607,9 +606,9 @@ void InitializeEnemyInVehicle(Ped ped, bool passenger)
     WEAPON::GIVE_WEAPON_TO_PED(ped, weaponHash, 1000, true, true);
 
     if (passenger)
-        AI::TASK_VEHICLE_SHOOT_AT_PED(ped, PLAYER::PLAYER_PED_ID(), 40.0f);
+        TASK::TASK_VEHICLE_SHOOT_AT_PED(ped, PLAYER::PLAYER_PED_ID(), 40.0f);
     else
-        AI::TASK_COMBAT_PED(ped, PLAYER::PLAYER_PED_ID(), 0, 16);
+        TASK::TASK_COMBAT_PED(ped, PLAYER::PLAYER_PED_ID(), 0, 16);
 
     BLIPS::CreateForEnemyPed(ped);
     PED::SET_PED_COMBAT_MOVEMENT(ped, 2);

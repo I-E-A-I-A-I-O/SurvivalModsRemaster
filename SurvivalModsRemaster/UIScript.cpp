@@ -1,3 +1,4 @@
+#include <main.h>
 #include "pch.h"
 #include "UIScript.hpp"
 
@@ -40,7 +41,7 @@ void UIScript::Clean() {
 #pragma ide diagnostic ignored "EndlessLoop"
 void UIScriptMain()
 {
-    while (DLC2::GET_IS_LOADING_SCREEN_ACTIVE())
+    while (DLC::GET_IS_LOADING_SCREEN_ACTIVE())
         WAIT(1);
 
 	while (true)
@@ -89,7 +90,7 @@ void UIScriptMain()
                         break;
                     }
 					case UIScript::ScaleformType::SURVIVAL_PASSED: {
-                        AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"BASE_JUMP_PASSED", (char*)"HUD_AWARDS", true);
+                        AUDIO::PLAY_SOUND_FRONTEND(-1, "BASE_JUMP_PASSED", "HUD_AWARDS", true);
                         scaleformHandles = SCREEN::LoadWallStat(SURVIVAL::SurvivalData::earnedMoney,
                                 0,0,true,true,false,false);
                         break;
@@ -100,11 +101,11 @@ void UIScriptMain()
                         strcpy_s(title, "~r~survival canceled");
                         strcpy_s(subtitle, "");
                         SCREEN::SetScaleformText(h, title, subtitle);
-                        AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"Survival_Failed", (char*)"DLC_VW_AS_Sounds", true);
+                        AUDIO::PLAY_SOUND_FRONTEND(-1, "Survival_Failed", "DLC_VW_AS_Sounds", true);
                         break;
                     }
 					case UIScript::ScaleformType::PLAYER_DIED: {
-                        AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"Survival_Failed", (char*)"DLC_VW_AS_Sounds", true);
+                        AUDIO::PLAY_SOUND_FRONTEND(-1, "Survival_Failed", "DLC_VW_AS_Sounds", true);
                         scaleformHandles = SCREEN::LoadWallStat(SURVIVAL::SurvivalData::earnedMoney,
                                                                 SURVIVAL::SurvivalData::CurrentWave,
                                                                 0,false,true,
@@ -130,7 +131,7 @@ void UIScriptMain()
 					case UIScript::ScaleformType::SURVIVAL_PASSED_TIMED:
 					{
 						int total = TIMERS::TimedSurvival::CurrentTime - TIMERS::TimedSurvival::StartTime;
-						AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"Survival_Passed", (char*)"DLC_VW_Survival_Sounds", true);
+						AUDIO::PLAY_SOUND_FRONTEND(-1, "Survival_Passed", "DLC_VW_Survival_Sounds", true);
                         scaleformHandles = SCREEN::LoadWallStat(SURVIVAL::SurvivalData::earnedMoney,
                                                                 0,
                                                                 total,true,true,
@@ -138,7 +139,7 @@ void UIScriptMain()
                         break;
 					}
                     case UIScript::ScaleformType::WAVE_SURVIVED: {
-                        AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"MP_WAVE_COMPLETE", (char*)"HUD_FRONTEND_DEFAULT_SOUNDSET", true);
+                        AUDIO::PLAY_SOUND_FRONTEND(-1, "MP_WAVE_COMPLETE", "HUD_FRONTEND_DEFAULT_SOUNDSET", true);
                         scaleformHandles = SCREEN::LoadWallStat(SURVIVAL::SurvivalData::earnedMoney,
                                                                 SURVIVAL::SurvivalData::CurrentWave,
                                                                 0,false,false,
@@ -149,14 +150,14 @@ void UIScriptMain()
 						break;
 				}
 
-				scaleformST = GAMEPLAY::GET_GAME_TIMER();
+				scaleformST = MISC::GET_GAME_TIMER();
 			}
 
             if (scaleformHandles.size() > (size_t)1) {
                 for (const int& handle: scaleformHandles) {
                     GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(handle, 255, 255, 0, 255, 0);
 
-                    if (GAMEPLAY::GET_GAME_TIMER() - scaleformST >= 15000)
+                    if (MISC::GET_GAME_TIMER() - scaleformST >= 15000)
                     {
                         UIScript::Data::showScaleform = false;
                         scaleformRequested = false;
@@ -171,13 +172,13 @@ void UIScriptMain()
                 int handle = scaleformHandles.at(0);
                 GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(handle, 255, 255, 0, 255, 0);
 
-                if (GAMEPLAY::GET_GAME_TIMER() - scaleformST >= 8000 && !scaleformFading)
+                if (MISC::GET_GAME_TIMER() - scaleformST >= 8000 && !scaleformFading)
                 {
                     scaleformFading = true;
                     SCREEN::FadeOutScaleform(handle, 2000);
-                    scaleformST = GAMEPLAY::GET_GAME_TIMER();
+                    scaleformST = MISC::GET_GAME_TIMER();
                 }
-                else if (GAMEPLAY::GET_GAME_TIMER() - scaleformST >= 2000 && scaleformFading)
+                else if (MISC::GET_GAME_TIMER() - scaleformST >= 2000 && scaleformFading)
                 {
                     UIScript::Data::showScaleform = false;
                     scaleformRequested = false;
@@ -190,7 +191,7 @@ void UIScriptMain()
 
 		if (ShowCount())
 		{
-			SCREEN::ShowEnemyCountBadge(SURVIVAL::SurvivalData::MaxWaveSize - ENEMIES::EnemiesData::kills, SURVIVAL::SurvivalData::MaxWaveSize, SURVIVAL::SurvivalData::CurrentWave);
+			SCREEN::ShowEnemyCountBadge(ENEMIES::EnemiesData::kills, SURVIVAL::SurvivalData::MaxWaveSize, SURVIVAL::SurvivalData::CurrentWave);
 		}
 
 		if (ShowInterTimeLeft())

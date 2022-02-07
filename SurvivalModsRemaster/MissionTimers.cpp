@@ -34,17 +34,17 @@ bool TIMERS::ProcessTimedSurvivalTimer(int endTime)
 	if (!TimedSurvival::Started)
 	{
 		TimedSurvival::Started = true;
-		TimedSurvival::StartTime = GAMEPLAY::GET_GAME_TIMER();
+		TimedSurvival::StartTime = MISC::GET_GAME_TIMER();
 		TimedSurvival::InterWaveTime = TimedSurvival::StartTime;
 		return false;
 	}
 	else
 	{
-		TimedSurvival::CurrentTime = GAMEPLAY::GET_GAME_TIMER();
+		TimedSurvival::CurrentTime = MISC::GET_GAME_TIMER();
 
 		if (TimedSurvival::CurrentTime - TimedSurvival::InterWaveTime >= 120000)
 		{
-			TimedSurvival::InterWaveTime = GAMEPLAY::GET_GAME_TIMER();
+			TimedSurvival::InterWaveTime = MISC::GET_GAME_TIMER();
 			INTERMISSION::Start();
 			INTERMISSION::Process();
 		}
@@ -70,12 +70,12 @@ bool TIMERS::ProcessTriggerPedTimer()
 	if (!TriggerPed::Started)
 	{
 		TriggerPed::Started = true;
-		TriggerPed::StartTime = GAMEPLAY::GET_GAME_TIMER();
+		TriggerPed::StartTime = MISC::GET_GAME_TIMER();
 		return false;
 	}
 	else
 	{
-		TriggerPed::CurrentTime = GAMEPLAY::GET_GAME_TIMER();
+		TriggerPed::CurrentTime = MISC::GET_GAME_TIMER();
 		if (TriggerPed::CurrentTime - TriggerPed::StartTime >= 10000)
 		{
 			TriggerPed::Started = false;
@@ -124,12 +124,12 @@ bool TIMERS::ProcessIntermissionTimer()
 	if (!Intermission::Started)
 	{
 		Intermission::Started = true;
-		Intermission::StartTime = GAMEPLAY::GET_GAME_TIMER();
+		Intermission::StartTime = MISC::GET_GAME_TIMER();
 		return false;
 	}
 	else
 	{
-		Intermission::CurrentTime = GAMEPLAY::GET_GAME_TIMER();
+		Intermission::CurrentTime = MISC::GET_GAME_TIMER();
 		Intermission::timeLeft = (Data::intermissionDuration / 1000) - ((Intermission::CurrentTime - Intermission::StartTime) / 1000);
 
 		if (Intermission::CurrentTime - Intermission::StartTime >= Data::intermissionDuration)
@@ -146,12 +146,12 @@ bool TIMERS::ProcessLeavingZoneTimer()
 	if (!LeavingZone::Started)
 	{
 		LeavingZone::Started = true;
-		LeavingZone::StartTime = GAMEPLAY::GET_GAME_TIMER();
+		LeavingZone::StartTime = MISC::GET_GAME_TIMER();
 		return false;
 	}
 	else
 	{
-		LeavingZone::CurrentTime = GAMEPLAY::GET_GAME_TIMER();
+		LeavingZone::CurrentTime = MISC::GET_GAME_TIMER();
 		char subtitle[300];
 		strcpy_s(subtitle, "Leaving survival in ~r~");
 		strcat_s(subtitle, std::to_string(20 - ((LeavingZone::CurrentTime - LeavingZone::StartTime) / 1000)).c_str());
@@ -173,12 +173,12 @@ bool TIMERS::ProcessDogTimer()
 	if (!DogTimer::Started)
 	{
 		DogTimer::Started = true;
-		DogTimer::StartTime = GAMEPLAY::GET_GAME_TIMER();
+		DogTimer::StartTime = MISC::GET_GAME_TIMER();
 		return false;
 	}
 	else
 	{
-		DogTimer::CurrentTime = GAMEPLAY::GET_GAME_TIMER();
+		DogTimer::CurrentTime = MISC::GET_GAME_TIMER();
 
 		if (DogTimer::CurrentTime - DogTimer::StartTime >= 30000)
 		{
@@ -199,12 +199,12 @@ bool TIMERS::ProcessSpawnMoreTimer()
 	if (!SpawnEnemy::Started)
 	{
 		SpawnEnemy::Started = true;
-		SpawnEnemy::StartTime = GAMEPLAY::GET_GAME_TIMER();
+		SpawnEnemy::StartTime = MISC::GET_GAME_TIMER();
 		return false;
 	}
 	else
 	{
-		SpawnEnemy::CurrentTime = GAMEPLAY::GET_GAME_TIMER();
+		SpawnEnemy::CurrentTime = MISC::GET_GAME_TIMER();
 		if (SpawnEnemy::CurrentTime - SpawnEnemy::StartTime >= 1500)
 		{
 			return true;
@@ -218,12 +218,12 @@ bool TIMERS::ProcessAircraftTimer()
 	if (!SpawnAircraft::Started)
 	{
 		SpawnAircraft::Started = true;
-		SpawnAircraft::StartTime = GAMEPLAY::GET_GAME_TIMER();
+		SpawnAircraft::StartTime = MISC::GET_GAME_TIMER();
 		return false;
 	}
 	else
 	{
-		SpawnAircraft::CurrentTime = GAMEPLAY::GET_GAME_TIMER();
+		SpawnAircraft::CurrentTime = MISC::GET_GAME_TIMER();
 		if (SpawnAircraft::CurrentTime - SpawnAircraft::StartTime >= 25000)
 		{
 			return true;
@@ -237,12 +237,12 @@ bool TIMERS::ProcessVehicleTimer()
 	if (!SpawnVehicle::Started)
 	{
 		SpawnVehicle::Started = true;
-		SpawnVehicle::StartTime = GAMEPLAY::GET_GAME_TIMER();
+		SpawnVehicle::StartTime = MISC::GET_GAME_TIMER();
 		return false;
 	}
 	else
 	{
-		SpawnVehicle::CurrentTime = GAMEPLAY::GET_GAME_TIMER();
+		SpawnVehicle::CurrentTime = MISC::GET_GAME_TIMER();
 		if (SpawnVehicle::CurrentTime - SpawnVehicle::StartTime >= 15000)
 		{
 			return true;

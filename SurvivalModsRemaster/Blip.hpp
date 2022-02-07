@@ -6,6 +6,7 @@
 namespace BLIPS
 {
 	Blip CreateForMissionTriggerPed(Vector3 pos, const char* blipName);
+    Blip Create(float x, float y, float z, int sprite, eBlipColor color, const char* name);
 	void CreateForEnemyPed(Ped ped);
 	void CreateForEnemyVehicle(Vehicle vehicle);
 	Blip GetBlipForEntity(Entity entity);

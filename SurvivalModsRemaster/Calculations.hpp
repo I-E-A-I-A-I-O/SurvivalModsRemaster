@@ -1,6 +1,6 @@
 #pragma once
 
-#include "natives.h"
+#include "types.h"
 #include <random>
 
 namespace CALC

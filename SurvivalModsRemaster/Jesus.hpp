@@ -1,5 +1,6 @@
 #pragma once
 
+#include <types.h>
 #include "Calculations.hpp"
 #include "natives.h"
 #include "enums.h"

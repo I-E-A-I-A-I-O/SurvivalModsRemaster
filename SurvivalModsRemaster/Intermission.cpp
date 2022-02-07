@@ -5,7 +5,7 @@ bool INTERMISSION::Data::Active;
 
 void INTERMISSION::Start()
 {
-    GRAPHICS::_START_SCREEN_EFFECT((char*)"SuccessNeutral", 0, false);
+    GRAPHICS::ANIMPOSTFX_PLAY((char*)"SuccessNeutral", 0, false);
     Data::Active = true;
 
     if (!SURVIVAL::SurvivalData::timed)
