@@ -12,6 +12,7 @@ std::vector<Blip> TriggerPedsData::blips;
 std::vector<bool> TriggerPedsData::timerActive;
 std::vector<bool> TriggerPedsData::killedFlags;
 std::vector<int> TriggerPedsData::starTime;
+std::vector<int> TriggerPedsData::playerRel;
 int Data::intermissionDuration;
 Controls Data::infiniteWaveControl;
 Controls Data::timedSurvivalControl;
@@ -28,8 +29,9 @@ nlohmann::json j;
 int Data::TPIndex;
 bool tpPointsEnabled;
 int playerId;
+SurvivalModes currentMode = SurvivalModes::TenWaves;
 
-/*struct TPPoint {
+struct TPPoint {
     float x;
     float y;
     float z;
@@ -39,21 +41,21 @@ int playerId;
         this->y = y;
         this->z = z;
     }
-};*/
+};
 
-/*enum eMarkers {
+enum eMarkers {
     BunkerEntrance,
     BunkerExit,
     LabEntrance,
     LabExit
-};*/
+};
 
-/*static std::vector<TPPoint> teleportPoints = std::vector<TPPoint>{
+static std::vector<TPPoint> teleportPoints = std::vector<TPPoint>{
         TPPoint(1571.56f, 2225.47f, 77.32f),
-        TPPoint(895.4349f, -3245.51123f, -99.25251f),
+        TPPoint(893.14f, -3245.89f, -99.25251f),
         TPPoint(456.766663f, 5571.864f, 780.1841f),
         TPPoint(244.57f, 6163.39f, -160.42f),
-};*/
+};
 
 static std::vector<Blip> entranceBlips = std::vector<Blip>();
 
@@ -129,7 +131,7 @@ void ReadConfig() {
     i.close();
 
     Data::intermissionDuration = j["Gameplay"]["IntermissionDuration"];
-    //tpPointsEnabled = j["Gameplay"]["TPMarkers"];
+    tpPointsEnabled = j["Gameplay"]["TPMarkers"];
     Data::infiniteWaveControl = static_cast<Controls>(j["Controls"]["StartInfiniteWaves"]);
     Data::timedSurvivalControl = static_cast<Controls>(j["Controls"]["StartTimedSurvival"]);
     Data::cancelControl = static_cast<Controls>(j["Controls"]["CancelSurvival"]);
@@ -150,29 +152,75 @@ void ReadConfig() {
     INIT::LoadTriggerPeds();
 }
 
-/*void createTPBlips() {
+void createTPBlips() {
+    STREAMING::REQUEST_IPL("gr_case6_bunkerclosed");
+    STREAMING::REQUEST_IPL("gr_grdlc_interior_placement_interior_0_grdlc_int_01_milo_");
+    STREAMING::REQUEST_IPL("gr_grdlc_interior_placement_interior_1_grdlc_int_02_milo_");
     TPPoint coords = teleportPoints.at(eMarkers::BunkerEntrance);
     entranceBlips.push_back(BLIPS::Create(coords.x, coords.y, coords.z, 557, eBlipColor::BlipColorWhite, "Bunker"));
     coords = teleportPoints.at(eMarkers::LabEntrance);
     entranceBlips.push_back(BLIPS::Create(coords.x, coords.y, coords.z, 499, eBlipColor::BlipColorWhite, "Secret Lab"));
-}*/
+}
 
-/*const char* getHelpText(size_t index) {
+const char* getHelpText(size_t index) {
     switch (index) {
-        case 0:
+        case eMarkers::BunkerEntrance:
             return "Press ~INPUT_CONTEXT~ to enter the bunker.";
-        case 1:
+        case eMarkers::BunkerExit:
             return "Press ~INPUT_CONTEXT~ to exit the bunker.";
-        case 2:
+        case eMarkers::LabEntrance:
             return "Press ~INPUT_CONTEXT~ to enter the lab.";
-        case 3:
+        case eMarkers::LabExit:
             return "Press ~INPUT_CONTEXT~ to exit the lab.";
         default:
             return "INVALID INDEX";
     }
-}*/
+}
 
-/*void processMarkers() {
+void toggleInterior(size_t index) {
+    switch (index) {
+        case eMarkers::BunkerEntrance: {
+            TPPoint v = teleportPoints.at(eMarkers::BunkerExit);
+            Interior i = INTERIOR::GET_INTERIOR_AT_COORDS(v.x, v.y, v.z);
+            INTERIOR::DEACTIVATE_INTERIOR_ENTITY_SET(i, "bunker_style_a");
+            INTERIOR::DEACTIVATE_INTERIOR_ENTITY_SET(i, "bunker_style_b");
+            INTERIOR::ACTIVATE_INTERIOR_ENTITY_SET(i, "bunker_style_c");
+            INTERIOR::DEACTIVATE_INTERIOR_ENTITY_SET(i, "standard_bunker_set");
+            INTERIOR::ACTIVATE_INTERIOR_ENTITY_SET(i, "upgrade_bunker_set");
+            INTERIOR::ACTIVATE_INTERIOR_ENTITY_SET(i, "upgrade_bunker_set_more");
+            INTERIOR::ACTIVATE_INTERIOR_ENTITY_SET(i, "security_upgrade");
+            INTERIOR::ACTIVATE_INTERIOR_ENTITY_SET(i, "Office_Upgrade_set");
+            INTERIOR::ACTIVATE_INTERIOR_ENTITY_SET(i, "gun_range_lights");
+            INTERIOR::ACTIVATE_INTERIOR_ENTITY_SET(i, "gun_schematic_set");
+            INTERIOR::ACTIVATE_INTERIOR_ENTITY_SET(i, "gun_locker_upgrade");
+            INTERIOR::REFRESH_INTERIOR(i);
+            AUDIO::PLAY_SOUND_FRONTEND(-1, "Door_Open_Limit", "DLC_GR_Bunker_Door_Sounds", true);
+            break;
+        }
+        case eMarkers::BunkerExit: {
+            AUDIO::PLAY_SOUND_FRONTEND(-1, "Enter_Car_Ramp_Deploy", "DLC_GR_MOC_Enter_Exit_Sounds", true);
+            break;
+        }
+        case eMarkers::LabEntrance: {
+            TPPoint v = teleportPoints.at(eMarkers::LabExit);
+            Interior i = INTERIOR::GET_INTERIOR_AT_COORDS(v.x, v.y, v.z);
+            INTERIOR::PIN_INTERIOR_IN_MEMORY(i);
+            AUDIO::PLAY_SOUND_FRONTEND(-1, "Door_Open_Limit", "DLC_XM_Silo_Secret_Door_Sounds", true);
+            break;
+        }
+        case eMarkers::LabExit: {
+            TPPoint v = teleportPoints.at(eMarkers::LabExit);
+            Interior i = INTERIOR::GET_INTERIOR_AT_COORDS(v.x, v.y, v.z);
+            INTERIOR::UNPIN_INTERIOR(i);
+            AUDIO::PLAY_SOUND_FRONTEND(-1, "DOOR_CLOSE", "CABLE_CAR_SOUNDS", true);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void processMarkers() {
     size_t size = teleportPoints.size();
     
     for (size_t i = 0; i < size; i++) {
@@ -196,6 +244,7 @@ void ReadConfig() {
         if (PAD::IS_CONTROL_JUST_PRESSED(0, 51)) {
             CAM::DO_SCREEN_FADE_OUT(1000);
             WAIT(1200);
+            toggleInterior(i);
             size_t index;
 
             if (i % 2 == 0)
@@ -209,7 +258,7 @@ void ReadConfig() {
             CAM::DO_SCREEN_FADE_IN(1000);
         }
     }
-}*/
+}
 
 void ControlsWatch() {
     if (!SURVIVAL::SurvivalData::IsActive && !canStart) {
@@ -220,28 +269,36 @@ void ControlsWatch() {
 
     if (Data::showControls) {
         if (PAD::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::infiniteWaveControl))) {
-            ClearAllies();
-            SURVIVAL::StartMission(true, false, false);
+            currentMode = SurvivalModes::Endless;
+            SCREEN::ShowNotification("Survival mode set to: Endless survival.");
         }
 
         if (PAD::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::timedSurvivalControl))) {
-            ClearAllies();
-            SURVIVAL::StartMission(false, true, false);
+            currentMode = SurvivalModes::Timed;
+            SCREEN::ShowNotification("Survival mode set to: Timed survival.");
         }
 
         if (PAD::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::hardcoreSurvivalControl))) {
-            ClearAllies();
-            SURVIVAL::StartMission(false, false, true);
+            currentMode = SurvivalModes::Hardcore;
+            SCREEN::ShowNotification("Survival mode set to: Hardcore survival.");
         }
-    } else if (SURVIVAL::SurvivalData::IsActive) {
-        if (PAD::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::cancelControl))) {
-            cancelStartTime = MISC::GET_GAME_TIMER();
-        }
+    } else {
+        if (SURVIVAL::SurvivalData::IsActive) {
+            if (PAD::IS_CONTROL_JUST_PRESSED(0, static_cast<int>(Data::cancelControl))) {
+                cancelStartTime = MISC::GET_GAME_TIMER();
+            }
 
-        if (PAD::IS_CONTROL_PRESSED(0, static_cast<int>(Data::cancelControl))) {
-            cancelCurrentTime = MISC::GET_GAME_TIMER();
-            if (cancelCurrentTime - cancelStartTime >= 3000) {
-                SURVIVAL::QuitSurvival(false);
+            if (PAD::IS_CONTROL_PRESSED(0, static_cast<int>(Data::cancelControl))) {
+                cancelCurrentTime = MISC::GET_GAME_TIMER();
+                if (cancelCurrentTime - cancelStartTime >= 3000) {
+                    SURVIVAL::QuitSurvival(false);
+                }
+            }
+        }
+        else {
+            if (currentMode != SurvivalModes::TenWaves) {
+                currentMode = SurvivalModes::TenWaves;
+                SCREEN::ShowNotification("Survival mode set to: Ten Waves");
             }
         }
     }
@@ -292,7 +349,12 @@ void ProcessTriggerPeds() {
                             TriggerPedsData::blips.at(i) = 0;
                             ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
                             TriggerPedsData::peds.at(i) = 0;
-                            SURVIVAL::StartMission(false, false, false);
+                            SURVIVAL::StartMission(
+                                    currentMode == SurvivalModes::Endless,
+                                    currentMode == SurvivalModes::Timed,
+                                    currentMode == SurvivalModes::Hardcore
+                                    );
+                            currentMode = SurvivalModes::TenWaves;
                         } else {
                             ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
                             TriggerPedsData::peds.at(i) = 0;
@@ -331,8 +393,8 @@ int main() {
 
     ReadConfig();
 
-    /*if (tpPointsEnabled)
-        createTPBlips();*/
+    if (tpPointsEnabled)
+        createTPBlips();
 
     while (true) {
         playerId = PLAYER::PLAYER_PED_ID();
@@ -340,9 +402,7 @@ int main() {
         ProcessTriggerPeds();
 
         if (SURVIVAL::SurvivalData::IsActive) {
-            if (SURVIVAL::SurvivalData::Triggered) {
-                SURVIVAL::SetOffTrigger();
-            } else if (SURVIVAL::SurvivalData::Started) {
+            if (SURVIVAL::SurvivalData::Started) {
                 SURVIVAL::ProcessSurvival();
 
                 if (PLAYER::IS_PLAYER_DEAD(0)) {
@@ -350,8 +410,8 @@ int main() {
                 }
             }
         }
-        /*else
-            processMarkers();*/
+        else
+            processMarkers();
 
         ControlsWatch();
         WAIT(0);
@@ -376,12 +436,11 @@ void OnAbort() {
         SURVIVAL::ScriptQuit();
     }
     
-    /*if (!entranceBlips.empty()) {
+    if (!entranceBlips.empty()) {
         for (Blip& blip : entranceBlips) {
             HUD::REMOVE_BLIP(&blip);
         }
         
         entranceBlips.clear();
-        unloadipl();
-    }*/
+    }
 }

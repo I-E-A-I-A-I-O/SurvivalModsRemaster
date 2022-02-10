@@ -46,6 +46,8 @@ void ENEMIES::ClearVectors()
 {
     for (Ped enemy : footEnemies)
     {
+        Blip blip = HUD::GET_BLIP_FROM_ENTITY(enemy);
+        HUD::REMOVE_BLIP(&blip);
         ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&enemy);
     }
 

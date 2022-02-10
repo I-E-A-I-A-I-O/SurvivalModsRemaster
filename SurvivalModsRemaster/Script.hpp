@@ -10,6 +10,13 @@
 #include <vector>
 #include <string>
 
+enum class SurvivalModes {
+    TenWaves,
+    Endless,
+    Timed,
+    Hardcore
+};
+
 struct Data
 {
 	static Hash enemiesRelGroup;
@@ -48,6 +55,7 @@ struct TriggerPedsData
 	static std::vector<int> starTime;
 	static std::vector<bool> killedFlags;
 	static std::vector<std::string> tasks;
+    static std::vector<int> playerRel;
 
 	static void ClearTriggerPeds()
 	{
@@ -76,6 +84,7 @@ struct TriggerPedsData
 		peds.clear();
 		killedFlags.clear();
 		allies.clear();
+        playerRel.clear();
 	}
 };
 

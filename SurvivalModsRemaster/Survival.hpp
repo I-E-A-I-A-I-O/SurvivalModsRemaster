@@ -23,7 +23,6 @@ namespace SURVIVAL
         static int MaxAircraft;
         static int MaxVehicles;
         static int MaxWaveSize;
-        static bool Triggered;
         static bool Started;
         static bool timed;
         static int timedTimeLeft;
@@ -32,7 +31,6 @@ namespace SURVIVAL
 	};
 
     void StartMission(bool infiniteWaves, bool timed, bool hardcore);
-    void SetOffTrigger();
     void Initialize();
     void ProcessSurvival();
     void CompleteSurvival();
@@ -42,5 +40,4 @@ namespace SURVIVAL
     void ScriptQuit();
     bool PlayerCheated();
     void GiveReward(bool playerDied);
-    bool IsDefault();
 }

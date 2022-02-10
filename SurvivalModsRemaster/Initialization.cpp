@@ -9,6 +9,7 @@ void INIT::LoadTriggerPeds()
     i.close();
 
     std::vector<std::string> names = js["SurvivalNames"];
+    std::vector<int> playerRelshps = js["RelationWithPlayer"];
     std::vector<std::string> models = js["Models"];
     std::vector<float> positionX = js["Positions"]["x"];
     std::vector<float> positionY = js["Positions"]["y"];
@@ -27,11 +28,11 @@ void INIT::LoadTriggerPeds()
         std::string name = names.at(n);
         std::vector<std::string> allies = js["Allies"][name];
 
-        for (auto & allie : allies)
+        for (const std::string& ally : allies)
         {
             SurvivalAllies sa = SurvivalAllies();
             sa.MissionID = name;
-            sa.RelGroupName = allie;
+            sa.RelGroupName = ally;
             TriggerPedsData::allies.push_back(sa);
         }
 
@@ -44,6 +45,7 @@ void INIT::LoadTriggerPeds()
         TriggerPedsData::tasks.push_back(tasks.at(n));
         TriggerPedsData::timerActive.push_back(false);
         TriggerPedsData::killedFlags.push_back(false);
+        TriggerPedsData::playerRel.push_back(playerRelshps.at(n));
     }
 }
 
@@ -107,7 +109,11 @@ Ped INIT::SpawnTriggerPed(size_t index)
             break;
     }
 
+    Hash pKey = MISC::GET_HASH_KEY("PLAYER");
+    int rel = TriggerPedsData::playerRel.at(index);
     PED::SET_PED_RELATIONSHIP_GROUP_HASH(handle, Data::neutralRelGroup);
+    PED::SET_RELATIONSHIP_BETWEEN_GROUPS(rel, Data::neutralRelGroup, pKey);
+    PED::SET_RELATIONSHIP_BETWEEN_GROUPS(rel, pKey, Data::neutralRelGroup);
     WEAPON::GIVE_WEAPON_TO_PED(handle, eWeapon::WeaponPistol, 100, true, false);
     TASK::TASK_START_SCENARIO_IN_PLACE(handle, TriggerPedsData::tasks.at(index).c_str(), 0, true);
     return handle;

@@ -9,7 +9,6 @@ int SURVIVAL::SurvivalData::CurrentWave;
 int SURVIVAL::SurvivalData::MaxAircraft;
 int SURVIVAL::SurvivalData::MaxVehicles;
 int SURVIVAL::SurvivalData::MaxWaveSize;
-bool SURVIVAL::SurvivalData::Triggered;
 bool SURVIVAL::SurvivalData::Started;
 bool SURVIVAL::SurvivalData::timed;
 int SURVIVAL::SurvivalData::earnedMoney;
@@ -64,30 +63,7 @@ void SURVIVAL::StartMission(bool infiniteWaves, bool timed, bool hardcore)
 	SetEnemyAllies();
 	MUSIC::PrepareTracks();
 	AUDIO::SET_AUDIO_FLAG("WantedMusicDisabled", true);
-
-	if (!IsDefault())
-	{
-		ped = TriggerPedsData::peds.at(Data::TPIndex);
-		ENTITY::SET_ENTITY_INVINCIBLE(ped, false);
-
-		if (!WEAPON::HAS_PED_GOT_WEAPON(PLAYER::PLAYER_PED_ID(), eWeapon::WeaponPistol, false))
-		{
-			WEAPON::GIVE_WEAPON_TO_PED(PLAYER::PLAYER_PED_ID(), eWeapon::WeaponPistol, 25, true, true);
-		}
-		else
-		{
-			WEAPON::SET_CURRENT_PED_WEAPON(PLAYER::PLAYER_PED_ID(), eWeapon::WeaponPistol, true);
-		}
-
-		PLAYER::SET_PLAYER_CONTROL(PLAYER::PLAYER_ID(), false, 0);
-		TASK::TASK_AIM_GUN_AT_ENTITY(PLAYER::PLAYER_PED_ID(), ped, -1, 0);
-		TASK::TASK_SHOOT_AT_ENTITY(PLAYER::PLAYER_PED_ID(), ped, 60000, eFiringPattern::FiringPatternFullAuto);
-		SurvivalData::Triggered = true;
-	}
-	else
-	{
-		Initialize();
-	}
+    Initialize();
 }
 
 void SURVIVAL::Initialize()
@@ -119,41 +95,6 @@ void SURVIVAL::Initialize()
 	}
 
 	SurvivalData::Started = true;
-}
-
-bool SURVIVAL::IsDefault()
-{
-	return !SurvivalData::hardcore && !SurvivalData::timed && !SurvivalData::InfiniteWaves;
-}
-
-void SURVIVAL::SetOffTrigger()
-{
-	if (PLAYER::GET_PLAYER_WANTED_LEVEL(PLAYER::PLAYER_ID()) > 0)
-	{
-		PLAYER::SET_PLAYER_WANTED_LEVEL(PLAYER::PLAYER_ID(), 0, 0);
-	}
-
-	if (!PED::IS_PED_DEAD_OR_DYING(ped, 1))
-	{
-		if (TIMERS::ProcessTriggerPedTimer())
-		{
-			ENTITY::SET_ENTITY_HEALTH(ped, 0, 0);
-		}
-		else
-		{
-			return;
-		}
-	}
-
-	TIMERS::RestartTriggerPedTimer();
-	SurvivalData::Triggered = false;
-	HUD::REMOVE_BLIP(&TriggerPedsData::blips.at(Data::TPIndex));
-	TriggerPedsData::blips.at(Data::TPIndex) = 0;
-	ENTITY::SET_PED_AS_NO_LONGER_NEEDED(&ped);
-	TriggerPedsData::peds.at(Data::TPIndex) = 0;
-	TASK::CLEAR_PED_TASKS(PLAYER::PLAYER_PED_ID());
-	PLAYER::SET_PLAYER_CONTROL(PLAYER::PLAYER_ID(), true, 0);
-	Initialize();
 }
 
 bool SURVIVAL::PlayerCheated()
