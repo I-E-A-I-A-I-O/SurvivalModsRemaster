@@ -140,9 +140,6 @@
     <ClCompile Include="SurvivalSpawner.cpp">
       <Filter>Source Files\Mission</Filter>
     </ClCompile>
-    <ClCompile Include="Timers.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="UIScript.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

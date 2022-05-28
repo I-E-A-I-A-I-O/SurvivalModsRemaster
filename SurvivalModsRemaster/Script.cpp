@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Script.hpp"
-#include "nlohmann/json.hpp"
+#include "json.hpp"
 
 std::vector<SurvivalAllies> TriggerPedsData::allies;
 std::vector<std::string> TriggerPedsData::names;
@@ -234,7 +234,7 @@ void processMarkers() {
         if (!CALC::IsInRange_2(v3Coords, playerCoords, 200))
             continue;
 
-        GRAPHICS::DRAW_MARKER(1, coords.x, coords.y, coords.z, 0, 1, 0, 0, 0, 0, 2, 2, 2, 255, 255, 0, 100, false, false, 2, false, nullptr, nullptr, false);
+        GRAPHICS::DRAW_MARKER(1, v3Coords.x, v3Coords.y, v3Coords.z, 0, 1, 0, 0, 0, 0, 2, 2, 2, 255, 255, 0, 100, false, false, 2, false, nullptr, nullptr, false);
 
         if (!CALC::IsInRange_2(v3Coords, playerCoords, 2))
             continue;
@@ -253,7 +253,8 @@ void processMarkers() {
                 index = i - 1;
 
             coords = teleportPoints.at(index);
-            ENTITY::SET_ENTITY_COORDS(playerId, coords.x, coords.y, coords.z + (i == 0 ? 1.0f : 0.0f), 1, 0, 0, 1);
+            coords.z = coords.z + (i == 0 ? 1.0f : 0.0f);
+            ENTITY::SET_ENTITY_COORDS(playerId, coords.x, coords.y, coords.z, 1, 0, 0, 1);
             WAIT(2000);
             CAM::DO_SCREEN_FADE_IN(1000);
         }

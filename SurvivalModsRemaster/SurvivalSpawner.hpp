@@ -6,7 +6,7 @@
 #include "Initialization.hpp"
 #include "natives.h"
 #include "enums.h"
-#include "nlohmann/json.hpp"
+#include "json.hpp"
 #include <fstream>
 #include <vector>
 #include <string>

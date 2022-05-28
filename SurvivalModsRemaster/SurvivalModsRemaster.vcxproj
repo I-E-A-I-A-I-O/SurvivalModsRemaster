@@ -204,7 +204,6 @@
     <ClCompile Include="SpawnData.cpp" />
     <ClCompile Include="Survival.cpp" />
     <ClCompile Include="SurvivalSpawner.cpp" />
-    <ClCompile Include="Timers.cpp" />
     <ClCompile Include="UIScript.cpp" />
   </ItemGroup>
   <ItemGroup>

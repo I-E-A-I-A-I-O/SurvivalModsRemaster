@@ -3,7 +3,7 @@
 #include "SpawnData.hpp"
 #include "Script.hpp"
 #include "natives.h"
-#include "nlohmann/json.hpp"
+#include "json.hpp"
 #include "Blip.hpp"
 #include <fstream>
 #include <string>
