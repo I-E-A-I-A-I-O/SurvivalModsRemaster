@@ -310,7 +310,7 @@ void ProcessSuicidals()
                 if (lastDamagedBone == eBone::SKEL_Head)
                 {
                     Vector3 coords = ENTITY::GET_ENTITY_COORDS(enemy.ped, true);
-                    FIRE::ADD_EXPLOSION(coords, eExplosionType::ExplosionTypeStickyBomb, 5.0f, true, false, 2.0f, false);
+                    FIRE::ADD_EXPLOSION(coords.x, coords.y, coords.z, eExplosionType::ExplosionTypeStickyBomb, 5.0f, true, false, 2.0f, false);
                     enemy.exploded = true;
                     continue;
                 }
@@ -322,7 +322,7 @@ void ProcessSuicidals()
             {
                 if (MISC::GET_GAME_TIMER() - enemy.timeOfDeath >= 2000)
                 {
-                    FIRE::ADD_EXPLOSION(enemy.deadCoords, eExplosionType::ExplosionTypeStickyBomb, 5.0f, true, false, 2.0f, false);
+                    FIRE::ADD_EXPLOSION(enemy.deadCoords.x, enemy.deadCoords.y, enemy.deadCoords.z , eExplosionType::ExplosionTypeStickyBomb, 5.0f, true, false, 2.0f, false);
                     enemy.exploded = true;
                 }
             }
@@ -334,7 +334,7 @@ void ProcessSuicidals()
 
             if (CALC::IsInRange_2(coords, playerCoords, 2.0f))
             {
-                FIRE::ADD_EXPLOSION(coords, eExplosionType::ExplosionTypeStickyBomb, 5.0f, true, false, 2.0f, false);
+                FIRE::ADD_EXPLOSION(coords.x, coords.y, coords.z, eExplosionType::ExplosionTypeStickyBomb, 5.0f, true, false, 2.0f, false);
                 enemy.exploded = true;
             }
         }
